@@ -2,6 +2,11 @@ package com.swd392.mentorbooking.repository;
 
 import com.swd392.mentorbooking.entity.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface AccountRepository extends JpaRepository<Account, Integer> {
+import java.util.Optional;
+
+@Repository
+public interface AccountRepository extends JpaRepository<Account, Long> {
+    Optional<Account> findByEmail(String email);
 }

@@ -1,66 +1,170 @@
 package com.swd392.mentorbooking.entity;
 
-import com.swd392.mentorbooking.entity.Enum.AccountGenderEnum;
-import com.swd392.mentorbooking.entity.Enum.AccountRoleEnum;
 import com.swd392.mentorbooking.entity.Enum.AccountStatusEnum;
+import com.swd392.mentorbooking.entity.Enum.GenderEnum;
+import com.swd392.mentorbooking.entity.Enum.RoleEnum;
+import com.swd392.mentorbooking.entity.Enum.SpecializationEnum;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+@Entity
+@Table(name = "account")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-@Entity
-public class Account {
+@Builder
+public class Account implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "account_id")
+    private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(name = "day_of_birth", nullable = true)
+    private LocalDateTime dayOfBirth;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender")
+    private GenderEnum gender;
+
+    @Column(name = "phone", nullable = true)
     private String phone;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private AccountGenderEnum gender;
+    @Column(name = "role", nullable = false)
+    private RoleEnum role;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private AccountStatusEnum status;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private AccountRoleEnum role;
-
-    @Column(nullable = true)
+    @Column(name = "avatar", nullable = true)
     private String avatar;
 
-    @Column(nullable = true)
-    private String classes;
+    @Column(name = "class", nullable = true)
+    private String className;
 
-    @Column(nullable = true)
-    private String lecture;
+    @ElementCollection(targetClass = SpecializationEnum.class)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "account_specializations", joinColumns = @JoinColumn(name = "account_id"))
+    @Column(name = "specialization", nullable = true)
+    private List<SpecializationEnum> specializations;
 
-    @Column(name = "create_at", nullable = false)
-    private LocalDateTime createAt;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private AccountStatusEnum status;
 
-    @Column(name = "update_at", nullable = true)
-    private LocalDateTime updateAt;
+    @Column(name = "lecturer", nullable = true)
+    private String lecturer;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = true)
+    private LocalDateTime updatedAt;
 
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
 
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
+    private Wallet wallet;
+
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
+    private Service services;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private List<WebsiteFeedback> websiteFeedbacks;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private List<Schedule> schedules;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private List<Blog> blogs;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private List<Comment> comments;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private List<Achievement> achievements;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private List<Booking> bookings;
+
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private Group group;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private List<Topic> topics;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private List<ServiceFeedback> feedbackRatings;
+
+    @Transient
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        Set<SimpleGrantedAuthority> authorities = new HashSet<>();
+        authorities.add(new SimpleGrantedAuthority(this.role.name()));
+        return authorities;
+    }
+
+    @Transient
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @Transient
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    @Transient
+    @Override
+    public boolean isAccountNonLocked() {
+        return UserDetails.super.isAccountNonLocked();
+    }
+
+    @Transient
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return UserDetails.super.isCredentialsNonExpired();
+    }
+
+    @Transient
+    @Override
+    public boolean isEnabled() {
+        return UserDetails.super.isEnabled();
+    }
+
+    @Transient
+    private String tokens;
+
+    @Transient
+    private String refreshToken;
+
+    public Account(String name, String email, RoleEnum role, AccountStatusEnum status) {
+        this.name = name;
+        this.email = email;
+        this.role = role;
+        this.status = status;
+        this.isDeleted = false;
+        this.createdAt = LocalDateTime.now();
+        this.gender = GenderEnum.MALE;
+    }
 }
