@@ -1,5 +1,5 @@
 # Bước 1: Build ứng dụng bằng Maven
-FROM maven:3.9.5-openjdk-17 AS build
+FROM maven:3-openjdk-17 AS build
 WORKDIR /app
 
 # Sao chép toàn bộ mã nguồn vào container
