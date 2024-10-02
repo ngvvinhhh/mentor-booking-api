@@ -35,8 +35,8 @@ public enum ErrorCode {
     EMAIL_EXISTED(1502, "This email has been registered, please log in!", HttpStatus.BAD_REQUEST),
     SUCCESS(200, "Success",HttpStatus.OK),
 
-//    COURSES | CODE: 2XXX
-    COURSE_NOT_FOUND(2001, "Course not found", HttpStatus.NOT_FOUND),
+//    TOPICS | CODE: 2XXX
+    TOPICS_NOT_FOUND(2001, "Topics not found", HttpStatus.NOT_FOUND),
     INVALID_ENUM(2002, "Invalid enum format", HttpStatus.BAD_REQUEST),
     NO_COURSE_IN_WISHLIST(2003, "No courses in wishlist", HttpStatus.BAD_REQUEST),
     INVALID_COURSE_ID(2004, "Invalid course ID", HttpStatus.BAD_REQUEST),
