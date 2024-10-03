@@ -1,5 +1,5 @@
 # Bước 1: Build ứng dụng bằng Maven
-FROM maven:3.9.5-openjdk-22-slim AS build
+FROM maven:3-openjdk-17 AS build
 WORKDIR /app
 
 # Sao chép toàn bộ mã nguồn vào container
@@ -9,7 +9,7 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 # Bước 2: Tạo image chứa file JAR đã build
-FROM openjdk:22-jdk-slim
+FROM openjdk:17-jdk-alpine
 
 # Đặt thư mục làm việc
 WORKDIR /app
