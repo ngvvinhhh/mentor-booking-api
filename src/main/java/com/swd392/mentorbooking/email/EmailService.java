@@ -27,7 +27,7 @@ public class EmailService {
             String link = "http://localhost:8080/auth/verify/" + emailDetail.getRecipient();
 
             context.setVariable("link", link);
-
+            context.setVariable("button", "Go to page");
             String text = templateEngine.process("VerifyAccount", context);
 
             // Creating a simple mail message
@@ -42,6 +42,29 @@ public class EmailService {
             javaMailSender.send(mimeMessage);
         } catch (MessagingException messagingException) {
             messagingException.printStackTrace();
+        }
+    }
+    public void sendEmail(EmailDetail emailDetail) {
+        try {
+            Context context = new Context();
+            context.setVariable("name", emailDetail.getName());
+            context.setVariable("button", "Go to page");
+            context.setVariable("link", emailDetail.getAttachment());
+
+            String template = templateEngine.process("VerifyAccount", context);
+
+            // Creating a simple mail message
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
+
+            // Setting up necessary details
+            mimeMessageHelper.setFrom("admin@gmail.com");
+            mimeMessageHelper.setTo(emailDetail.getRecipient());
+            mimeMessageHelper.setText(template, true);
+            mimeMessageHelper.setSubject(emailDetail.getSubject());
+            javaMailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            e.printStackTrace();
         }
     }
 }

@@ -1,9 +1,6 @@
 package com.swd392.mentorbooking.service;
 
-import com.swd392.mentorbooking.dto.auth.LoginRequestDTO;
-import com.swd392.mentorbooking.dto.auth.LoginResponseDTO;
-import com.swd392.mentorbooking.dto.auth.RegisterRequestDTO;
-import com.swd392.mentorbooking.dto.auth.RegisterResponseDTO;
+import com.swd392.mentorbooking.dto.auth.*;
 import com.swd392.mentorbooking.email.EmailDetail;
 import com.swd392.mentorbooking.email.EmailService;
 import com.swd392.mentorbooking.entity.Account;
@@ -25,6 +22,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class AuthService implements UserDetailsService {
@@ -68,6 +67,14 @@ public class AuthService implements UserDetailsService {
 
         account.setPassword(passwordEncoder.encode(registerRequestDTO.getPassword()));
         return account;
+    }
+
+    private String getString(String token) {
+        String email = jwtService.extractEmail(token);
+        if (email == null || email.isEmpty()) {
+            throw new AuthAppException(ErrorCode.TOKEN_INVALID);
+        }
+        return email;
     }
 
     public ResponseEntity<LoginResponseDTO> checkLogin(LoginRequestDTO loginRequestDTO) {
@@ -158,4 +165,66 @@ public class AuthService implements UserDetailsService {
             return new ResponseEntity<>(response, errorCode.getHttpStatus());
         }
     }
+    public ResponseEntity<ForgotPasswordResponse> forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
+        try {
+            // CHECK VALID EMAIL
+            Optional<Account> tempAccount = accountRepository.findByEmail(forgotPasswordRequest.getEmail());
+
+            Account checkAccount = tempAccount.orElseThrow(() -> new AuthAppException(ErrorCode.EMAIL_NOT_FOUND));
+
+            if (checkAccount.getEmail() == null || checkAccount.getEmail().isEmpty() || checkAccount.getStatus().equals(AccountStatusEnum.UNVERIFIED)) {
+                throw new AuthAppException(ErrorCode.EMAIL_NOT_FOUND);
+            }
+            // GENERATE TOKEN FOR EMAIL FORGOT PASSWORD (ENSURE UNIQUE AND JUST ONLY EMAIL CAN USE)
+            String token = jwtService.generateToken(forgotPasswordRequest.getEmail());
+            Account account = tempAccount.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            account.setTokens(token);
+
+            //SEND MAIL
+            EmailDetail emailDetail = EmailDetail.builder()
+                    .recipient(account.getEmail())
+                    .msgBody("Reset your password account.")
+                    .subject("Reset password!")
+                    .attachment("https://circuit-project.vercel.app/forgotPassword?" + jwtService.generateToken(account.getEmail()))
+                    .name(account.getName())
+                    .build();
+            emailService.sendEmail(emailDetail);
+
+            accountRepository.save(account);
+            ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse("Password reset token generated successfully.", null, 200);
+            return new ResponseEntity<>(forgotPasswordResponse, HttpStatus.OK);
+        } catch (AuthAppException e) {
+            ErrorCode errorCode = e.getErrorCode();
+            ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse("Password reset failed", e.getMessage(), errorCode.getCode());
+            return new ResponseEntity<>(forgotPasswordResponse, errorCode.getHttpStatus());
+        }
+    }
+
+    public ResponseEntity<ResetPasswordResponse> resetPassword(ResetPasswordRequest resetPasswordRequest, String token) {
+        try {
+            // AFTER USER CLICK LINK FORGOT PASSWORD IN EMAIL THEN REDIRECT TO API HERE (RESET PASSWORD)
+            // CHECK PASSWORD AND REPEAT PASSWORD
+            if (!resetPasswordRequest.getNew_password().equals(resetPasswordRequest.getRepeat_password())) {
+                throw new AuthAppException(ErrorCode.PASSWORD_REPEAT_INCORRECT);
+            }
+            // CALL FUNC
+            String email = getString(token);
+            // FIND EMAIL IN DATABASE AND UPDATE NEW PASSWORD
+            Optional<Account> accountOptional = accountRepository.findByEmail(email);
+            if (accountOptional.isPresent()) {
+                Account account = accountOptional.get();
+                account.setPassword(passwordEncoder.encode(resetPasswordRequest.getNew_password()));
+                accountRepository.save(account);
+            }
+
+            ResetPasswordResponse resetPasswordResponse = new ResetPasswordResponse("Password reset token generated successfully.", null, 200);
+            return new ResponseEntity<>(resetPasswordResponse, HttpStatus.CREATED);
+        } catch (AuthAppException e) {
+            ErrorCode errorCode = e.getErrorCode();
+            ResetPasswordResponse resetPasswordResponse = new ResetPasswordResponse("Password reset failed", e.getMessage(), errorCode.getCode());
+            return new ResponseEntity<>(resetPasswordResponse, errorCode.getHttpStatus());
+        }
+
+    }
+
 }

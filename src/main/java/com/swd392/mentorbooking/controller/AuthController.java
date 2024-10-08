@@ -1,9 +1,6 @@
 package com.swd392.mentorbooking.controller;
 
-import com.swd392.mentorbooking.dto.auth.LoginRequestDTO;
-import com.swd392.mentorbooking.dto.auth.LoginResponseDTO;
-import com.swd392.mentorbooking.dto.auth.RegisterRequestDTO;
-import com.swd392.mentorbooking.dto.auth.RegisterResponseDTO;
+import com.swd392.mentorbooking.dto.auth.*;
 import com.swd392.mentorbooking.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +27,14 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public void forgotPassword() {
-
+    public ResponseEntity<ForgotPasswordResponse> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+        return authService.forgotPassword(forgotPasswordRequest);
     }
 
     @PostMapping("/reset-password")
-    public void resetPassword() {
+    public ResponseEntity<ResetPasswordResponse> resetPassword(@RequestParam("token") String token,
+                                                               @RequestBody ResetPasswordRequest resetPasswordRequest) {
+        return authService.resetPassword(resetPasswordRequest, token);
 
     }
 }
