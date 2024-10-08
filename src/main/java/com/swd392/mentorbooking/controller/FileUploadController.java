@@ -8,10 +8,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
+@CrossOrigin("**")
+@RequestMapping("/firebase")
 public class FileUploadController {
 
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -25,24 +29,8 @@ public class FileUploadController {
     private AccountRepository accountRepository;
 
     @PostMapping("/upload-avatar")
-    public ResponseEntity<String> uploadAvatar(@RequestParam("file") MultipartFile file) {
-        try {
-            // Kiểm tra kích thước file
-            if (file.getSize() > MAX_FILE_SIZE) {
-                return ResponseEntity.badRequest().body("File size exceeds the maximum allowed size of 5MB.");
-            }
-
-            // Kiểm tra định dạng file
-            String contentType = file.getContentType();
-            if (contentType == null || !VALID_IMAGE_TYPES.contains(contentType)) {
-                return ResponseEntity.badRequest().body("Invalid file type. Only JPEG, PNG, and GIF are allowed.");
-            }
-
-            String fileUrl = firebaseStorageService.uploadFile(file, "avatars");
-            return ResponseEntity.ok(fileUrl);
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body("Error uploading file: " + e.getMessage());
-        }
+    public String uploadAvatar(@RequestParam("file") MultipartFile file) {
+        return firebaseStorageService.upload(file);
     }
 
     @GetMapping("/account/{accountId}/avatar")
@@ -56,26 +44,5 @@ public class FileUploadController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(avatarUrl);
-    }
-
-    @PostMapping("/upload-blog-image")
-    public ResponseEntity<String> uploadBlogImage(@RequestParam("file") MultipartFile file) {
-        try {
-            // Kiểm tra kích thước file
-            if (file.getSize() > MAX_FILE_SIZE) {
-                return ResponseEntity.badRequest().body("File size exceeds the maximum allowed size of 5MB.");
-            }
-
-            // Kiểm tra định dạng file
-            String contentType = file.getContentType();
-            if (contentType == null || !VALID_IMAGE_TYPES.contains(contentType)) {
-                return ResponseEntity.badRequest().body("Invalid file type. Only JPEG, PNG, and GIF are allowed.");
-            }
-
-            String fileUrl = firebaseStorageService.uploadFile(file, "blogs");
-            return ResponseEntity.ok(fileUrl);
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body("Error uploading file: " + e.getMessage());
-        }
     }
 }
