@@ -17,13 +17,10 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.UUID;
 
 @Service
 public class FirebaseStorageService {
-    @Value("${firebase.storage.bucket}")
-    private String bucketName;
 
     private File convertToFile(MultipartFile multipartFile, String fileName) throws IOException {
         File tempFile = new File(fileName);
@@ -38,7 +35,10 @@ public class FirebaseStorageService {
         BlobId blobId = BlobId.of("mentor-booking-3d46a.appspot.com", fileName); // Replace with your bucker name
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("media").build();
         InputStream inputStream = FirebaseStorageService.class.getClassLoader().getResourceAsStream("mentor-booking-3d46a-firebase-adminsdk-ohqij-8f07903118.json"); // change the file name with your one
-        Credentials credentials = GoogleCredentials.fromStream(inputStream);
+        Credentials credentials = null;
+        if (inputStream != null) {
+            credentials = GoogleCredentials.fromStream(inputStream);
+        }
         Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
         storage.create(blobInfo, Files.readAllBytes(file.toPath()));
 
@@ -53,7 +53,9 @@ public class FirebaseStorageService {
     public String upload(MultipartFile multipartFile) {
         try {
             String fileName = multipartFile.getOriginalFilename();                        // to get original file name
-            fileName = UUID.randomUUID().toString().concat(this.getExtension(fileName));  // to generated random string values for file name.
+            if (fileName != null) {
+                fileName = UUID.randomUUID().toString().concat(this.getExtension(fileName));  // to generated random string values for file name.
+            }
 
             File file = this.convertToFile(multipartFile, fileName);                      // to convert multipartFile to File
             String URL = this.uploadFile(file, fileName);                                   // to get uploaded file link
