@@ -55,7 +55,7 @@ public class AuthService implements UserDetailsService {
     }
 
     public Account findAccountByEmail(String email) {
-        return accountRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("Account not found"));
+        return accountRepository.findByEmail(email).orElse(null);
     }
 
     private @NotNull Account convertToAccount(RegisterRequestDTO registerRequestDTO) {

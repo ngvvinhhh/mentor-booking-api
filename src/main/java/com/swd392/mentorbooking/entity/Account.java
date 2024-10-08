@@ -62,7 +62,7 @@ public class Account implements UserDetails {
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "account_specializations", joinColumns = @JoinColumn(name = "account_id"))
     @Column(name = "specialization", nullable = true)
-    private List<SpecializationEnum> specializations;
+    private List<SpecializationEnum> specializations = null;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
@@ -70,6 +70,18 @@ public class Account implements UserDetails {
 
     @Column(name = "lecturer", nullable = true)
     private String lecturer;
+
+    @Column(name = "youtubeLink", nullable = true)
+    private String youtubeLink;
+
+    @Column(name = "linkedinLink", nullable = true)
+    private String linkedinLink;
+
+    @Column(name = "facebookLink", nullable = true)
+    private String facebookLink;
+
+    @Column(name = "twitterLink", nullable = true)
+    private String twitterLink;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
