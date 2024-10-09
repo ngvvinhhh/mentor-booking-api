@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Service {
+public class Services {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +23,10 @@ public class Service {
     private Account account;
 
     @Column(name = "price", nullable = false)
-    private Double price;
+    private double price;
+
+    @Column(name = "description", nullable = false)
+    private String description;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

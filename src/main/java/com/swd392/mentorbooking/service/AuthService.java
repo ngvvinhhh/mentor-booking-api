@@ -28,8 +28,6 @@ import java.util.Optional;
 @Service
 public class AuthService implements UserDetailsService {
 
-    private static final String defaultAvatar = "logo.png";
-
     @Autowired
     private AccountRepository accountRepository;
 
@@ -100,7 +98,6 @@ public class AuthService implements UserDetailsService {
                 throw new AuthAppException(ErrorCode.USERNAME_PASSWORD_NOT_CORRECT);
             }
 
-
             Account returnAccount = (Account) authentication.getPrincipal();
             // CALL FUNC || GENERATE TOKEN (1DAY) AND REFRESH TOKEN (7DAYS)
             account.setTokens(jwtService.generateToken(account.getEmail()));
@@ -165,6 +162,7 @@ public class AuthService implements UserDetailsService {
             return new ResponseEntity<>(response, errorCode.getHttpStatus());
         }
     }
+
     public ResponseEntity<ForgotPasswordResponse> forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
         try {
             // CHECK VALID EMAIL

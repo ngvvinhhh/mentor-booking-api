@@ -96,7 +96,7 @@ public class Account implements UserDetails {
     private Wallet wallet;
 
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
-    private Service services;
+    private Services services;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<WebsiteFeedback> websiteFeedbacks;
