@@ -1,4 +1,4 @@
-package com.swd392.mentorbooking.dto.topic;
+package com.swd392.mentorbooking.dto.semester;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -8,12 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TopicRequest {
+public class SemesterRequest {
     @NotBlank(message = "Topic name cannot be empty")
     private String topicName;
-
-    @NotBlank(message = "Description cannot be empty")
-    private String description;
-
-    private Long semesterId;
 }

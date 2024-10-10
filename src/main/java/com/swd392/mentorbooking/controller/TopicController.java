@@ -1,5 +1,8 @@
 package com.swd392.mentorbooking.controller;
 
+import com.swd392.mentorbooking.dto.Response;
+import com.swd392.mentorbooking.dto.blog.CreateBlogRequestDTO;
+import com.swd392.mentorbooking.dto.blog.CreateBlogRespnseDTO;
 import com.swd392.mentorbooking.dto.topic.TopicRequest;
 import com.swd392.mentorbooking.dto.topic.TopicResponse;
 import com.swd392.mentorbooking.entity.Topic;
@@ -19,9 +22,8 @@ public class TopicController {
     TopicService topicService;
 
     @PostMapping("create")
-    public ResponseEntity<TopicResponse> createTopic(@Valid @RequestBody TopicRequest topicRequest){
-        TopicResponse newTopic = topicService.createTopic(topicRequest);
-        return ResponseEntity.ok(newTopic);
+    public Response<TopicResponse> createTopic(@Valid @RequestBody TopicRequest topicRequest){
+        return topicService.createTopic(topicRequest);
     }
 
     @GetMapping("view")
