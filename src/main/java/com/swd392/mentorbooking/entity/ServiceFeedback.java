@@ -16,7 +16,7 @@ public class ServiceFeedback {
 
     @ManyToOne
     @JoinColumn(name = "service_id", nullable = false)
-    private Service service;
+    private Services service;
 
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
