@@ -1,4 +1,6 @@
-package com.swd392.mentorbooking.dto.service;import lombok.AllArgsConstructor;
+package com.swd392.mentorbooking.dto.blog;
+
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,8 +11,10 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateServiceResponseDTO {
-    private double price;
+public class CreateBlogRespnseDTO {
+
+    private String title;
     private String description;
+    private String image;
     private LocalDateTime createdAt;
 }

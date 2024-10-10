@@ -1,5 +1,6 @@
 package com.swd392.mentorbooking.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.swd392.mentorbooking.entity.Enum.AccountStatusEnum;
 import com.swd392.mentorbooking.entity.Enum.GenderEnum;
 import com.swd392.mentorbooking.entity.Enum.RoleEnum;
@@ -35,6 +36,7 @@ public class Account implements UserDetails {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    @JsonIgnore
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -58,6 +60,7 @@ public class Account implements UserDetails {
     @Column(name = "class", nullable = true)
     private String className;
 
+    @JsonIgnore
     @ElementCollection(targetClass = SpecializationEnum.class)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "account_specializations", joinColumns = @JoinColumn(name = "account_id"))
@@ -67,9 +70,6 @@ public class Account implements UserDetails {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private AccountStatusEnum status;
-
-    @Column(name = "lecturer", nullable = true)
-    private String lecturer;
 
     @Column(name = "youtubeLink", nullable = true)
     private String youtubeLink;
@@ -92,37 +92,48 @@ public class Account implements UserDetails {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
     private Wallet wallet;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
     private Services services;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<WebsiteFeedback> websiteFeedbacks;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<Schedule> schedules;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<Blog> blogs;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<Comment> comments;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<Achievement> achievements;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<Booking> bookings;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "group_id")
     private Group group;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<Topic> topics;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<ServiceFeedback> feedbackRatings;
 
@@ -134,30 +145,35 @@ public class Account implements UserDetails {
         return authorities;
     }
 
+    @JsonIgnore
     @Transient
     @Override
     public String getUsername() {
         return this.email;
     }
 
+    @JsonIgnore
     @Transient
     @Override
     public boolean isAccountNonExpired() {
         return UserDetails.super.isAccountNonExpired();
     }
 
+    @JsonIgnore
     @Transient
     @Override
     public boolean isAccountNonLocked() {
         return UserDetails.super.isAccountNonLocked();
     }
 
+    @JsonIgnore
     @Transient
     @Override
     public boolean isCredentialsNonExpired() {
         return UserDetails.super.isCredentialsNonExpired();
     }
 
+    @JsonIgnore
     @Transient
     @Override
     public boolean isEnabled() {

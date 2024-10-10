@@ -1,7 +1,7 @@
 package com.swd392.mentorbooking.controller;
 
 import com.swd392.mentorbooking.dto.Response;
-import com.swd392.mentorbooking.entity.Account;
+import com.swd392.mentorbooking.dto.admin.AccountInfoAdmin;
 import com.swd392.mentorbooking.entity.Blog;
 import com.swd392.mentorbooking.entity.Booking;
 import com.swd392.mentorbooking.entity.Topic;
@@ -20,7 +20,7 @@ public class AdminController {
     private AdminService adminService;
 
     @GetMapping("/accounts")
-    public Response<List<Account>> getAllAccountByRole(@RequestParam(value = "role", required = false) String role) {
+    public Response<List<AccountInfoAdmin>> getAllAccountByRole(@RequestParam(value = "role", required = false) String role) {
         return adminService.getAllAccountByRole(role);
     }
 
