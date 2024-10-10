@@ -3,8 +3,12 @@ package com.swd392.mentorbooking.controller;
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.blog.CreateBlogRequestDTO;
 import com.swd392.mentorbooking.dto.blog.CreateBlogRespnseDTO;
+import com.swd392.mentorbooking.dto.blog.UpdateBlogRequestDTO;
+import com.swd392.mentorbooking.dto.blog.UpdateBlogResponseDTO;
 import com.swd392.mentorbooking.dto.topic.TopicRequest;
 import com.swd392.mentorbooking.dto.topic.TopicResponse;
+import com.swd392.mentorbooking.dto.topic.UpdateTopicRequest;
+import com.swd392.mentorbooking.dto.topic.UpdateTopicResponse;
 import com.swd392.mentorbooking.entity.Topic;
 import com.swd392.mentorbooking.service.TopicService;
 import jakarta.validation.Valid;
@@ -30,5 +34,10 @@ public class TopicController {
     public ResponseEntity getAllTopics(){
         List<Topic> topics = topicService.getAllTopics();
         return ResponseEntity.ok(topics);
+    }
+
+    @PutMapping("/update/{topicId}")
+    public Response<UpdateTopicResponse> updateTopic(@PathVariable Long topicId, @Valid @RequestBody UpdateTopicRequest updateTopicRequest) {
+        return topicService.updateTopic(topicId, updateTopicRequest);
     }
 }
