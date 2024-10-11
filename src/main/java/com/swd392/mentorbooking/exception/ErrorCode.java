@@ -72,8 +72,8 @@ public enum ErrorCode {
     // TRANSACTIONS | CODE: 7XXX
     TRANSACTION_NOT_FOUND(7000, "Transaction not found", HttpStatus.NOT_FOUND),
 
-//    CERTIFICATE | CODE: 7XXX
-    CERTIFICATE_NOT_FOUND(7000, "This wallet does not exist, please re-check", HttpStatus.BAD_REQUEST),
+//    SEMESTER | CODE: 7XXX
+    SEMESTER_NOT_FOUND(7000, "Semester not found, please re-check", HttpStatus.BAD_REQUEST),
 
 // BILLING | CODE 8XXX
     BILLING_NOT_EMPTY(7001, "Billing is not empty", HttpStatus.BAD_REQUEST),

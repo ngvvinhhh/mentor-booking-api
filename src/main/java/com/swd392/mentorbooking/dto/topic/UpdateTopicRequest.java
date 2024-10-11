@@ -8,11 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TopicRequest {
-    @NotBlank(message = "Topic name cannot be empty")
+public class UpdateTopicRequest {
     private String topicName;
 
-    @NotBlank(message = "Description cannot be empty")
     private String description;
 
     private Long semesterId;
