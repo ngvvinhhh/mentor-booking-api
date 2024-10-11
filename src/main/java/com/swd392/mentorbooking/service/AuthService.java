@@ -1,5 +1,6 @@
 package com.swd392.mentorbooking.service;
 
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.swd392.mentorbooking.dto.auth.*;
 import com.swd392.mentorbooking.email.EmailDetail;
 import com.swd392.mentorbooking.email.EmailService;
@@ -23,6 +24,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Optional;
 
 @Service
@@ -105,6 +107,7 @@ public class AuthService implements UserDetailsService {
 
             String responseString = "Login successful";
             LoginResponseDTO loginResponseDTO = new LoginResponseDTO(
+                    200,
                     responseString,
                     null,
                     returnAccount.getTokens(),
@@ -117,6 +120,7 @@ public class AuthService implements UserDetailsService {
             ErrorCode errorCode = e.getErrorCode();
             String errorResponse = "Login failed";
             LoginResponseDTO loginResponseDTO = new LoginResponseDTO(
+                    400,
                     e.getMessage(),
                     errorResponse,
                     null,
@@ -186,7 +190,7 @@ public class AuthService implements UserDetailsService {
                     .attachment("https://circuit-project.vercel.app/forgotPassword?" + jwtService.generateToken(account.getEmail()))
                     .name(account.getName())
                     .build();
-            emailService.sendEmail(emailDetail);
+//            emailService.sendEmail(emailDetail);
 
             accountRepository.save(account);
             ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse("Password reset token generated successfully.", null, 200);
@@ -225,4 +229,19 @@ public class AuthService implements UserDetailsService {
 
     }
 
+    public boolean verifyAccount(String token) throws Exception {
+        try {
+            String email = jwtService.extractEmail(token);
+
+            Account account = accountRepository.findByEmail(email).orElse(null);
+            if (account == null) {
+                throw new AuthAppException(ErrorCode.EMAIL_NOT_FOUND);
+            }
+            account.setStatus(AccountStatusEnum.VERIFIED);
+            accountRepository.save(account);
+            return true;
+        } catch (Exception e) {
+            throw new TokenExpiredException("Invalid or expired token!", Instant.now());
+        }
+    }
 }

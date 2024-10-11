@@ -11,17 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 //This
 @Configuration
-@OpenAPIDefinition(
-        info = @Info(
-                title = "Mentor-Booking",
-                version = "1.0.0"
-        ),
-        servers = {
-                @Server(url = "https://mentor-booking-api.onrender.com/", description = "Production Server URL"),
-                @Server(url = "http://localhost:8080", description = "Development Server URL")
-        },
-        security = @SecurityRequirement(name = "bearerAuth")
-)
+@OpenAPIDefinition(info = @Info(title = "My API", version = "v1"))
 @SecurityScheme(
         name = "bearerAuth",
         type = SecuritySchemeType.HTTP,

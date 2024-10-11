@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LoginResponseDTO {
+    private int code;
+
     private String message;
 
     private String error;
@@ -16,8 +18,9 @@ public class LoginResponseDTO {
 
     private String refreshToken;
 
-    public LoginResponseDTO(String message, String error, String accessToken, String refreshToken) {
+    public LoginResponseDTO(int code, String message, String error, String accessToken, String refreshToken) {
         super();
+        this.code = code;
         this.message = message;
         this.error = error;
         this.accessToken = accessToken;

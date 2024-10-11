@@ -19,7 +19,7 @@ public enum ErrorCode {
     OLD_PASSWORD_INCORRECT(1009, "Old password incorrect", HttpStatus.BAD_REQUEST),
     PASSWORD_REPEAT_INCORRECT(1010, "Password repeat do not match", HttpStatus.BAD_REQUEST),
     NOT_LOGIN(1011, "You need to login", HttpStatus.BAD_REQUEST),
-    USERNAME_PASSWORD_NOT_CORRECT(1012, "Username or password is not correct", HttpStatus.BAD_REQUEST),
+    USERNAME_PASSWORD_NOT_CORRECT(1012, "Email or password is not correct", HttpStatus.BAD_REQUEST),
     ACCOUNT_NOT_FOUND(1013,"Account not found", HttpStatus.NOT_FOUND),
     EMAIL_NOT_FOUND(1013,"Email not found, please register account.", HttpStatus.NOT_FOUND),
     ACCOUNT_NOT_INSTRUCTOR(1014,"Account not instructor", HttpStatus.BAD_REQUEST),

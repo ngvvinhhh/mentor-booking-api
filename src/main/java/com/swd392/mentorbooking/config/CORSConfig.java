@@ -13,10 +13,17 @@ public class CORSConfig implements WebMvcConfigurer {
                 .allowedOrigins("http://localhost:3000",
                         "http://localhost:8080",
                         "http://localhost:5173",
-                        "https://example.com",
+                        "http://167.71.220.5:8080",
                         "https://circuit-project.vercel.app/") // Thêm các domain được phép truy cập
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Cho phép các phương thức
                 .allowedHeaders("*") // Cho phép tất cả các header
                 .allowCredentials(true); // Cho phép gửi thông tin xác thực (cookie, auth headers)
+
+        // Thêm cấu hình cho Swagger
+        registry.addMapping("/v2/api-docs/**").allowedOrigins("*").allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+        registry.addMapping("/swagger-resources/**").allowedOrigins("*").allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+        registry.addMapping("/swagger-ui.html").allowedOrigins("*").allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+        registry.addMapping("/webjars/**").allowedOrigins("*").allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+        registry.addMapping("/swagger-ui/**").allowedOrigins("*").allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
     }
 }
