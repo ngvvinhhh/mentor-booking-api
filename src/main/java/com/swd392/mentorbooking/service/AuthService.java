@@ -7,10 +7,12 @@ import com.swd392.mentorbooking.email.EmailDetail;
 import com.swd392.mentorbooking.email.EmailService;
 import com.swd392.mentorbooking.entity.Account;
 import com.swd392.mentorbooking.entity.Enum.AccountStatusEnum;
+import com.swd392.mentorbooking.entity.Wallet;
 import com.swd392.mentorbooking.exception.ErrorCode;
 import com.swd392.mentorbooking.exception.auth.AuthAppException;
 import com.swd392.mentorbooking.jwt.JWTService;
 import com.swd392.mentorbooking.repository.AccountRepository;
+import com.swd392.mentorbooking.repository.WalletRepository;
 import com.swd392.mentorbooking.utils.AccountUtils;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,9 @@ public class AuthService implements UserDetailsService {
 
     @Autowired
     private AccountUtils accountUtils;
+
+    @Autowired
+    private WalletRepository walletRepository;
 
     //Please do not touch
     @Override
@@ -156,6 +161,11 @@ public class AuthService implements UserDetailsService {
             accountRepository.save(account);
 
             //Create wallet as the account is created here
+            Wallet wallet = Wallet.builder()
+                    .account(account)
+                    .total(0.0)
+                    .build();
+            walletRepository.save(wallet);
 
             String responseMessage = "Successful registration, please check your email for verification";
             RegisterResponseDTO response = new RegisterResponseDTO(responseMessage, null, 201, registerRequestDTO.getEmail());
