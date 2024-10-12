@@ -28,7 +28,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String token= null;
         String userName = null;
         String uri = request.getRequestURI();
-        if (uri.contains("/auth/login") || uri.contains("/auth/register")) {
+        if (uri.contains("/auth/login") || uri.contains("/auth/register") || uri.contains("/auth/forgot-password")) {
             filterChain.doFilter(request,response);
             return;
         }
