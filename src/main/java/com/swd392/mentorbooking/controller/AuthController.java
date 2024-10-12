@@ -30,7 +30,7 @@ public class AuthController {
     }
 
     @GetMapping("/delete/")
-    public Response deleteAccount() {
+    public Response<String> deleteAccount() {
         return authService.deleteAccount();
     }
 

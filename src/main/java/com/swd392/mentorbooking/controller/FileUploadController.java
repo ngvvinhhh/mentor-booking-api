@@ -16,10 +16,6 @@ import java.util.List;
 @RequestMapping("/firebase")
 public class FileUploadController {
 
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-    private static final List<String> VALID_IMAGE_TYPES = List.of("image/jpeg", "image/png", "image/gif");
-
-
     @Autowired
     private FirebaseStorageService firebaseStorageService;
 

@@ -256,7 +256,7 @@ public class AuthService implements UserDetailsService {
         }
     }
 
-    public Response deleteAccount() {
+    public Response<String> deleteAccount() {
         // Get the current account
         Account account = accountUtils.getCurrentAccount();
         if (account == null) return new Response<>(401, "Please login first", null);
@@ -269,6 +269,6 @@ public class AuthService implements UserDetailsService {
         account.setIsDeleted(true);
         accountRepository.save(account);
 
-        return new Response<>(200, "Delete account successfully.", null);
+        return new Response<>(200, "Delete account successfully.", "The account with email " + account.getEmail() + " is deleted");
     }
 }
