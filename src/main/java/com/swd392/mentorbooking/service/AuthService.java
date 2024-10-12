@@ -1,6 +1,7 @@
 package com.swd392.mentorbooking.service;
 
 import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.auth.*;
 import com.swd392.mentorbooking.email.EmailDetail;
 import com.swd392.mentorbooking.email.EmailService;
@@ -10,6 +11,7 @@ import com.swd392.mentorbooking.exception.ErrorCode;
 import com.swd392.mentorbooking.exception.auth.AuthAppException;
 import com.swd392.mentorbooking.jwt.JWTService;
 import com.swd392.mentorbooking.repository.AccountRepository;
+import com.swd392.mentorbooking.utils.AccountUtils;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -30,6 +32,8 @@ import java.util.Optional;
 @Service
 public class AuthService implements UserDetailsService {
 
+    private final static String defaultAvatar = "https://firebasestorage.googleapis.com/v0/b/mentor-booking-3d46a.appspot.com/o/76f15d2d-9f0b-4051-8177-812d5ee785a1.jpg?alt=media";
+
     @Autowired
     private AccountRepository accountRepository;
 
@@ -46,6 +50,9 @@ public class AuthService implements UserDetailsService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private AccountUtils accountUtils;
 
     //Please do not touch
     @Override
@@ -64,6 +71,7 @@ public class AuthService implements UserDetailsService {
                 registerRequestDTO.getRole(),
                 AccountStatusEnum.UNVERIFIED
         );
+        account.setAvatar(defaultAvatar);
 
         account.setPassword(passwordEncoder.encode(registerRequestDTO.getPassword()));
         return account;
@@ -87,6 +95,9 @@ public class AuthService implements UserDetailsService {
             }
             if (account.getStatus().equals(AccountStatusEnum.UNVERIFIED)) {
                 throw new AuthAppException(ErrorCode.ACCOUNT_NOT_VERIFY);
+            }
+            if (account.getIsDeleted().equals(true)) {
+                throw new AuthAppException(ErrorCode.ACCOUNT_IS_DELETED);
             }
             Authentication authentication;
             try {
@@ -243,5 +254,21 @@ public class AuthService implements UserDetailsService {
         } catch (Exception e) {
             throw new TokenExpiredException("Invalid or expired token!", Instant.now());
         }
+    }
+
+    public Response<String> deleteAccount() {
+        // Get the current account
+        Account account = accountUtils.getCurrentAccount();
+        if (account == null) return new Response<>(401, "Please login first", null);
+
+        //Check if account really exist
+        account = accountRepository.findById(account.getId()).orElse(null);
+        if (account == null) return new Response<>(401, "Account not found", null);
+
+        //Set account status to deleted
+        account.setIsDeleted(true);
+        accountRepository.save(account);
+
+        return new Response<>(200, "Delete account successfully.", "The account with email " + account.getEmail() + " is deleted");
     }
 }

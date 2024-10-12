@@ -1,5 +1,6 @@
 package com.swd392.mentorbooking.controller;
 
+import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.entity.Account;
 import com.swd392.mentorbooking.repository.AccountRepository;
 import com.swd392.mentorbooking.utils.FirebaseStorageService;
@@ -15,10 +16,6 @@ import java.util.List;
 @RequestMapping("/firebase")
 public class FileUploadController {
 
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-    private static final List<String> VALID_IMAGE_TYPES = List.of("image/jpeg", "image/png", "image/gif");
-
-
     @Autowired
     private FirebaseStorageService firebaseStorageService;
 
@@ -26,7 +23,7 @@ public class FileUploadController {
     private AccountRepository accountRepository;
 
     @PostMapping("/upload-avatar")
-    public String uploadAvatar(@RequestParam("file") MultipartFile file) {
+    public Response<List<String>> uploadAvatar(@RequestParam("file") MultipartFile file) {
         return firebaseStorageService.upload(file);
     }
 

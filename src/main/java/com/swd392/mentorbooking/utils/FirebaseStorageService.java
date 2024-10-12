@@ -1,6 +1,8 @@
 package com.swd392.mentorbooking.utils;
 
+import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
+import com.swd392.mentorbooking.dto.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.google.cloud.storage.BlobInfo;
@@ -13,6 +15,8 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -20,6 +24,11 @@ public class FirebaseStorageService {
 
     @Autowired
     private Storage storage;
+
+    @Autowired
+    public FirebaseStorageService(Storage storage) {
+        this.storage = storage;
+    }
 
     private File convertToFile(MultipartFile multipartFile, String fileName) throws IOException {
         File tempFile = new File(fileName);
@@ -42,7 +51,7 @@ public class FirebaseStorageService {
         return fileName.substring(fileName.lastIndexOf("."));
     }
 
-    public String upload(MultipartFile multipartFile) {
+    public Response<List<String>> upload(MultipartFile multipartFile) {
         try {
             String fileName = multipartFile.getOriginalFilename();
             if (fileName != null) {
@@ -52,10 +61,30 @@ public class FirebaseStorageService {
             File file = this.convertToFile(multipartFile, fileName);  // Chuyển MultipartFile thành File
             String URL = this.uploadFile(file, fileName);  // Upload và nhận link tải file
             file.delete();  // Xóa file tạm sau khi upload
-            return URL;
+            List<String> response = new ArrayList<>();
+            response.add(URL);
+            response.add(fileName);
+            return new Response<>(200, "Upload image successful", response);
         } catch (Exception e) {
             e.printStackTrace();
-            return "Image couldn't upload, Something went wrong";
+            return new Response<>(400, "Image couldn't upload, Something went wrong", null);
         }
+    }
+
+    public String getAvatarUrl(String fileName) {
+        // Define your bucket name (change this to your Firebase bucket name)
+        String bucketName = "your-firebase-project-id.appspot.com";
+
+        // Get the blob (file) from the bucket
+        Blob blob = storage.get(bucketName, "avatars/" + fileName);  // Assuming avatars are in 'avatars/' folder
+
+        if (blob == null) {
+            throw new RuntimeException("File not found in Firebase Storage: " + fileName);
+        }
+
+        // Get a signed URL (downloadable link to the file)
+        String downloadUrl = blob.getMediaLink();  // This is the URL to access the file
+
+        return downloadUrl;
     }
 }

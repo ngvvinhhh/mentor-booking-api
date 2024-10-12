@@ -1,8 +1,6 @@
 package com.swd392.mentorbooking.exception;
 
 import com.swd392.mentorbooking.dto.ErrorResponse;
-import com.swd392.mentorbooking.dto.Response;
-import com.swd392.mentorbooking.exception.auth.InvalidAccountException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -26,9 +24,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
-    @ExceptionHandler(InvalidAccountException.class)
-    public ResponseEntity<Response<Object>> handleInvalidAccountException(InvalidAccountException ex) {
-        Response<Object> response = new Response<>(400, ex.getMessage(), null);
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> ForbiddenException(ForbiddenException ex) {
+        List<String> errorMessages = new ArrayList<>(); // Tạo danh sách để lưu các thông báo lỗi
+        errorMessages.add(ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.FORBIDDEN.value(), errorMessages);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 }

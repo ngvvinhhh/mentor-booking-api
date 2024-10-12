@@ -1,5 +1,6 @@
 package com.swd392.mentorbooking.controller;
 
+import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.auth.*;
 import com.swd392.mentorbooking.service.AuthService;
 import jakarta.validation.Valid;
@@ -26,6 +27,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO) {
         return authService.checkLogin(loginRequestDTO);
+    }
+
+    @GetMapping("/delete/")
+    public Response<String> deleteAccount() {
+        return authService.deleteAccount();
     }
 
     @PostMapping("/forgot-password")

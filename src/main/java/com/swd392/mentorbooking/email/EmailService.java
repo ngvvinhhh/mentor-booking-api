@@ -28,10 +28,11 @@ public class EmailService {
 
             context.setVariable("name", emailDetail.getName());
             String token = jwtService.generateToken(emailDetail.getRecipient());
-            String link = "http://localhost:8080/auth/verify/" + token;
 
+            String link = "http://localhost:8080/auth/verify/" + token;
             context.setVariable("link", link);
-            context.setVariable("button", "Go to page");
+
+            context.setVariable("button", "Verify");
 
             proceedToSendMail(emailDetail, context, "VerifyAccount");
         } catch (MessagingException messagingException) {
