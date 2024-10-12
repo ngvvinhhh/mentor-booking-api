@@ -1,7 +1,5 @@
 package com.swd392.mentorbooking.dto.account;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.swd392.mentorbooking.entity.Account;
 import com.swd392.mentorbooking.entity.Enum.SpecializationEnum;
 import lombok.*;
 
