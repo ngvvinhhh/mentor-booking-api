@@ -19,10 +19,23 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
 
+    // ** ACCOUNT SECTION ** //
+
+    // Get all account
     @GetMapping("/accounts")
     public Response<List<AccountInfoAdmin>> getAllAccountByRole(@RequestParam(value = "role", required = false) String role) {
         return adminService.getAllAccountByRole(role);
     }
+
+    // Delete account
+    @DeleteMapping("/account/delete/{accountId}")
+    public Response<AccountInfoAdmin> deleteAccount(@PathVariable Long accountId) {
+        return adminService.deleteAccount(accountId);
+    }
+
+    // Ban account
+
+    // ** BOOKING SECTION ** //
 
     // Get all bookings
     @GetMapping("/bookings")
@@ -30,11 +43,15 @@ public class AdminController {
         return adminService.getAllBooking();
     }
 
+    // ** TOPIC SECTION ** //
+
     // Get all topics
     @GetMapping("/topics")
     public Response<List<Topic>> getAllTopic() {
         return adminService.getAllTopic();
     }
+
+    // ** BLOG SECTION ** //
 
     // Get all blogs
     @GetMapping("/blogs")

@@ -60,6 +60,9 @@ public class Account implements UserDetails {
     @Column(name = "class", nullable = true)
     private String className;
 
+    @Column(name = "cv", nullable = true)
+    private String cv;
+
     @JsonIgnore
     @ElementCollection(targetClass = SpecializationEnum.class)
     @Enumerated(EnumType.STRING)

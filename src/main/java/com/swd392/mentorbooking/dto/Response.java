@@ -2,6 +2,7 @@ package com.swd392.mentorbooking.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
+import org.springframework.http.HttpStatus;
 
 @Setter
 @Getter

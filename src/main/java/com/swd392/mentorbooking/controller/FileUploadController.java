@@ -1,5 +1,6 @@
 package com.swd392.mentorbooking.controller;
 
+import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.entity.Account;
 import com.swd392.mentorbooking.repository.AccountRepository;
 import com.swd392.mentorbooking.utils.FirebaseStorageService;
@@ -26,7 +27,7 @@ public class FileUploadController {
     private AccountRepository accountRepository;
 
     @PostMapping("/upload-avatar")
-    public String uploadAvatar(@RequestParam("file") MultipartFile file) {
+    public Response<List<String>> uploadAvatar(@RequestParam("file") MultipartFile file) {
         return firebaseStorageService.upload(file);
     }
 
