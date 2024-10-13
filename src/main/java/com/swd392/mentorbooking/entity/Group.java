@@ -46,5 +46,9 @@ public class Group {
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     private List<Account> accounts;
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+    private List<Invitation> invitations;
+
 }
 

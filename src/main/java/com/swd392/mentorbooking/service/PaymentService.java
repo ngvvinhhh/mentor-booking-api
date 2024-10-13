@@ -49,21 +49,18 @@ public class PaymentService {
         Account customer = accountRepository.findById(paymentRequest.getUserId())
                 .orElseThrow(() -> new InvalidAccountException("Account not found."));
         Payment payment = new Payment();
-
         payment.setAccount(customer);
-
         payment.setCreatedAt(LocalDateTime.now());
         payment.setTotal(paymentRequest.getAmount());
         payment.setDescription(paymentRequest.getDescription());
 
-        // Save the payment to the database
-        Payment savedPayment = paymentRepository.save(payment);
+        // Initial status is PENDING
+        payment.setStatus(PaymentStatusEnum.PENDING);
 
-        // Add money to wallet
-        addToWallet(customer.getWallet(), savedPayment.getTotal());
-
-        return savedPayment;
+        // Save to database but not add money yet
+        return paymentRepository.save(payment);
     }
+
 
     public String createUrl(PaymentRequest paymentRequest) throws Exception {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
@@ -83,7 +80,7 @@ public class PaymentService {
         String tmnCode = "C2CFQOTD";
         String secretKey = "867ZAJFLY3FAR95N9MHKC4SHN7VGCZLN";
         String vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        String returnUrl = "https://circuit-project.vercel.app/payment-succeed?" + payment.getId();
+        String returnUrl = "https://circuit-project.vercel.app/payment/payment-pending?id=" + payment.getId();
         String currCode = "VND";
 
         Map<String, String> vnpParams = new TreeMap<>();
@@ -138,6 +135,31 @@ public class PaymentService {
             result.append(String.format("%02x", b));
         }
         return result.toString();
+    }
+
+    public String processPaymentCallback(Long paymentId, Map<String, String> params) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid payment ID"));
+
+        // Check response from VNPAY
+        String vnpResponseCode = params.get("vnp_ResponseCode");
+
+        if ("00".equals(vnpResponseCode)) { // Code "00" means successful payment
+            // Update payment status successfully
+            payment.setStatus(PaymentStatusEnum.SUCCESS);
+            paymentRepository.save(payment);
+
+            // Add money to wallet
+            addToWallet(payment.getAccount().getWallet(), payment.getTotal());
+
+            return "redirect:https://circuit-project.vercel.app/payment/payment-success";
+        } else {
+            // Payment failed, update status failed
+            payment.setStatus(PaymentStatusEnum.FAILED);
+            paymentRepository.save(payment);
+
+            return "redirect:https://circuit-project.vercel.app/payment/payment-failure";
+        }
     }
 
     private void addToWallet(Wallet wallet, double amount) {

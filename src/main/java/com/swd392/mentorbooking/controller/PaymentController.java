@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/payment")
 @CrossOrigin("**")
@@ -15,9 +17,16 @@ public class PaymentController {
     @Autowired
     PaymentService paymentService;
 
-    @PostMapping("create")
-    public ResponseEntity create (@RequestBody PaymentRequest paymentRequest) throws Exception {
+    @PostMapping("deposit")
+    public ResponseEntity deposit (@RequestBody PaymentRequest paymentRequest) throws Exception {
         String  vnpayUrl = paymentService.createUrl(paymentRequest);
         return  ResponseEntity.ok(vnpayUrl);
     }
+
+    @GetMapping("/payment-pending")
+    public String paymentSucceed(@RequestParam("id") Long paymentId, @RequestParam Map<String, String> params) {
+        return paymentService.processPaymentCallback(paymentId, params);
+    }
+
+
 }
