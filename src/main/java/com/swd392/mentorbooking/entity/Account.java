@@ -1,10 +1,7 @@
 package com.swd392.mentorbooking.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.swd392.mentorbooking.entity.Enum.AccountStatusEnum;
-import com.swd392.mentorbooking.entity.Enum.GenderEnum;
-import com.swd392.mentorbooking.entity.Enum.RoleEnum;
-import com.swd392.mentorbooking.entity.Enum.SpecializationEnum;
+import com.swd392.mentorbooking.entity.Enum.*;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -126,6 +123,10 @@ public class Account implements UserDetails {
     @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<Booking> bookings;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private List<Payment> payments;
 
     @JsonIgnore
     @ManyToOne
