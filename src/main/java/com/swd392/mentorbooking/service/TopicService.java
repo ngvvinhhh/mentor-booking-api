@@ -118,5 +118,34 @@ public class TopicService {
         return new Response<>(200, "Topic updated successfully!", data);
     }
 
+    public Response<String> deleteTopic(Long topicId) {
+
+        // Get the current account
+        Account account = accountUtils.getCurrentAccount();
+        if (account == null) return new Response<>(401, "Please login first", null);
+
+        // Find the topic by ID
+        Topic topic = topicRepository.findById(topicId).orElse(null);
+        if (topic == null) return new Response<>(404, "Topic not found", null);
+
+        // Check if the topic is already deleted
+        if (topic.getIsDeleted()) return new Response<>(400, "Topic is already deleted", null);
+
+        // Soft delete: Set 'isDeleted' to true and update 'updatedAt'
+        topic.setIsDeleted(true);
+        topic.setUpdatedAt(LocalDateTime.now());
+
+        // Save the changes
+        try {
+            topicRepository.save(topic);
+        } catch (Exception e) {
+            throw new TopicException("There was something wrong when deleting the topic, please try again...", ErrorCode.TOPICS_NOT_FOUND);
+        }
+
+        // Return success response
+        return new Response<>(200, "Topic deleted successfully!", "Topic with ID " + topicId + " was soft deleted.");
+    }
+
+
 
 }

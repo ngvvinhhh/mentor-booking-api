@@ -104,6 +104,11 @@ public class MentorController {
 
     // ** ACHIEVEMENT SECTION ** //
 
+    @GetMapping("/achievement/get")
+    public Response<List<CreateAchievementResponseDTO>> getAllAchievements() {
+        return mentorService.getAllAchievements();
+    }
+
     @GetMapping("/achievement/create")
     public Response<CreateAchievementResponseDTO> createAchievement(@Valid @RequestBody CreateAchievementRequestDTO createAchievementRequestDTO) {
         return mentorService.createAchievement(createAchievementRequestDTO);

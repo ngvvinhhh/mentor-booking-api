@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MentorService {
@@ -286,6 +287,28 @@ public class MentorService {
     }
 
     // ** ACHIEVEMENT SECTION ** //
+
+    public Response<List<CreateAchievementResponseDTO>> getAllAchievements() {
+        // Check the current logged in account
+        Account account = checkAccount();
+
+        // Get all achievements for the current account
+        List<Achievement> achievements = achievementRepository.findAllByAccountId(account.getId());
+
+        // Convert achievements to CreateAchievementResponseDTO
+        List<CreateAchievementResponseDTO> responseDTOs = achievements.stream().map(achievement ->
+                CreateAchievementResponseDTO.builder()
+                        .achievementName(achievement.getAchievementName())
+                        .achievementLink(achievement.getLink())
+                        .achievementDescription(achievement.getDescription())
+                        .created_at(achievement.getCreatedAt())
+                        .build()
+        ).collect(Collectors.toList());
+
+        // Return the response
+        return new Response<>(200, "Retrieve all achievements successfully!", responseDTOs);
+    }
+
 
     public Response<CreateAchievementResponseDTO> createAchievement(@Valid CreateAchievementRequestDTO createAchievementRequestDTO) {
         // Check the current logged in account

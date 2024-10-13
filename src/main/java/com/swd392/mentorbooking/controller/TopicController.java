@@ -40,4 +40,9 @@ public class TopicController {
     public Response<UpdateTopicResponse> updateTopic(@PathVariable Long topicId, @Valid @RequestBody UpdateTopicRequest updateTopicRequest) {
         return topicService.updateTopic(topicId, updateTopicRequest);
     }
+
+    @DeleteMapping("/delete/{topicId}")
+    public Response<String> deleteTopic(@PathVariable Long topicId) {
+        return topicService.deleteTopic(topicId);
+    }
 }
