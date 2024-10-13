@@ -128,6 +128,10 @@ public class Account implements UserDetails {
     private List<Booking> bookings;
 
     @JsonIgnore
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private List<Payment> payments;
+
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "group_id")
     private Group group;
