@@ -66,6 +66,11 @@ public class MentorController {
         return mentorService.updateBlog(blogId, updateServiceRequestDTO);
     }
 
+    @DeleteMapping("/blog/delete/{blogId}")
+    public Response<UpdateBlogResponseDTO> deleteBlog(@PathVariable Long blogId) {
+        return mentorService.deleteBlog(blogId);
+    }
+
     // ** CV SECTION ** //
 
     // Create a CV
@@ -80,6 +85,11 @@ public class MentorController {
         return mentorService.updateCV(uploadCVRequest);
     }
 
+    // Delete a CV
+    @DeleteMapping("/cv/delete")
+    public Response<UploadCVRequest> deleteCV() {
+        return mentorService.deleteCV();
+    }
     // ** SPECIALIZATION SECTION ** //
 
     @GetMapping("/specialization/get")

@@ -101,7 +101,7 @@ public class Account implements UserDetails {
 
     @JsonIgnore
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
-    private Services services;
+    private Services service;
 
     @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)

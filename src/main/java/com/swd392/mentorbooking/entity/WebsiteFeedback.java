@@ -26,7 +26,7 @@ public class WebsiteFeedback {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = true)
     private LocalDateTime updatedAt;
 
     @Column(name = "is_deleted", nullable = false)
