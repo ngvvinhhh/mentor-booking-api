@@ -4,8 +4,7 @@ import com.swd392.mentorbooking.entity.Enum.RoleEnum;
 import com.swd392.mentorbooking.entity.Enum.SpecializationEnum;
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.account.SearchMentorResponseDTO;
-import com.swd392.mentorbooking.dto.account.mentor.GetMentorProfileResponse;
-import com.swd392.mentorbooking.dto.account.student.GetStudentProfileResponse;
+import com.swd392.mentorbooking.dto.account.student.GetProfileResponse;
 import com.swd392.mentorbooking.entity.Account;
 import com.swd392.mentorbooking.entity.WebsiteFeedback;
 import com.swd392.mentorbooking.exception.ErrorCode;
@@ -35,35 +34,46 @@ public class AccountService {
     @Autowired
     private WebsiteFeedbackRepository websiteFeedbackRepository;
 
-    public Response<GetStudentProfileResponse> getStudentProfile() {
+    public Response<GetProfileResponse> getProfile() {
         // Get the current account
         Account account = checkAccount();
 
-        GetStudentProfileResponse response = GetStudentProfileResponse.builder()
+        GetProfileResponse response = GetProfileResponse.builder()
                 .id(account.getId())
                 .name(account.getName())
                 .email(account.getEmail())
+                .role(account.getRole())
                 .dayOfBirth(account.getDayOfBirth())
                 .gender(account.getGender())
                 .phone(account.getPhone())
                 .avatar(account.getAvatar())
                 .className(account.getClassName())
+                .specializations(account.getSpecializations())
+                .facebookLink(account.getFacebookLink())
+                .linkedinLink(account.getLinkedinLink())
+                .twitterLink(account.getTwitterLink())
+                .youtubeLink(account.getYoutubeLink())
                 .build();
         return new Response<>(200, "Retrieve data successfully", response);
     }
 
-    public Response<GetMentorProfileResponse> getMentorProfile() {
-        // Get the current account
-        Account account = checkAccount();
 
-        GetMentorProfileResponse response = GetMentorProfileResponse.builder()
+    public Response<GetProfileResponse> getProfileById(Long accountId) {
+        Account account = accountRepository.findById(accountId).orElse(null);
+        if (account == null) {
+            throw new AuthAppException(ErrorCode.ACCOUNT_NOT_FOUND);
+        }
+
+        GetProfileResponse response = GetProfileResponse.builder()
                 .id(account.getId())
                 .name(account.getName())
                 .email(account.getEmail())
+                .role(account.getRole())
                 .dayOfBirth(account.getDayOfBirth())
                 .gender(account.getGender())
                 .phone(account.getPhone())
                 .avatar(account.getAvatar())
+                .className(account.getClassName())
                 .specializations(account.getSpecializations())
                 .facebookLink(account.getFacebookLink())
                 .linkedinLink(account.getLinkedinLink())
@@ -132,5 +142,6 @@ public class AccountService {
 
         return account;
     }
+
 }
 

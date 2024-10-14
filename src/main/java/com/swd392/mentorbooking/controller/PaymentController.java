@@ -18,9 +18,9 @@ public class PaymentController {
     PaymentService paymentService;
 
     @PostMapping("deposit")
-    public ResponseEntity deposit (@RequestBody PaymentRequest paymentRequest) throws Exception {
-        String  vnpayUrl = paymentService.createUrl(paymentRequest);
-        return  ResponseEntity.ok(vnpayUrl);
+    public ResponseEntity<String> deposit (@RequestBody PaymentRequest paymentRequest) throws Exception {
+        String vnpayUrl = paymentService.createUrl(paymentRequest);
+        return ResponseEntity.ok(vnpayUrl);
     }
 
     @GetMapping("/payment-pending")

@@ -1,6 +1,5 @@
 package com.swd392.mentorbooking.entity;
 
-import com.swd392.mentorbooking.entity.Enum.AccountStatusEnum;
 import com.swd392.mentorbooking.entity.Enum.PaymentStatusEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
