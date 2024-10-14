@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SemesterResponse {
     private long semesterId;
-    private String topicName;
+    private String semesterName;
 }
