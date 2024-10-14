@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SemesterRequest {
-    @NotBlank(message = "Topic name cannot be empty")
-    private String topicName;
+    @NotBlank(message = "Semester name cannot be empty")
+    private String semesterName;
 }

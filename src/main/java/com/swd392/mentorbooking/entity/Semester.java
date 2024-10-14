@@ -16,8 +16,8 @@ public class Semester {
     @Column(name = "semester_id")
     private Long id;
 
-    @Column(name = "topic_name", nullable = false)
-    private String topicName;
+    @Column(name = "semester_name", nullable = false)
+    private String semesterName;
 
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
