@@ -208,10 +208,9 @@ public class AuthService implements UserDetailsService {
                     .recipient(account.getEmail())
                     .msgBody("Reset your password account.")
                     .subject("Reset password!")
-                    .attachment("https://circuit-project.vercel.app/forgotPassword?" + jwtService.generateToken(account.getEmail()))
+                    .attachment("http://localhost:5173/forgotPassword?" + jwtService.generateToken(account.getEmail()))
                     .name(account.getName())
                     .build();
-//            emailService.sendEmail(emailDetail);
 
             accountRepository.save(account);
             ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse("Password reset token generated successfully.", null, 200);

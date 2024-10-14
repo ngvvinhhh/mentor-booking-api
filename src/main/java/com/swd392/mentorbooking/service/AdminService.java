@@ -46,13 +46,13 @@ public class AdminService {
         try {
             if (role == null) {
                 // Get all accounts
-                data = accountRepository.findAll();
+                data = accountRepository.findAccountsByIsDeletedFalse();
             } else if (role.equalsIgnoreCase("mentor")) {
                 // Get accounts by mentor role
-                data = accountRepository.findAccountsByRole(RoleEnum.MENTOR);
+                data = accountRepository.findAccountsByRoleAndIsDeletedFalse(RoleEnum.MENTOR);
             } else if (role.equalsIgnoreCase("student")) {
                 // Get accounts by student role
-                data = accountRepository.findAccountsByRole(RoleEnum.STUDENT);
+                data = accountRepository.findAccountsByRoleAndIsDeletedFalse(RoleEnum.STUDENT);
             } else {
                 // Role not supported
                 String message = "Your role is not supported!";
@@ -109,7 +109,7 @@ public class AdminService {
     }
 
     public Response<AccountInfoAdmin> deleteAccount(Long accountId) {
-        checkAccount();
+        //checkAccount();
 
         Account accountToDelete = accountRepository.findById(accountId).orElse(null);
         if (accountToDelete == null) {
