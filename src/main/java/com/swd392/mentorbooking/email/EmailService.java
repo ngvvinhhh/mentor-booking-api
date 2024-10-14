@@ -40,18 +40,25 @@ public class EmailService {
         }
     }
 
-    public void sendEmail(EmailDetail emailDetail) {
+    public void sendEmailJoinGroup(EmailDetail emailDetail) {
         try {
             Context context = new Context();
             context.setVariable("name", emailDetail.getName());
             context.setVariable("button", "Go to page");
             context.setVariable("link", emailDetail.getAttachment());
 
-            proceedToSendMail(emailDetail, context, "VerifyAccount");
+            emailDetail.setSubject("You've been invited to join a group!");
+            emailDetail.setMsgBody("Hi " + emailDetail.getName() + ",\n\n" +
+                    "You've been invited to join a group. Click the button below to join:\n\n" +
+                    "<a href=\"" + emailDetail.getAttachment() + "\">" + context.getVariable("button") + "</a>");
+
+            proceedToSendMail(emailDetail, context, "invite-template");
         } catch (MessagingException e) {
             e.printStackTrace();
         }
     }
+
+
     private void proceedToSendMail(EmailDetail emailDetail, Context context, String template) throws MessagingException {
         String text = templateEngine.process(template, context);
 

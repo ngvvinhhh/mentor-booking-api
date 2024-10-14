@@ -1,10 +1,8 @@
 package com.swd392.mentorbooking.controller;
 
+import com.swd392.mentorbooking.dto.Invititation.AcceptInviteRequest;
 import com.swd392.mentorbooking.dto.Response;
-import com.swd392.mentorbooking.dto.group.AddMemberRequest;
-import com.swd392.mentorbooking.dto.group.GroupRequest;
-import com.swd392.mentorbooking.dto.group.GroupResponse;
-import com.swd392.mentorbooking.dto.group.UpdateGroupResponse;
+import com.swd392.mentorbooking.dto.group.*;
 import com.swd392.mentorbooking.service.GroupService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,8 +43,17 @@ public class GroupController {
     }
 
     @PostMapping("/remove-account")
-    public Response<GroupResponse> RemoveAccountToGroup(@Valid @RequestBody AddMemberRequest removeMemberRequest) {
+    public Response<GroupResponse> RemoveAccountToGroup(@Valid @RequestBody RemoveMemberRequest removeMemberRequest) {
         return groupService.removeAccountFromGroup(removeMemberRequest);
+    }
+
+    @PostMapping("/accept-invite")
+    public Response<GroupResponse> acceptGroupInvitation(@Valid @RequestBody AcceptInviteRequest acceptInviteRequest) {
+        return groupService.acceptGroupInvitation(
+                acceptInviteRequest.getEmail(),
+                acceptInviteRequest.getGroupId(),
+                acceptInviteRequest.getToken()
+        );
     }
 
 }
