@@ -40,6 +40,29 @@ public class EmailService {
         }
     }
 
+    public void sendForgotPasswordEmail(EmailDetail emailDetail) {
+        try {
+            Context context = new Context();
+            context.setVariable("name", emailDetail.getName());
+
+            // Tạo token để người dùng có thể reset mật khẩu
+            String token = jwtService.generateToken(emailDetail.getRecipient());
+            String resetLink = "https://circuit-project.vercel.app/forgotPassword?" + token;
+
+            context.setVariable("link", resetLink);
+            context.setVariable("button", "Reset Password");
+
+            emailDetail.setSubject("Password Reset Request");
+            emailDetail.setMsgBody("Hi " + emailDetail.getName() + ",\n\n" +
+                    "We received a request to reset your password. Click the button below to reset it:\n\n" +
+                    "<a href=\"" + resetLink + "\">Reset Password</a>");
+
+            proceedToSendMail(emailDetail, context, "forgot-password");
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void sendEmailJoinGroup(EmailDetail emailDetail) {
         try {
             Context context = new Context();

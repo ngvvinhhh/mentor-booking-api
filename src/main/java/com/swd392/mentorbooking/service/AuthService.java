@@ -206,6 +206,15 @@ public class AuthService implements UserDetailsService {
             //SEND MAIL
             EmailDetail emailDetail = EmailDetail.builder()
                     .recipient(account.getEmail())
+                    .msgBody("Dear " + account.getName() + ",\n\n" +
+                            "We received a request to reset the password for your account. To complete the process, please click the link below:\n\n" +
+                            "<a href=\"https://circuit-project.vercel.app/forgotPassword?" + token + "\">Reset My Password</a>\n\n" +
+                            "If you did not request a password reset, please ignore this email or contact support if you have any concerns.\n\n" +
+                            "Thank you,\nThe Support Team")
+                    .subject("Password Reset Request - Action Required")
+                    .name(account.getName())
+                    .build();
+            emailService.sendForgotPasswordEmail(emailDetail);
                     .msgBody("Reset your password account.")
                     .subject("Reset password!")
                     .attachment("http://localhost:5173/forgotPassword?" + jwtService.generateToken(account.getEmail()))

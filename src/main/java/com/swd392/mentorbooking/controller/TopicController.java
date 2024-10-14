@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -39,5 +40,16 @@ public class TopicController {
     @PutMapping("/update/{topicId}")
     public Response<UpdateTopicResponse> updateTopic(@PathVariable Long topicId, @Valid @RequestBody UpdateTopicRequest updateTopicRequest) {
         return topicService.updateTopic(topicId, updateTopicRequest);
+    }
+
+    @DeleteMapping("/delete/{topicId}")
+    public Response<String> deleteTopic(@PathVariable Long topicId) {
+        return topicService.deleteTopic(topicId);
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadTopics(@RequestParam("file") MultipartFile file) {
+        Response<String> response = topicService.addTopicsFromExcel(file);
+        return ResponseEntity.status(response.getCode()).body(response.getMessage());
     }
 }
