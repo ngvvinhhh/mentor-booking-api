@@ -2,8 +2,7 @@ package com.swd392.mentorbooking.controller;
 
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.account.SearchMentorResponseDTO;
-import com.swd392.mentorbooking.dto.account.mentor.GetMentorProfileResponse;
-import com.swd392.mentorbooking.dto.account.student.GetStudentProfileResponse;
+import com.swd392.mentorbooking.dto.account.student.GetProfileResponse;
 import com.swd392.mentorbooking.entity.Enum.SpecializationEnum;
 import com.swd392.mentorbooking.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,14 +21,14 @@ public class AccountController {
 
     // ** PROFILE SECTION ** //
 
-    @GetMapping("/student/profile")
-    public Response<GetStudentProfileResponse> getStudentProfile() {
-        return accountService.getStudentProfile();
+    @GetMapping("/profile")
+    public Response<GetProfileResponse> getProfile() {
+        return accountService.getProfile();
     }
 
-    @GetMapping("/mentor/profile")
-    public Response<GetMentorProfileResponse> getMentorProfile() {
-        return accountService.getMentorProfile();
+    @GetMapping("/profile/{accountId}")
+    public Response<GetProfileResponse> getProfileById(@PathVariable("accountId") Long accountId) {
+        return accountService.getProfileById(accountId);
     }
 
     // ** SEARCH SECTION ** //

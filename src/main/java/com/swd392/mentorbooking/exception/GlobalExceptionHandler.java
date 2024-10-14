@@ -1,7 +1,6 @@
 package com.swd392.mentorbooking.exception;
 
 import com.swd392.mentorbooking.dto.ErrorResponse;
-import com.swd392.mentorbooking.exception.auth.InvalidAccountException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
