@@ -2,9 +2,12 @@ package com.swd392.mentorbooking.controller;
 
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.account.SearchMentorResponseDTO;
-import com.swd392.mentorbooking.dto.account.student.GetProfileResponse;
+import com.swd392.mentorbooking.dto.account.GetProfileResponse;
+import com.swd392.mentorbooking.dto.account.UpdateProfileRequestDTO;
+import com.swd392.mentorbooking.dto.website_feedback.WebsiteFeedbackRequestDTO;
 import com.swd392.mentorbooking.entity.Enum.SpecializationEnum;
 import com.swd392.mentorbooking.service.AccountService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
@@ -26,9 +29,9 @@ public class AccountController {
         return accountService.getProfile();
     }
 
-    @GetMapping("/profile/{accountId}")
-    public Response<GetProfileResponse> getProfileById(@PathVariable("accountId") Long accountId) {
-        return accountService.getProfileById(accountId);
+    @PutMapping("/student/update-profile")
+    public Response<GetProfileResponse> UpdateProfile(@Valid @RequestBody UpdateProfileRequestDTO updateProfileRequestDTO) {
+        return accountService.updateProfile(updateProfileRequestDTO);
     }
 
     // ** SEARCH SECTION ** //
@@ -39,7 +42,7 @@ public class AccountController {
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(required = false) List<SpecializationEnum> specializations,
-            @RequestParam(defaultValue = "service.price,asc") String[] sort
+            @RequestParam(required = false, defaultValue = "service.price,asc") String[] sort
     )
     {
         Sort.Direction direction = Sort.Direction.fromString(sort[1]);
@@ -52,8 +55,8 @@ public class AccountController {
 
     // Create website feedback
     @PostMapping("/website/create-feedback")
-    public Response<String> createWebsiteFeedback(@RequestBody String description) {
-        return accountService.createWebsiteFeedback(description);
+    public Response<WebsiteFeedbackRequestDTO> createWebsiteFeedback(@RequestBody WebsiteFeedbackRequestDTO websiteFeedbackEnum) {
+        return accountService.createWebsiteFeedback(websiteFeedbackEnum);
     }
 
 }

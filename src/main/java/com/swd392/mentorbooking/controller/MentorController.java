@@ -32,7 +32,7 @@ public class MentorController {
     // ** PROFILE SECTION ** //
 
     // Update profile's social links
-    @PostMapping("/social-update")
+    @PutMapping("/social-update")
     public ResponseEntity<Response<UpdateSocialLinkResponseDTO>> updateSocialLink(@RequestBody UpdateSocialLinkRequestDTO updateSocialLinkRequestDTO) {
         Response<UpdateSocialLinkResponseDTO> response = mentorService.updateSocialLink(updateSocialLinkRequestDTO);
         return ResponseEntity.status(response.getCode()).body(response);
@@ -118,4 +118,9 @@ public class MentorController {
     public Response<CreateAchievementResponseDTO> deleteAchievement(@PathVariable Long achievementId) {
         return mentorService.deleteAchievement(achievementId);
     }
+
+    // ** SCHEDULE SECTION ** //
+
+    // Create schedule
+    // Delete schedule - This schedule must still be available to delete
 }
