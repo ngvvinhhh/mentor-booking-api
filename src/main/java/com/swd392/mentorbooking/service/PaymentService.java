@@ -31,9 +31,6 @@ import java.util.TreeMap;
 public class PaymentService {
 
     @Autowired
-    AccountUtils accountUtils;
-
-    @Autowired
     PaymentRepository paymentRepository;
 
     @Autowired
@@ -45,7 +42,7 @@ public class PaymentService {
     @Autowired
     WalletLogRepository walletLogRepository;
 
-    public Payment create(PaymentRequest paymentRequest) {
+    public Payment createPayment(PaymentRequest paymentRequest) {
         Account customer = accountRepository.findById(paymentRequest.getUserId())
                 .orElseThrow(() -> new InvalidAccountException("Account not found."));
         Payment payment = new Payment();
@@ -68,7 +65,7 @@ public class PaymentService {
         String formattedCreateDate = createDate.format(formatter);
 
         // Create payment
-        Payment payment = create(paymentRequest);
+        Payment payment = createPayment(paymentRequest);
 
         // Save the transaction status (money not added to wallet yet)
         payment.setStatus(PaymentStatusEnum.PENDING);
@@ -99,9 +96,9 @@ public class PaymentService {
 
         StringBuilder signDataBuilder = new StringBuilder();
         for (Map.Entry<String, String> entry : vnpParams.entrySet()) {
-            signDataBuilder.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8.toString()));
+            signDataBuilder.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
             signDataBuilder.append("=");
-            signDataBuilder.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.toString()));
+            signDataBuilder.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
             signDataBuilder.append("&");
         }
         signDataBuilder.deleteCharAt(signDataBuilder.length() - 1); // Remove last '&'
@@ -114,9 +111,9 @@ public class PaymentService {
         StringBuilder urlBuilder = new StringBuilder(vnpUrl);
         urlBuilder.append("?");
         for (Map.Entry<String, String> entry : vnpParams.entrySet()) {
-            urlBuilder.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8.toString()));
+            urlBuilder.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
             urlBuilder.append("=");
-            urlBuilder.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.toString()));
+            urlBuilder.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
             urlBuilder.append("&");
         }
         urlBuilder.deleteCharAt(urlBuilder.length() - 1); // Remove last '&'

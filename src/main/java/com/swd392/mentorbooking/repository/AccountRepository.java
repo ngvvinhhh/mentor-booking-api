@@ -17,10 +17,5 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
 
     List<Account> findByIdIn(List<Long> accountIds);
 
-
-    List<Account> findAccountsByRoleAndServicePriceBetweenOrderByServicePriceAsc(RoleEnum roleEnum, double minPrice, double maxPrice);
-
-    List<Account> findAccountsByRoleAndServicePriceBetweenOrderByServicePriceDesc(RoleEnum roleEnum, double minPrice, double maxPrice);
-
     List<Account> findAccountsByIsDeletedFalse();
 }
