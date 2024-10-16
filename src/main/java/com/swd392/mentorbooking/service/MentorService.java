@@ -7,30 +7,31 @@ import com.swd392.mentorbooking.dto.blog.CreateBlogRequestDTO;
 import com.swd392.mentorbooking.dto.blog.CreateBlogRespnseDTO;
 import com.swd392.mentorbooking.dto.blog.UpdateBlogRequestDTO;
 import com.swd392.mentorbooking.dto.blog.UpdateBlogResponseDTO;
+import com.swd392.mentorbooking.dto.booking.BookingGroupResponseDTO;
+import com.swd392.mentorbooking.dto.booking.BookingListResponseDTO;
+import com.swd392.mentorbooking.dto.booking.BookingMentorResponseDTO;
 import com.swd392.mentorbooking.dto.mentor.*;
 import com.swd392.mentorbooking.dto.service.CreateServiceRequestDTO;
 import com.swd392.mentorbooking.dto.service.CreateServiceResponseDTO;
 import com.swd392.mentorbooking.dto.service.UpdateServiceRequestDTO;
 import com.swd392.mentorbooking.dto.service.UpdateServiceResponseDTO;
-import com.swd392.mentorbooking.entity.Account;
-import com.swd392.mentorbooking.entity.Achievement;
-import com.swd392.mentorbooking.entity.Blog;
+import com.swd392.mentorbooking.entity.*;
+import com.swd392.mentorbooking.entity.Enum.ScheduleStatus;
 import com.swd392.mentorbooking.entity.Enum.SpecializationEnum;
-import com.swd392.mentorbooking.entity.Services;
 import com.swd392.mentorbooking.exception.ErrorCode;
 import com.swd392.mentorbooking.exception.auth.AuthAppException;
 import com.swd392.mentorbooking.exception.ForbiddenException;
 import com.swd392.mentorbooking.exception.service.CreateServiceException;
-import com.swd392.mentorbooking.repository.AccountRepository;
-import com.swd392.mentorbooking.repository.AchievementRepository;
-import com.swd392.mentorbooking.repository.BlogRepository;
-import com.swd392.mentorbooking.repository.ServiceRepository;
+import com.swd392.mentorbooking.repository.*;
 import com.swd392.mentorbooking.utils.AccountUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,6 +54,15 @@ public class MentorService {
 
     @Autowired
     private AchievementRepository achievementRepository;
+
+    @Autowired
+    private ScheduleRepository scheduleRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
+
+    @Autowired
+    private GroupRepository groupRepository;
 
     public Response<UpdateSocialLinkResponseDTO> updateSocialLink(UpdateSocialLinkRequestDTO updateSocialLinkRequestDTO) {
         // Check the current logged in account
@@ -309,7 +319,6 @@ public class MentorService {
         return new Response<>(200, "Retrieve all achievements successfully!", responseDTOs);
     }
 
-
     public Response<CreateAchievementResponseDTO> createAchievement(@Valid CreateAchievementRequestDTO createAchievementRequestDTO) {
         // Check the current logged in account
         Account account = checkAccount();
@@ -372,7 +381,6 @@ public class MentorService {
 
     }
 
-
     private Account checkAccount() {
         // Get the current account
         Account account = accountUtils.getCurrentAccount();
@@ -385,6 +393,83 @@ public class MentorService {
             throw new AuthAppException(ErrorCode.ACCOUNT_NOT_FOUND);
         }
         return account;
+    }
+
+    // ** SCHEDULE SECTION ** //
+
+    public Response<CreateScheduleResponseDTO> createSchedule(CreateScheduleRequestDTO createScheduleRequestDTO) {
+        Account account = checkAccount();
+
+        Schedule schedule = Schedule.builder()
+                .account(account)
+                .date(createScheduleRequestDTO.getDate())
+                .startTime(createScheduleRequestDTO.getStartFrom())
+                .endTime(createScheduleRequestDTO.getEndAt())
+                .status(ScheduleStatus.ACTIVE)
+                .createdAt(LocalDateTime.now())
+                .isDeleted(false)
+                .build();
+
+        scheduleRepository.save(schedule);
+
+        CreateScheduleResponseDTO response = CreateScheduleResponseDTO.builder()
+                .accountId(account.getId())
+                .accountName(account.getName())
+                .date(schedule.getDate())
+                .startTime(schedule.getStartTime())
+                .endTime(schedule.getEndTime())
+                .status(schedule.getStatus())
+                .build();
+
+        return new Response<>(201, "Created schedule!", response);
+    }
+
+    public Response deleteSchedule(Long scheduleId) {
+        Account account = checkAccount();
+
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElse(null);
+        if (schedule == null) {
+            return new Response<>(204, "There is no such schedule with that scheduleId!", null);
+        }
+        if (!schedule.getAccount().getId().equals(account.getId())) {
+            throw new ForbiddenException("This schedule does not belong to you to delete");
+        }
+        schedule.setIsDeleted(true);
+        scheduleRepository.save(schedule);
+        return new Response<>(200, "Schedule with scheduleId " + scheduleId + " is deleted!", true);
+    }
+
+    // ** BOOKING SECTION ** //
+
+    public Response<List<BookingListResponseDTO>> getAllBooking() {
+        Account account = checkAccount();
+
+        List<BookingListResponseDTO> response = bookingRepository.findBookingsByAccountAndIsDeletedFalse(account)
+                .stream()
+                .map(booking -> {
+                    List<BookingGroupResponseDTO> groupResponseDTO = booking.getGroup().getAccounts().stream()
+                            .map(account1 -> BookingGroupResponseDTO.builder()
+                                    .accountId(account1.getId())
+                                    .name(account1.getName())
+                                    .email(account1.getEmail())
+                                    .build())
+                            .collect(Collectors.toList());
+
+                    return BookingListResponseDTO.builder()
+                            .bookingId(booking.getBookingId())
+                            .location(booking.getLocation())
+                            .note(booking.getLocationNote())
+                            .bookingDate(booking.getSchedule().getDate())
+                            .startTime(booking.getSchedule().getStartTime())
+                            .endTime(booking.getSchedule().getEndTime())
+                            .mentor(new BookingMentorResponseDTO(account.getId(), account.getName()))
+                            .group(groupResponseDTO)
+                            .status(booking.getStatus())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return new Response<>(200, "Retrieve booking list successfully!", response);
     }
 
 }

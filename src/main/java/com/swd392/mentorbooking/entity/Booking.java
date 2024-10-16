@@ -4,6 +4,8 @@ import com.swd392.mentorbooking.entity.Enum.BookingStatus;
 import lombok.*;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "booking")
 @Data
@@ -38,5 +40,14 @@ public class Booking {
     @ManyToOne
     @JoinColumn(name = "schedule_id", nullable = false)
     private Schedule schedule;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted;
 }
 

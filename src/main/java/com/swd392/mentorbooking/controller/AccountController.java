@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -29,7 +30,7 @@ public class AccountController {
         return accountService.getProfile();
     }
 
-    @PutMapping("/student/update-profile")
+    @PutMapping("/profile/update-profile")
     public Response<GetProfileResponse> UpdateProfile(@Valid @RequestBody UpdateProfileRequestDTO updateProfileRequestDTO) {
         return accountService.updateProfile(updateProfileRequestDTO);
     }
@@ -51,6 +52,11 @@ public class AccountController {
         return accountService.searchMentor(name, minPrice, maxPrice, specializations, sortCriteria);
     }
 
+    @GetMapping("/specialization/get-all")
+    public Response<List<SpecializationEnum>> getSpecializations() {
+        return new Response<>(200, "Retrieve data successfully!", Arrays.stream(SpecializationEnum.values()).toList());
+    }
+
     // ** WEBSITE FEEDBACK SECTION ** //
 
     // Create website feedback
@@ -58,5 +64,7 @@ public class AccountController {
     public Response<WebsiteFeedbackRequestDTO> createWebsiteFeedback(@RequestBody WebsiteFeedbackRequestDTO websiteFeedbackEnum) {
         return accountService.createWebsiteFeedback(websiteFeedbackEnum);
     }
+
+    // ** WEBSITE FEEDBACK SECTION ** //
 
 }

@@ -7,6 +7,7 @@ import com.swd392.mentorbooking.dto.blog.CreateBlogRequestDTO;
 import com.swd392.mentorbooking.dto.blog.CreateBlogRespnseDTO;
 import com.swd392.mentorbooking.dto.blog.UpdateBlogRequestDTO;
 import com.swd392.mentorbooking.dto.blog.UpdateBlogResponseDTO;
+import com.swd392.mentorbooking.dto.booking.BookingListResponseDTO;
 import com.swd392.mentorbooking.dto.mentor.*;
 import com.swd392.mentorbooking.dto.service.CreateServiceRequestDTO;
 import com.swd392.mentorbooking.dto.service.CreateServiceResponseDTO;
@@ -90,6 +91,7 @@ public class MentorController {
     public Response<UploadCVRequest> deleteCV() {
         return mentorService.deleteCV();
     }
+
     // ** SPECIALIZATION SECTION ** //
 
     @GetMapping("/specialization/get")
@@ -127,5 +129,21 @@ public class MentorController {
     // ** SCHEDULE SECTION ** //
 
     // Create schedule
+    @PostMapping("/schedule/create")
+    public Response<CreateScheduleResponseDTO> createSchedule(@RequestBody CreateScheduleRequestDTO createScheduleRequestDTO) {
+        return mentorService.createSchedule(createScheduleRequestDTO);
+    }
+
     // Delete schedule - This schedule must still be available to delete
+    @DeleteMapping("/schedule/delete/{scheduleId}")
+    public Response deleteSchedule(@PathVariable Long scheduleId) {
+        return mentorService.deleteSchedule(scheduleId);
+    }
+
+    // ** BOOKING SECTION ** //
+
+    @GetMapping("/booking/view")
+    public Response<List<BookingListResponseDTO>> getAllBooking() {
+        return mentorService.getAllBooking();
+    }
 }

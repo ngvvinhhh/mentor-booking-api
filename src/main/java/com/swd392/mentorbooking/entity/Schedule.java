@@ -3,7 +3,11 @@ package com.swd392.mentorbooking.entity;
 import com.swd392.mentorbooking.entity.Enum.ScheduleStatus;
 import lombok.*;
 import jakarta.persistence.*;
+
+import java.sql.Time;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "schedule")
@@ -23,7 +27,13 @@ public class Schedule {
     private Account account;
 
     @Column(name = "date", nullable = false)
-    private LocalDateTime date;
+    private Date date;
+
+    @Column(name = "start_at", nullable = false)
+    private LocalTime startTime;
+
+    @Column(name = "end_at", nullable = false)
+    private LocalTime endTime;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -32,7 +42,7 @@ public class Schedule {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = true)
     private LocalDateTime updatedAt;
 
     @Column(name = "is_deleted", nullable = false)
