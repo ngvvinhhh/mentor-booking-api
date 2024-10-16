@@ -1,6 +1,6 @@
 package com.swd392.mentorbooking.controller;
 
-import com.swd392.mentorbooking.dto.Invititation.AcceptInviteRequest;
+import com.swd392.mentorbooking.dto.invititation.AcceptInviteRequest;
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.group.*;
 import com.swd392.mentorbooking.service.GroupService;
@@ -50,7 +50,6 @@ public class GroupController {
     @PostMapping("/accept-invite")
     public Response<GroupResponse> acceptGroupInvitation(@Valid @RequestBody AcceptInviteRequest acceptInviteRequest) {
         return groupService.acceptGroupInvitation(
-                acceptInviteRequest.getEmail(),
                 acceptInviteRequest.getGroupId(),
                 acceptInviteRequest.getToken()
         );
