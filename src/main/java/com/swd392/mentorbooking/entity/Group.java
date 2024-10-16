@@ -1,7 +1,10 @@
 package com.swd392.mentorbooking.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import jakarta.persistence.*;
+import net.minidev.json.annotate.JsonIgnore;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -47,7 +50,9 @@ public class Group {
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     private List<Account> accounts;
 
+
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Invitation> invitations;
 
 }

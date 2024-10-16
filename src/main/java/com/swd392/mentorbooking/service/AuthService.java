@@ -213,8 +213,8 @@ public class AuthService implements UserDetailsService {
                             "Thank you,\nThe Support Team")
                     .subject("Password Reset Request - Action Required")
                     .name(account.getName())
-                    .attachment("http://localhost:5173/forgotPassword?" + jwtService.generateToken(account.getEmail()))
                     .build();
+            emailService.sendForgotPasswordEmail(emailDetail);
 
             accountRepository.save(account);
             ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse("Password reset token generated successfully.", null, 200);

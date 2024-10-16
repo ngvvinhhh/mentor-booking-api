@@ -33,7 +33,7 @@ public class SemesterService {
 
             // Convert Semester list to SemesterResponse
             List<SemesterResponse> semesterResponses = semesters.stream()
-                    .map(semester -> new SemesterResponse(semester.getId(), semester.getSemesterName()))
+                    .map(semester -> new SemesterResponse(semester.getId(), semester.getSemesterName(), semester.getStartDate(), semester.getEndDate()))
                     .collect(Collectors.toList());
 
             return new Response<>(200, "Retrieved all semesters successfully!", semesterResponses);
@@ -51,6 +51,10 @@ public class SemesterService {
         // Create semester and set fields
         Semester semester = new Semester();
         semester.setSemesterName(semesterRequest.getSemesterName());
+        semester.setStartDate(semesterRequest.getStartDate());
+        // Add 10 weeks to startDate to set endDate
+        semester.setEndDate(semesterRequest.getStartDate().plusWeeks(10));
+
 
         semester.setIsDeleted(false);
 
@@ -64,7 +68,9 @@ public class SemesterService {
         // Create a response entity
         SemesterResponse semesterResponse = new SemesterResponse(
                 semester.getId(),
-                semester.getSemesterName()
+                semester.getSemesterName(),
+                semester.getStartDate(),
+                semester.getEndDate()
         );
 
         return new Response<>(200, "Semester created successfully!", semesterResponse);
@@ -95,7 +101,9 @@ public class SemesterService {
         // Create response
         SemesterResponse semesterResponse = new SemesterResponse(
                 semester.getId(),
-                semester.getSemesterName()
+                semester.getSemesterName(),
+                semester.getStartDate(),
+                semester.getEndDate()
         );
 
         return new Response<>(200, "Semester updated successfully!", semesterResponse);
