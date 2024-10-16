@@ -1,5 +1,6 @@
 package com.swd392.mentorbooking.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ public class ProjectProgress {
 
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = false)
+    @JsonBackReference
     private Group group;
 
     @Column(name = "description", nullable = false)
@@ -26,5 +28,8 @@ public class ProjectProgress {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted;
 }
 
