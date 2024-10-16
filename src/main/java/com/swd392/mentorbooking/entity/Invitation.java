@@ -1,8 +1,10 @@
 package com.swd392.mentorbooking.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.swd392.mentorbooking.entity.Enum.InviteStatus;
 import lombok.*;
 import jakarta.persistence.*;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.time.LocalDateTime;
 
@@ -22,8 +24,10 @@ public class Invitation {
     @Column(name = "email", nullable = false)
     private String email;
 
+
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = false)
+    @JsonBackReference
     private Group group;
 
     @Column(name = "token", nullable = false, unique = true)
@@ -33,10 +37,12 @@ public class Invitation {
     @Column(name = "status")
     private InviteStatus status;
 
+    @Column(name = "sender_email", nullable = false)
+    private String senderEmail;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // Optionally, you can add an updatedAt field for tracking changes
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted;
 }

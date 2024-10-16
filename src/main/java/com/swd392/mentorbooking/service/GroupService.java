@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -183,32 +184,51 @@ public class GroupService {
             throw new InvalidAccountException("Cannot add account to a deleted group.");
         }
 
-        // Find account by email
-        Account account = accountRepository.findByEmail(addMemberRequest.getEmail())
-                .orElseThrow(() -> new InvalidAccountException("Account not found."));
+        // Get Sender email
+        Account sender = accountUtils.getCurrentAccount();
+        if (sender == null) return new Response<>(401, "Please login first", null);
 
-        // Check if the account is already in the group
-        if (group.getStudents().contains(account.getId())) {
-            throw new InvalidAccountException("Account is already a member of the group.");
-        }
+        // Find account by email using Optional
+        Optional<Account> accountOpt = accountRepository.findByEmail(addMemberRequest.getEmail());
 
         // Generate a unique token for the invitation (could use UUID or similar)
         String token = UUID.randomUUID().toString();
         String joinLink = "https://circuit-project.vercel.app/joinGroup?email=" + addMemberRequest.getEmail() + "&groupId=" + group.getId() + "&token=" + token;
 
+        EmailDetail emailDetail = new EmailDetail();
+        emailDetail.setRecipient(addMemberRequest.getEmail());
+
+        if (accountOpt.isEmpty()) {
+            // Account does not exist, set attachment to registration link
+            String registrationLink = "https://circuit-project.vercel.app/signUp"; // Registration page URL
+            emailDetail.setAttachment(registrationLink);
+            emailDetail.setName("User");
+
+        } else {
+            // Get the Account if present
+            Account account = accountOpt.get();
+            emailDetail.setName(account.getName());
+
+            // Check if the account is already in the group
+            if (group.getStudents().contains(account.getId())) {
+                throw new InvalidAccountException("Account is already a member of the group.");
+            }
+
+            // If the account exists, set the attachment to the join link
+            emailDetail.setAttachment(joinLink);
+        }
+
         // Store the invitation with PENDING status in a separate table or map
         Invitation invitation = new Invitation();
-        invitation.setEmail(account.getEmail());
+        invitation.setSenderEmail(sender.getEmail());
+        invitation.setEmail(addMemberRequest.getEmail()); // Use the email from the request
         invitation.setGroup(group);
         invitation.setToken(token);
         invitation.setStatus(InviteStatus.PENDING);
-        invitaionRepository.save(invitation); // Make sure to create an InvitationRepository
+        invitation.setIsDeleted(false);
+        invitaionRepository.save(invitation);
 
         // Send invitation email
-        EmailDetail emailDetail = new EmailDetail();
-        emailDetail.setRecipient(account.getEmail());
-        emailDetail.setName(account.getName());
-        emailDetail.setAttachment(joinLink);
         emailService.sendEmailJoinGroup(emailDetail);
 
         // Create a response entity
@@ -223,13 +243,15 @@ public class GroupService {
         return new Response<>(200, "Invitation sent to the account successfully!", groupResponse);
     }
 
-    public Response<GroupResponse> acceptGroupInvitation(String email, Long groupId, String token) {
-        // Find the invitation by email, groupId, and token
+
+
+    public Response<GroupResponse> acceptGroupInvitation(Long groupId, String token) {
+        // Find the invitation by token
         Invitation invitation = invitaionRepository.findByToken(token)
                 .orElseThrow(() -> new InvalidAccountException("Invalid or expired invitation token."));
 
         // Find the group associated with the invitation
-        Group group = groupRepository.findById(invitation.getGroup().getId())
+        Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new InvalidAccountException("Group not found."));
 
         // Find the account associated with the invitation email
@@ -263,6 +285,7 @@ public class GroupService {
 
         return new Response<>(200, "Successfully joined the group!", groupResponse);
     }
+
 
 
 
