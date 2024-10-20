@@ -3,6 +3,7 @@ package com.swd392.mentorbooking.entity;
 import lombok.*;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "project_progress")
@@ -26,5 +27,8 @@ public class ProjectProgress {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }
 

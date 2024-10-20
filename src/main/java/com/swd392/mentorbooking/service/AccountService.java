@@ -151,7 +151,7 @@ public class AccountService {
         searchMentorResponseDTO.setAccountEmail(account.getEmail());
         searchMentorResponseDTO.setAccountPhone(account.getPhone());
         searchMentorResponseDTO.setPricePerHour(account.getService().getPrice());
-        searchMentorResponseDTO.setEnumList(account.getSpecializations());
+        searchMentorResponseDTO.setSpecializationList(account.getSpecializations());
         searchMentorResponseDTO.setAvatar(account.getAvatar());
         return searchMentorResponseDTO;
     }
