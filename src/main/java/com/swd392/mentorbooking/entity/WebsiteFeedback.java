@@ -1,5 +1,7 @@
 package com.swd392.mentorbooking.entity;
 
+import com.swd392.mentorbooking.entity.Enum.GenderEnum;
+import com.swd392.mentorbooking.entity.Enum.WebsiteFeedbackEnum;
 import lombok.*;
 import jakarta.persistence.*;import java.time.LocalDateTime;
 
@@ -22,6 +24,10 @@ public class WebsiteFeedback {
 
     @Column(name = "description", nullable = false)
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "feedback_type")
+    private WebsiteFeedbackEnum websiteFeedbackEnum;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

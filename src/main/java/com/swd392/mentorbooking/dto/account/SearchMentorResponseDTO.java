@@ -14,5 +14,5 @@ public class SearchMentorResponseDTO {
     private String accountPhone;
     private double pricePerHour;
     private String avatar;
-    private List<SpecializationEnum> enumList;
+    private List<SpecializationEnum> specializationList;
 }
