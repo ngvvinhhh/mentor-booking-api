@@ -28,8 +28,8 @@ public class WalletService {
             throw new AuthAppException(ErrorCode.NOT_LOGIN);
         }
 
-        Wallet wallet = walletRepository.findByAccount(account)
-                .orElseThrow(() -> new AuthAppException(ErrorCode.WALLET_NOT_FOUND));
+        Wallet wallet = walletRepository.findByAccount(account);
+
 
         WalletResponse walletResponse = new WalletResponse(
                 wallet.getId(),
