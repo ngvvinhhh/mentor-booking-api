@@ -42,6 +42,7 @@ public class Group {
     private Boolean isDeleted;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<ProjectProgress> projectProgresses;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)

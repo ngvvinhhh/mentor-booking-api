@@ -1,6 +1,8 @@
 package com.swd392.mentorbooking.exception;
 
 import com.swd392.mentorbooking.dto.ErrorResponse;
+import com.swd392.mentorbooking.dto.Response;
+import com.swd392.mentorbooking.exception.group.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -40,5 +42,14 @@ public class GlobalExceptionHandler {
         String errorMessage = "Invalid date and time format. Please use the correct format: yyyy-MM-dd'T'HH:mm";
         return ResponseEntity.badRequest().body(errorMessage);
     }
+
+    // Handler cho NotFoundException
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<Response<String>> handleNotFoundException(NotFoundException ex) {
+        Response<String> response = new Response<>(404, ex.getMessage(), null);
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
 
 }
