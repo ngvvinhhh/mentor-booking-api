@@ -33,6 +33,7 @@ public enum ErrorCode {
     INVALID_EMAIL(1500, "Invalid email", HttpStatus.BAD_REQUEST),
     EMAIL_WAIT_VERIFY(1501, "This email has been registered and is not verified, please verify and login", HttpStatus.BAD_REQUEST),
     EMAIL_EXISTED(1502, "This email has been registered, please log in!", HttpStatus.BAD_REQUEST),
+    ACCOUNT_ACCESS_FORBIDDEN(1503, "Access to this account is forbidden", HttpStatus.FORBIDDEN),
     SUCCESS(200, "Success",HttpStatus.OK),
 
 //    TOPICS | CODE: 2XXX

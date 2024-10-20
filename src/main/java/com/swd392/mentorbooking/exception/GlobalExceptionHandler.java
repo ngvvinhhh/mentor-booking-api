@@ -1,10 +1,13 @@
 package com.swd392.mentorbooking.exception;
 
 import com.swd392.mentorbooking.dto.ErrorResponse;
+import com.swd392.mentorbooking.dto.Response;
+import com.swd392.mentorbooking.exception.group.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.ArrayList;
@@ -31,5 +34,14 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.FORBIDDEN.value(), errorMessages);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
+
+    // Handler cho NotFoundException
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<Response<String>> handleNotFoundException(NotFoundException ex) {
+        Response<String> response = new Response<>(404, ex.getMessage(), null);
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
 
 }
