@@ -2,22 +2,27 @@ package com.swd392.mentorbooking.service;
 
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.admin.AccountInfoAdmin;
-import com.swd392.mentorbooking.entity.Account;
-import com.swd392.mentorbooking.entity.Blog;
-import com.swd392.mentorbooking.entity.Booking;
+import com.swd392.mentorbooking.dto.auth.RegisterRequestDTO;
+import com.swd392.mentorbooking.dto.auth.RegisterResponseDTO;
+import com.swd392.mentorbooking.email.EmailDetail;
+
+import com.swd392.mentorbooking.entity.*;
+import com.swd392.mentorbooking.entity.Enum.AccountStatusEnum;
 import com.swd392.mentorbooking.entity.Enum.RoleEnum;
-import com.swd392.mentorbooking.entity.Topic;
 import com.swd392.mentorbooking.exception.ErrorCode;
 import com.swd392.mentorbooking.exception.ForbiddenException;
 import com.swd392.mentorbooking.exception.auth.AuthAppException;
-import com.swd392.mentorbooking.repository.AccountRepository;
-import com.swd392.mentorbooking.repository.BlogRepository;
-import com.swd392.mentorbooking.repository.BookingRepository;
-import com.swd392.mentorbooking.repository.TopicRepository;
+import com.swd392.mentorbooking.repository.*;
 import com.swd392.mentorbooking.utils.AccountUtils;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,6 +43,13 @@ public class AdminService {
 
     @Autowired
     private AccountUtils accountUtils;
+
+    @Autowired
+    private WalletRepository walletRepository;
+
+    @Autowired
+    @Lazy
+    private PasswordEncoder passwordEncoder;
 
     public Response<List<AccountInfoAdmin>> getAllAccountByRole(String role) {
 
@@ -135,6 +147,48 @@ public class AdminService {
 
         if (!account.getRole().equals(RoleEnum.ADMIN)) {
             throw new ForbiddenException("You are not allowed to perform admin's action!");
+        }
+
+    }
+
+    public ResponseEntity<RegisterResponseDTO> addNewAccount(RegisterRequestDTO registerRequestDTO) {
+        try {
+            //Check if the email exist
+            Account tempAccount = accountRepository.findByEmail(registerRequestDTO.getEmail()).orElse(null);
+            if (tempAccount != null) {
+                if (tempAccount.getStatus().equals(AccountStatusEnum.VERIFIED)) {
+                    throw new AuthAppException(ErrorCode.EMAIL_EXISTED);
+                } else if (tempAccount.getStatus().equals(AccountStatusEnum.UNVERIFIED)) {
+                    throw new AuthAppException(ErrorCode.EMAIL_WAIT_VERIFY);
+                }
+            }
+            Account account = new Account();
+            account.setName(registerRequestDTO.getName());
+            account.setEmail(registerRequestDTO.getEmail());
+            account.setPassword(passwordEncoder.encode(registerRequestDTO.getPassword()));
+            account.setRole(registerRequestDTO.getRole());
+            account.setStatus(AccountStatusEnum.VERIFIED);
+            account.setCreatedAt(LocalDateTime.now());
+            account.setIsDeleted(false);
+            account.setAvatar("https://firebasestorage.googleapis.com/v0/b/mentor-booking-3d46a.appspot.com/o/76f15d2d-9f0b-4051-8177-812d5ee785a1.jpg?alt=media");
+            accountRepository.save(account);
+
+            //Create wallet as the account is created here
+            Wallet wallet = Wallet.builder()
+                    .account(account)
+                    .total(0.0)
+                    .build();
+            walletRepository.save(wallet);
+
+            String responseMessage = "Successful registration, please check your email for verification";
+            RegisterResponseDTO response = new RegisterResponseDTO(responseMessage, null, 201, registerRequestDTO.getEmail());
+
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } catch (AuthAppException e) {
+            ErrorCode errorCode = e.getErrorCode();
+            String errorMessage = "Register failed";
+            RegisterResponseDTO response = new RegisterResponseDTO(errorMessage, errorCode.getMessage(), errorCode.getCode(), null);
+            return new ResponseEntity<>(response, errorCode.getHttpStatus());
         }
     }
 }
