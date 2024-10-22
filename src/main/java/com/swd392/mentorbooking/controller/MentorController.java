@@ -99,7 +99,7 @@ public class MentorController {
         return mentorService.getAllAvailableSpecialization();
     }
 
-    @PostMapping("/specialization/update")
+    @PutMapping("/specialization/update")
     public Response<UpdateSpecializationResponseDTO> updateSpecialization(@RequestBody UpdateSpecializationRequestDTO updateSpecializationRequestDTO) {
         return mentorService.updateSpecialization(updateSpecializationRequestDTO);
     }
@@ -111,7 +111,7 @@ public class MentorController {
         return mentorService.getAllAchievements();
     }
 
-    @GetMapping("/achievement/create")
+    @PostMapping("/achievement/create")
     public Response<CreateAchievementResponseDTO> createAchievement(@Valid @RequestBody CreateAchievementRequestDTO createAchievementRequestDTO) {
         return mentorService.createAchievement(createAchievementRequestDTO);
     }
