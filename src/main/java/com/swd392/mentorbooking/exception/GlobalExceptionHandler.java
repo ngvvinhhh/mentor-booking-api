@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +34,13 @@ public class GlobalExceptionHandler {
         errorMessages.add(ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.FORBIDDEN.value(), errorMessages);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
+    @ExceptionHandler(DateTimeParseException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<String> handleDateTimeParseException(DateTimeParseException ex) {
+        String errorMessage = "Invalid date and time format. Please use the correct format: yyyy-MM-dd'T'HH:mm";
+        return ResponseEntity.badRequest().body(errorMessage);
     }
 
     // Handler cho NotFoundException

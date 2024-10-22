@@ -38,6 +38,7 @@ public class JWTService {
         String token = Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(now)
+                //id if necessary
                 .setExpiration(expirationDate)
                 .signWith(SignatureAlgorithm.HS512, getSigningKey())
                 .compact();
