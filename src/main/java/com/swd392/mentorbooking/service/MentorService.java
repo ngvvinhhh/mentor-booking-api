@@ -10,20 +10,24 @@ import com.swd392.mentorbooking.dto.blog.UpdateBlogResponseDTO;
 import com.swd392.mentorbooking.dto.booking.BookingGroupResponseDTO;
 import com.swd392.mentorbooking.dto.booking.BookingListResponseDTO;
 import com.swd392.mentorbooking.dto.booking.BookingMentorResponseDTO;
+import com.swd392.mentorbooking.dto.booking.BookingResponse;
 import com.swd392.mentorbooking.dto.mentor.*;
 import com.swd392.mentorbooking.dto.service.CreateServiceRequestDTO;
 import com.swd392.mentorbooking.dto.service.CreateServiceResponseDTO;
 import com.swd392.mentorbooking.dto.service.UpdateServiceRequestDTO;
 import com.swd392.mentorbooking.dto.service.UpdateServiceResponseDTO;
 import com.swd392.mentorbooking.entity.*;
+import com.swd392.mentorbooking.entity.Enum.BookingStatus;
 import com.swd392.mentorbooking.entity.Enum.ScheduleStatus;
 import com.swd392.mentorbooking.entity.Enum.SpecializationEnum;
 import com.swd392.mentorbooking.exception.ErrorCode;
 import com.swd392.mentorbooking.exception.auth.AuthAppException;
 import com.swd392.mentorbooking.exception.ForbiddenException;
+import com.swd392.mentorbooking.exception.group.NotFoundException;
 import com.swd392.mentorbooking.exception.service.CreateServiceException;
 import com.swd392.mentorbooking.repository.*;
 import com.swd392.mentorbooking.utils.AccountUtils;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -63,6 +67,8 @@ public class MentorService {
 
     @Autowired
     private GroupRepository groupRepository;
+
+    @Autowired NotificationRepository notificationRepository;
 
     public Response<UpdateSocialLinkResponseDTO> updateSocialLink(UpdateSocialLinkRequestDTO updateSocialLinkRequestDTO) {
         // Check the current logged in account
@@ -384,6 +390,96 @@ public class MentorService {
                 .collect(Collectors.toList());
 
         return new Response<>(200, "Retrieve booking list successfully!", response);
+    }
+
+    @Transactional
+    public Response<BookingResponse> approveBooking(Long bookingId) {
+        // Get current account (mentor)
+        Account mentorAccount = accountUtils.getCurrentAccount();
+        if (mentorAccount == null) return new Response<>(401, "Please login first", null);
+
+        // Find the booking by ID
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Booking not found with id: " + bookingId));
+
+        // Check if the booking is currently in PROCESSING status
+        if (!booking.getStatus().equals(BookingStatus.PROCESSING)) {
+            return new Response<>(400, "Booking cannot be approved as it is not in processing status.", null);
+        }
+
+        // Update booking status to SUCCESSFUL
+        booking.setStatus(BookingStatus.SUCCESSFUL);
+
+        // Create notification for the approval
+        Notification notification = new Notification();
+        notification.setMessage(booking.getStatus().getMessage());
+        notification.setDate(booking.getSchedule().getDate());
+        notification.setStatus(booking.getStatus());
+        notification.setBooking(booking);
+        notification.setCreatedAt(LocalDateTime.now());
+        notification.setIsDeleted(false);
+
+        // Save updated booking and notification to the database
+        bookingRepository.save(booking);
+        notificationRepository.save(notification);
+
+        // Create response object
+        BookingResponse bookingResponse = BookingResponse.builder()
+                .bookingId(booking.getBookingId())
+                .location(booking.getLocation())
+                .locationNote(booking.getLocationNote())
+                .scheduleId(booking.getSchedule().getId())
+                .message(notification.getMessage())
+                .status(booking.getStatus())
+                .mentorName(booking.getSchedule().getAccount().getName()) // Mentor name
+                .build();
+
+        return new Response<>(200, "Booking approved successfully!", bookingResponse);
+    }
+
+    @Transactional
+    public Response<BookingResponse> rejectBooking(Long bookingId) {
+        // Get current account (mentor)
+        Account mentorAccount = accountUtils.getCurrentAccount();
+        if (mentorAccount == null) return new Response<>(401, "Please login first", null);
+
+        // Find the booking by ID
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Booking not found with id: " + bookingId));
+
+        // Check if the booking is currently in PROCESSING status
+        if (!booking.getStatus().equals(BookingStatus.PROCESSING)) {
+            return new Response<>(400, "Booking cannot be approved as it is not in processing status.", null);
+        }
+
+        // Update booking status to DECLINED
+        booking.setStatus(BookingStatus.DECLINED);
+
+        // Create notification for the approval
+        Notification notification = new Notification();
+        notification.setMessage(booking.getStatus().getMessage());
+        notification.setDate(booking.getSchedule().getDate());
+        notification.setStatus(booking.getStatus());
+        notification.setBooking(booking);
+        notification.setCreatedAt(LocalDateTime.now());
+        notification.setIsDeleted(false);
+
+        // Save updated booking and notification to the database
+        bookingRepository.save(booking);
+        notificationRepository.save(notification);
+
+        // Create response object
+        BookingResponse bookingResponse = BookingResponse.builder()
+                .bookingId(booking.getBookingId())
+                .location(booking.getLocation())
+                .locationNote(booking.getLocationNote())
+                .scheduleId(booking.getSchedule().getId())
+                .message(notification.getMessage())
+                .status(booking.getStatus())
+                .mentorName(booking.getSchedule().getAccount().getName()) // Mentor name
+                .build();
+
+        return new Response<>(200, "Booking approved successfully!", bookingResponse);
     }
 
 }

@@ -62,8 +62,8 @@ public enum ErrorCode {
     INVALID_CATEGORY(4001, "Invalid category, please recheck", HttpStatus.BAD_REQUEST),
     INVALID_INPUT(4002, "Invalid input, please recheck", HttpStatus.BAD_REQUEST),
 
-//    ORDERS | CODE: 5XXX
-    ORDER_NOT_FOUND(5000, "Order not found", HttpStatus.NOT_FOUND),
+//    SCHEDULE | CODE: 5XXX
+    SCHEDULE_NOT_FOUND(5000, "Schedule not found", HttpStatus.NOT_FOUND),
     ORDER_IS_DELETED(5001,"This Order has been deleted", HttpStatus.BAD_REQUEST),
 
 //    WALLETS | CODE: 6XXX

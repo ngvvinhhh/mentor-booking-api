@@ -4,6 +4,7 @@ import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.achievement.CreateAchievementRequestDTO;
 import com.swd392.mentorbooking.dto.achievement.CreateAchievementResponseDTO;
 import com.swd392.mentorbooking.dto.booking.BookingListResponseDTO;
+import com.swd392.mentorbooking.dto.booking.BookingResponse;
 import com.swd392.mentorbooking.dto.mentor.*;
 import com.swd392.mentorbooking.dto.service.CreateServiceRequestDTO;
 import com.swd392.mentorbooking.dto.service.CreateServiceResponseDTO;
@@ -122,5 +123,15 @@ public class MentorController {
     @GetMapping("/booking/view")
     public Response<List<BookingListResponseDTO>> getAllBooking() {
         return mentorService.getAllBooking();
+    }
+
+    @GetMapping("/booking/approve/{bookingId}")
+    public Response<BookingResponse> approveBooking(@PathVariable Long bookingId) {
+        return mentorService.approveBooking(bookingId);
+    }
+
+    @GetMapping("/booking/reject/{bookingId}")
+    public Response<BookingResponse> rejectBooking(@PathVariable Long bookingId) {
+        return mentorService.rejectBooking(bookingId);
     }
 }
