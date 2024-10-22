@@ -39,6 +39,7 @@ public class AccountService {
 
     @Autowired
     private WebsiteFeedbackRepository websiteFeedbackRepository;
+
     @Autowired
     private WalletRepository walletRepository;
 
@@ -50,6 +51,17 @@ public class AccountService {
 
         // Return the result
         return returnProfile(account);
+    }
+
+    public Response<GetProfileResponse> getProfileById(long accountId) {
+        Account data = accountRepository.findById(accountId).orElse(null);
+
+        if (data != null) {
+            return returnProfile(data);
+        }
+        else {
+            return new Response<>(200, "No profile was found!", null);
+        }
     }
 
     public Response<GetProfileResponse> updateProfile(@Valid UpdateProfileRequestDTO updateProfileRequestDTO) {
@@ -173,5 +185,7 @@ public class AccountService {
 
         return new Response<>(201, "Feedback created successfully!", websiteFeedbackRequestDTO);
     }
+
+
 }
 

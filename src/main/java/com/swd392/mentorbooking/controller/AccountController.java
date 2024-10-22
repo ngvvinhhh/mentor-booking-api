@@ -35,6 +35,11 @@ public class AccountController {
         return accountService.updateProfile(updateProfileRequestDTO);
     }
 
+    @GetMapping("profile/{accountId}")
+    public Response<GetProfileResponse> getProfileById(@PathVariable long accountId) {
+        return accountService.getProfileById(accountId);
+    }
+
     // ** SEARCH SECTION ** //
 
     @GetMapping("/search-mentor")

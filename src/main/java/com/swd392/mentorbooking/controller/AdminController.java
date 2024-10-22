@@ -42,7 +42,6 @@ public class AdminController {
         return adminService.addNewAccount(registerRequestDTO);
     }
 
-
     // Ban account
 
     // ** BOOKING SECTION ** //
