@@ -14,7 +14,9 @@ import com.swd392.mentorbooking.jwt.JWTService;
 import com.swd392.mentorbooking.repository.AccountRepository;
 import com.swd392.mentorbooking.repository.WalletRepository;
 import com.swd392.mentorbooking.utils.AccountUtils;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.NonUniqueResultException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
@@ -58,6 +60,9 @@ public class AuthService implements UserDetailsService {
 
     @Autowired
     private WalletRepository walletRepository;
+
+    @Autowired
+    private OTPService otpService;
 
     //Please do not touch
     @Override
@@ -226,6 +231,79 @@ public class AuthService implements UserDetailsService {
         }
     }
 
+    public ResponseEntity<ForgotPasswordResponse> forgotPasswordOTP(ForgotPasswordRequest forgotPasswordRequest) {
+        try {
+            // CHECK VALID EMAIL
+            Optional<Account> tempAccount = accountRepository.findByEmail(forgotPasswordRequest.getEmail());
+
+            Account checkAccount = tempAccount.orElseThrow(() -> new AuthAppException(ErrorCode.EMAIL_NOT_FOUND));
+
+            if (checkAccount.getEmail() == null || checkAccount.getEmail().isEmpty() || checkAccount.getStatus().equals(AccountStatusEnum.UNVERIFIED)) {
+                throw new AuthAppException(ErrorCode.EMAIL_NOT_FOUND);
+            }
+
+            // GENERATE OTP
+            String otp = otpService.generateOTP(); // Tạo OTP
+            otpService.saveOTPForUser(checkAccount.getEmail(), otp); // Lưu OTP vào Redis với thời gian hết hạn
+
+            // SEND EMAIL
+            EmailDetail emailDetail = EmailDetail.builder()
+                    .recipient(checkAccount.getEmail())
+                    .msgBody("Dear " + checkAccount.getName() + ",\n\n" +
+                            "We received a request to reset the password for your account. Please use the following OTP to reset your password:\n\n" +
+                            otp + "\n\n" +
+                            "This OTP is valid for 10 minutes.\n\n" +
+                            "If you did not request a password reset, please ignore this email or contact support if you have any concerns.\n\n" +
+                            "Thank you,\nThe Support Team")
+                    .subject("Password Reset Request - OTP Verification")
+                    .name(checkAccount.getName())
+                    .build();
+            emailService.sendOTPForgotPasswordEmail(emailDetail);
+
+            ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse("OTP has been sent to your email.", null, 200);
+            return new ResponseEntity<>(forgotPasswordResponse, HttpStatus.OK);
+        } catch (AuthAppException e) {
+            ErrorCode errorCode = e.getErrorCode();
+            ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse("Password reset failed", e.getMessage(), errorCode.getCode());
+            return new ResponseEntity<>(forgotPasswordResponse, errorCode.getHttpStatus());
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<ResetPasswordResponse> resetPasswordOTP(ResetPasswordOTPRequest resetPasswordRequest) {
+        try {
+            // VALIDATE OTP
+            boolean isOtpValid = otpService.validateOTP(resetPasswordRequest.getEmail(), resetPasswordRequest.getOtp());
+            if (!isOtpValid) {
+                throw new AuthAppException(ErrorCode.INVALID_OTP);
+            }
+
+            // CHECK PASSWORD AND REPEAT PASSWORD
+            if (!resetPasswordRequest.getNewPassword().equals(resetPasswordRequest.getRepeatPassword())) {
+                throw new AuthAppException(ErrorCode.PASSWORD_REPEAT_INCORRECT);
+            }
+
+            // FIND ACCOUNT AND UPDATE PASSWORD
+            Account account = accountRepository.findFirstByEmail(resetPasswordRequest.getEmail())
+                    .orElseThrow(() -> new AuthAppException(ErrorCode.EMAIL_NOT_FOUND));
+
+            account.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
+            accountRepository.save(account);
+
+            ResetPasswordResponse resetPasswordResponse = new ResetPasswordResponse("Password has been reset successfully.", null, 200);
+            return new ResponseEntity<>(resetPasswordResponse, HttpStatus.CREATED);
+        } catch (AuthAppException e) {
+            ErrorCode errorCode = e.getErrorCode();
+            ResetPasswordResponse resetPasswordResponse = new ResetPasswordResponse("Password reset failed", e.getMessage(), errorCode.getCode());
+            return new ResponseEntity<>(resetPasswordResponse, errorCode.getHttpStatus());
+        } catch (NonUniqueResultException e) {
+            // Handle the case if somehow duplicates are not cleaned up
+            ResetPasswordResponse resetPasswordResponse = new ResetPasswordResponse("Error occurred", "Multiple accounts found with the same email.", 500);
+            return new ResponseEntity<>(resetPasswordResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
     public ResponseEntity<ResetPasswordResponse> resetPassword(ResetPasswordRequest resetPasswordRequest, String token) {
         try {
             // AFTER USER CLICK LINK FORGOT PASSWORD IN EMAIL THEN REDIRECT TO API HERE (RESET PASSWORD)
@@ -253,6 +331,8 @@ public class AuthService implements UserDetailsService {
 
     }
 
+
+
     public boolean verifyAccount(String token) throws Exception {
         try {
             String email = jwtService.extractEmail(token);
@@ -268,6 +348,8 @@ public class AuthService implements UserDetailsService {
             throw new TokenExpiredException("Invalid or expired token!", Instant.now());
         }
     }
+
+
 
     public Response<String> deleteAccount() {
         // Get the current account

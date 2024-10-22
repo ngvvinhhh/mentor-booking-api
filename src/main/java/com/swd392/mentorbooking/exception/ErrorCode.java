@@ -30,10 +30,11 @@ public enum ErrorCode {
     NOT_PURCHASED_COURSE(1019, "Account has not purchased course", HttpStatus.BAD_REQUEST),
     UNEXPECTED_ERROR(1020, "An unexpected error occurred", HttpStatus.BAD_REQUEST),
 //    Accounts | Emails | CODE: 15XX
-    INVALID_EMAIL(1500, "Invalid email", HttpStatus.BAD_REQUEST),
+    INVALID_OTP(1500, "Invalid email", HttpStatus.BAD_REQUEST),
     EMAIL_WAIT_VERIFY(1501, "This email has been registered and is not verified, please verify and login", HttpStatus.BAD_REQUEST),
     EMAIL_EXISTED(1502, "This email has been registered, please log in!", HttpStatus.BAD_REQUEST),
     ACCOUNT_ACCESS_FORBIDDEN(1503, "Access to this account is forbidden", HttpStatus.FORBIDDEN),
+
     SUCCESS(200, "Success",HttpStatus.OK),
 
 //    TOPICS | CODE: 2XXX
