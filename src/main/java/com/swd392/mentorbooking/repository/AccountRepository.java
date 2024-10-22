@@ -19,5 +19,8 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
 
     List<Account> findAccountsByIsDeletedFalse();
 
+    Optional<Account> findFirstByEmail(String email);
+
+
     Account findAccountByEmail(String email);
 }
