@@ -14,4 +14,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findBookingsByAccountAndIsDeletedFalse(Account mentorAccount);
 
     Optional<Booking> findByAccountAndScheduleAndIsDeletedFalse(Account account, Schedule schedule);
+
+    List<Booking> findByAccount(Account account);
+
 }

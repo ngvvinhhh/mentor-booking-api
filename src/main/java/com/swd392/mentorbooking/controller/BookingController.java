@@ -3,8 +3,6 @@ package com.swd392.mentorbooking.controller;
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.booking.BookingResponse;
 import com.swd392.mentorbooking.dto.booking.CreateBookingRequest;
-import com.swd392.mentorbooking.dto.group.GroupRequest;
-import com.swd392.mentorbooking.dto.group.GroupResponse;
 import com.swd392.mentorbooking.service.BookingService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

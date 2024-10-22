@@ -32,6 +32,7 @@ public class Notification {
     @Column(name = "status", nullable = false)
     private BookingStatus status;
 
+
     @ManyToOne
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
