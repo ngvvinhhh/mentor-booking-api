@@ -22,6 +22,10 @@ public class Notification {
     @Column(name = "notification_id")
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
+
     @Column(name = "message", nullable = false)
     private String message;
 

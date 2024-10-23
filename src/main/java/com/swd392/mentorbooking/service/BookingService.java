@@ -73,6 +73,7 @@ public class BookingService {
         notification.setMessage(booking.getStatus().getMessage());
         notification.setDate(booking.getSchedule().getDate());
         notification.setStatus(booking.getStatus());
+        notification.setAccount(booking.getAccount());
         notification.setBooking(booking);
         notification.setCreatedAt(LocalDateTime.now());
         notification.setIsDeleted(false);
