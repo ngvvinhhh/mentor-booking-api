@@ -17,11 +17,14 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 public class Notification {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "notification_id")
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 
     @Column(name = "message", nullable = false)
     private String message;
@@ -34,8 +37,12 @@ public class Notification {
     private BookingStatus status;
 
     @ManyToOne
-    @JoinColumn(name = "booking_id", nullable = false)
+    @JoinColumn(name = "booking_id", nullable = true)
     private Booking booking;
+
+    @ManyToOne
+    @JoinColumn(name = "invitation_id", nullable = true)
+    private Invitation invitation;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

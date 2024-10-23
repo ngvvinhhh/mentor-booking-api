@@ -1,6 +1,9 @@
 package com.swd392.mentorbooking.email;
 
+import com.swd392.mentorbooking.entity.Otp;
 import com.swd392.mentorbooking.jwt.JWTService;
+import com.swd392.mentorbooking.repository.OTPRepository;
+import com.swd392.mentorbooking.service.OTPService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +13,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import java.util.Optional;
 
 @Service
 public class EmailService {
@@ -22,6 +27,12 @@ public class EmailService {
 
     @Autowired
     private JWTService jwtService;
+
+    @Autowired
+    private OTPService otpService;
+
+    @Autowired
+    private OTPRepository otpRepository;
 
     @Value("${URL}")
     private String url;
@@ -43,6 +54,39 @@ public class EmailService {
             messagingException.printStackTrace();
         }
     }
+
+    public void sendOTPForgotPasswordEmail(EmailDetail emailDetail) {
+        try {
+            // Kiểm tra xem đã có OTP nào tồn tại cho email này chưa
+            Optional<Otp> existingOtp = otpRepository.findByEmail(emailDetail.getRecipient());
+            if (existingOtp.isPresent()) {
+                // Nếu có, có thể xóa hoặc cập nhật
+                otpService.deleteOtp(existingOtp.get()); // hoặc otpService.updateOtp(existingOtp.get(), newOtp);
+            }
+
+            // Tạo OTP mới
+            String otp = otpService.generateOTP();
+
+            // Lưu OTP vào cơ sở dữ liệu
+            otpService.saveOTPForUser(emailDetail.getRecipient(), otp);
+
+            // Tạo nội dung email
+            Context context = new Context();
+            context.setVariable("name", emailDetail.getName());
+            context.setVariable("otp", otp); // Đặt OTP vào nội dung email
+
+            emailDetail.setSubject("Password Reset Request");
+            emailDetail.setMsgBody("Hi " + emailDetail.getName() + ",\n\n" +
+                    "We received a request to reset your password. Your OTP code is: " + otp + "\n\n" +
+                    "Enter this code on the password reset page to proceed.");
+
+            // Gửi email với OTP
+            proceedToSendMail(emailDetail, context, "forgot-password-otp");
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void sendForgotPasswordEmail(EmailDetail emailDetail) {
         try {

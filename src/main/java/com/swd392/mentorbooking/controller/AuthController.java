@@ -45,6 +45,17 @@ public class AuthController {
 
     }
 
+    @PostMapping("/forgot-password-otp")
+    public ResponseEntity<ForgotPasswordResponse> forgotPasswordOTP(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+        return authService.forgotPasswordOTP(forgotPasswordRequest);
+    }
+
+    @PostMapping("/reset-password-otp")
+    public ResponseEntity<ResetPasswordResponse> resetPasswordOTP(@RequestBody ResetPasswordOTPRequest resetPasswordRequest) {
+        return authService.resetPasswordOTP(resetPasswordRequest);
+
+    }
+
     @GetMapping("/verify/{token}")
     public ResponseEntity<Void> activateAccount(@PathVariable String token) throws Exception {
         if (authService.verifyAccount(token)) {
