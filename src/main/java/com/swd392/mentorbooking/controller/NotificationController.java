@@ -22,6 +22,6 @@ public class NotificationController {
 
     @GetMapping("/all")
     public Response<List<NotificationResponse>> getAllNotifications() {
-        return  notificationService.getAllNotifications();
+        return  notificationService.getAllNotificationsForAccount();
     }
 }

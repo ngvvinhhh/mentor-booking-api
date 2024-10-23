@@ -36,10 +36,13 @@ public class Notification {
     @Column(name = "status", nullable = false)
     private BookingStatus status;
 
+    @ManyToOne
+    @JoinColumn(name = "booking_id", nullable = true)
+    private Booking booking;
 
     @ManyToOne
-    @JoinColumn(name = "booking_id", nullable = false)
-    private Booking booking;
+    @JoinColumn(name = "invitation_id", nullable = true)
+    private Invitation invitation;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
