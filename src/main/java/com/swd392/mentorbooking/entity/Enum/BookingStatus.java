@@ -7,7 +7,8 @@ public enum BookingStatus {
     COMPLETED,
     PROCESSING,
     SUCCESSFUL,
-    DECLINED;
+    DECLINED,
+    ACCEPT;
 
     public String getMessage() {
         switch (this) {
@@ -18,13 +19,13 @@ public enum BookingStatus {
             case DECLINED:
                 return "You have declined the booking request.";
             case PENDING:
-                return "Your booking is pending confirmation.";
+                return "Your invitation to group is pending.";
             case CONFIRMED:
                 return "Your booking is confirmed.";
             case CANCELLED:
                 return "Your booking has been cancelled.";
-            case COMPLETED:
-                return "Your booking has been completed.";
+            case ACCEPT:
+                return "Your invitation to group is accept.";
             default:
                 return "";
         }

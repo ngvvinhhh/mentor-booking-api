@@ -1,28 +1,27 @@
 package com.swd392.mentorbooking.service;
 
 
+import com.google.type.DateTime;
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.group.*;
 import com.swd392.mentorbooking.email.EmailDetail;
 import com.swd392.mentorbooking.email.EmailService;
-import com.swd392.mentorbooking.entity.Account;
+import com.swd392.mentorbooking.entity.*;
+import com.swd392.mentorbooking.entity.Enum.BookingStatus;
 import com.swd392.mentorbooking.entity.Enum.InviteStatus;
-import com.swd392.mentorbooking.entity.Group;
-import com.swd392.mentorbooking.entity.Invitation;
-import com.swd392.mentorbooking.entity.Topic;
 import com.swd392.mentorbooking.exception.auth.InvalidAccountException;
 import com.swd392.mentorbooking.exception.group.NotFoundException;
 import com.swd392.mentorbooking.exception.service.CreateServiceException;
-import com.swd392.mentorbooking.repository.AccountRepository;
-import com.swd392.mentorbooking.repository.GroupRepository;
-import com.swd392.mentorbooking.repository.InvitaionRepository;
-import com.swd392.mentorbooking.repository.TopicRepository;
+import com.swd392.mentorbooking.repository.*;
 import com.swd392.mentorbooking.utils.AccountUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,6 +46,9 @@ public class GroupService {
 
     @Autowired
     InvitaionRepository invitaionRepository;
+
+    @Autowired
+    NotificationRepository notificationRepository;
 
     public Response<List<GroupResponse>> getAllGroups() {
         // Fetch all groups that are not deleted
@@ -217,6 +219,7 @@ public class GroupService {
             // If the account exists, set the attachment to the join link
             emailDetail.setAttachment(joinLink);
         }
+        LocalDateTime currentDateTime = LocalDateTime.now();
 
         // Store the invitation with PENDING status in a separate table or map
         Invitation invitation = new Invitation();
@@ -224,9 +227,24 @@ public class GroupService {
         invitation.setEmail(addMemberRequest.getEmail()); // Use the email from the request
         invitation.setGroup(group);
         invitation.setToken(token);
-        invitation.setStatus(InviteStatus.PENDING);
+        invitation.setStatus(BookingStatus.PENDING);
         invitation.setIsDeleted(false);
+
+
+
         invitaionRepository.save(invitation);
+
+        // Create new Notification object
+        Notification notification = new Notification();
+        notification.setAccount(accountOpt.orElse(null));
+        notification.setDate(Date.from(currentDateTime.atZone(ZoneId.systemDefault()).toInstant()));
+        notification.setMessage(invitation.getStatus().getMessage());
+        notification.setStatus(invitation.getStatus());
+        notification.setCreatedAt(LocalDateTime.now());
+        notification.setInvitation(invitation);
+        notification.setIsDeleted(false);
+
+        notificationRepository.save(notification);
 
         // Send invitation email
         emailService.sendEmailJoinGroup(emailDetail);
@@ -268,7 +286,7 @@ public class GroupService {
         group.setQuantityMember(group.getStudents().size());
 
         // Update the invitation status to ACCEPTED
-        invitation.setStatus(InviteStatus.ACCEPT);
+        invitation.setStatus(BookingStatus.ACCEPT);
         invitaionRepository.save(invitation);
 
         // Save the updated group

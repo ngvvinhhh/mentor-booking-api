@@ -1,5 +1,6 @@
 package com.swd392.mentorbooking.dto.invititation;
 
+import com.swd392.mentorbooking.entity.Enum.BookingStatus;
 import com.swd392.mentorbooking.entity.Enum.InviteStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,6 +14,6 @@ import java.time.LocalDateTime;
 public class InvitationResponse {
     private Long invitationId;
     private String sender;
-    private InviteStatus status;
+    private BookingStatus status;
     private LocalDateTime createdAt;
 }

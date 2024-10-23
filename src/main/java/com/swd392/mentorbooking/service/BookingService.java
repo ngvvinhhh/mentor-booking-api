@@ -68,6 +68,11 @@ public class BookingService {
                 .isDeleted(false)
                 .build();
 
+
+
+        // Save booking to database
+        bookingRepository.save(booking);
+
         // Create new Notification object
         Notification notification = new Notification();
         notification.setMessage(booking.getStatus().getMessage());
@@ -77,9 +82,6 @@ public class BookingService {
         notification.setBooking(booking);
         notification.setCreatedAt(LocalDateTime.now());
         notification.setIsDeleted(false);
-
-        // Save booking to database
-        bookingRepository.save(booking);
         notificationRepository.save(notification);
 
 

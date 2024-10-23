@@ -1,6 +1,7 @@
 package com.swd392.mentorbooking.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.swd392.mentorbooking.entity.Enum.BookingStatus;
 import com.swd392.mentorbooking.entity.Enum.InviteStatus;
 import lombok.*;
 import jakarta.persistence.*;
@@ -35,7 +36,7 @@ public class Invitation {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private InviteStatus status;
+    private BookingStatus status;
 
     @Column(name = "sender_email", nullable = false)
     private String senderEmail;
