@@ -17,7 +17,7 @@ public class OTPService {
     private OTPRepository otpRepository;
 
     private static final int OTP_LENGTH = 6; // Độ dài của mã OTP
-    private static final int OTP_EXPIRATION_MINUTES = 10;
+    private static final int OTP_EXPIRATION_MINUTES = 1; // OTP hết hạn sau 1 phút
 
     public void saveOTPForUser(String email, String otp) {
         LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(OTP_EXPIRATION_MINUTES);
