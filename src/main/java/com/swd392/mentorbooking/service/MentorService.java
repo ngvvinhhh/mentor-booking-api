@@ -501,6 +501,7 @@ public class MentorService {
         notification.setMessage(booking.getStatus().getMessage());
         notification.setDate(booking.getSchedule().getDate());
         notification.setStatus(booking.getStatus());
+        notification.setAccount(booking.getAccount());
         notification.setBooking(booking);
         notification.setCreatedAt(LocalDateTime.now());
         notification.setIsDeleted(false);
@@ -545,6 +546,7 @@ public class MentorService {
         Notification notification = new Notification();
         notification.setMessage(booking.getStatus().getMessage());
         notification.setDate(booking.getSchedule().getDate());
+        notification.setAccount(booking.getAccount());
         notification.setStatus(booking.getStatus());
         notification.setBooking(booking);
         notification.setCreatedAt(LocalDateTime.now());
