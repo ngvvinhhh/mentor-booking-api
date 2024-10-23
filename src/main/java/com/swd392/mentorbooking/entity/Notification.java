@@ -17,6 +17,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 public class Notification {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "notification_id")
@@ -31,7 +32,6 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private BookingStatus status;
-
 
     @ManyToOne
     @JoinColumn(name = "booking_id", nullable = false)
