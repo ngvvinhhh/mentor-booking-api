@@ -4,6 +4,7 @@ import com.swd392.mentorbooking.dto.invititation.AcceptInviteRequest;
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.group.*;
 import com.swd392.mentorbooking.service.GroupService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @CrossOrigin("**")
 @RequestMapping("/group")
+@SecurityRequirement(name = "api")
 public class GroupController {
     @Autowired
     GroupService groupService;

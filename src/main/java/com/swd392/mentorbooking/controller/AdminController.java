@@ -8,6 +8,7 @@ import com.swd392.mentorbooking.entity.Blog;
 import com.swd392.mentorbooking.entity.Booking;
 import com.swd392.mentorbooking.entity.Topic;
 import com.swd392.mentorbooking.service.AdminService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin")
 @CrossOrigin("**")
+@SecurityRequirement(name = "api")
 public class AdminController {
 
     @Autowired

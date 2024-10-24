@@ -7,6 +7,7 @@ import com.swd392.mentorbooking.dto.account.UpdateProfileRequestDTO;
 import com.swd392.mentorbooking.dto.website_feedback.WebsiteFeedbackRequestDTO;
 import com.swd392.mentorbooking.entity.Enum.SpecializationEnum;
 import com.swd392.mentorbooking.service.AccountService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -18,6 +19,7 @@ import java.util.List;
 @RestController
 @CrossOrigin("**")
 @RequestMapping("/account")
+@SecurityRequirement(name = "api")
 public class AccountController {
 
     @Autowired

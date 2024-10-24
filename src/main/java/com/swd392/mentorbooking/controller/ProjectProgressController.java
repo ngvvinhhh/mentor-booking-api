@@ -5,6 +5,7 @@ import com.swd392.mentorbooking.dto.projectprogress.ProjectProgressRequest;
 import com.swd392.mentorbooking.dto.projectprogress.UpdateProgressRequest;
 import com.swd392.mentorbooking.entity.ProjectProgress;
 import com.swd392.mentorbooking.service.ProjectProgressService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/payment")
 @CrossOrigin("**")
+@SecurityRequirement(name = "api")
 public class ProjectProgressController {
     @Autowired
     ProjectProgressService projectProgressService;
