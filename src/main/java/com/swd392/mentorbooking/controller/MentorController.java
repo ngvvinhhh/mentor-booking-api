@@ -16,6 +16,7 @@ import com.swd392.mentorbooking.dto.service.UpdateServiceRequestDTO;
 import com.swd392.mentorbooking.dto.service.UpdateServiceResponseDTO;
 import com.swd392.mentorbooking.entity.Enum.SpecializationEnum;
 import com.swd392.mentorbooking.service.MentorService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,7 @@ import java.util.List;
 @RestController
 @CrossOrigin("**")
 @RequestMapping("/mentor")
+@SecurityRequirement(name = "api")
 public class MentorController {
 
     @Autowired

@@ -3,6 +3,7 @@ package com.swd392.mentorbooking.controller;
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.auth.*;
 import com.swd392.mentorbooking.service.AuthService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import java.net.URI;
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin("**")
+@SecurityRequirement(name = "api")
 public class AuthController {
 
     @Autowired

@@ -4,6 +4,7 @@ import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.semester.SemesterRequest;
 import com.swd392.mentorbooking.dto.semester.SemesterResponse;
 import com.swd392.mentorbooking.service.SemesterService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/semester")
 @CrossOrigin("**")
+@SecurityRequirement(name = "api")
 public class SemesterController {
 
     @Autowired

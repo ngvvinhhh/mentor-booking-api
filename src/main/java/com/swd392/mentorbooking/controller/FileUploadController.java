@@ -4,6 +4,7 @@ import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.entity.Account;
 import com.swd392.mentorbooking.repository.AccountRepository;
 import com.swd392.mentorbooking.utils.FirebaseStorageService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @CrossOrigin("**")
 @RequestMapping("/firebase")
+@SecurityRequirement(name = "api")
 public class FileUploadController {
 
     @Autowired
