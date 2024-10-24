@@ -76,48 +76,56 @@ public class GroupService {
 
     public Response<GroupResponse> createGroup(@Valid GroupRequest groupRequest) {
 
-        // Find list of Accounts
+        // Get the current account of the group creator
+        Account currentAccount = accountUtils.getCurrentAccount();
+        if (currentAccount == null) {
+            return new Response<>(401, "Please login first", null);
+        }
+
+        // Add the group creator's ID to the studentIds list if it doesn't already exist
+        if (!groupRequest.getStudentIds().contains(currentAccount.getId())) {
+            groupRequest.getStudentIds().add(currentAccount.getId());
+        }
+
+        // Find list of Accounts by studentIds
         List<Account> accounts = accountRepository.findByIdIn(groupRequest.getStudentIds());
 
-        // Check if the number of accounts retrieved is different from the number of accountId in the request
+        // Check if the number of accounts does not match the list of studentIds in the request
         if (accounts.size() != groupRequest.getStudentIds().size()) {
             throw new InvalidAccountException("One or more account IDs are invalid or do not exist in the database.");
         }
 
-        // Find topic of group
-        Topic topic = topicRepository.findById(groupRequest.getTopicId()).orElseThrow(null);
-        if (topic == null) return new Response<>(404, "Topic not found", null);
+        // Find group topics
+        Topic topic = topicRepository.findById(groupRequest.getTopicId()).orElseThrow(() -> new NotFoundException("Topic not found"));
 
-
-
-        // Create group and set fields
+        // Create new Group and set up information fields
         Group group = new Group();
         group.setTopicId(topic.getId());
-        group.setStudents(groupRequest.getStudentIds());
-        group.setAccounts(accounts);
+        group.setAccounts(accounts);  // List of accounts including group creator
         group.setQuantityMember(accounts.size());
         group.setCreatedAt(LocalDateTime.now());
         group.setUpdatedAt(LocalDateTime.now());
         group.setIsDeleted(false);
 
-        // Save group
+        // Save group to database
         try {
             groupRepository.save(group);
         } catch (Exception e) {
             throw new CreateServiceException("There was something wrong when creating the group, please try again...");
         }
 
-        // Create a response entity
+        // Create GroupResponse
         GroupResponse groupResponse = new GroupResponse(
                 group.getId(),
                 group.getTopicId(),
-                group.getStudents(),
+                groupRequest.getStudentIds(),
                 group.getQuantityMember(),
                 group.getCreatedAt()
         );
 
         return new Response<>(200, "Group created successfully!", groupResponse);
     }
+
 
     public Response<UpdateGroupResponse> updateGroup(Long groupId, @Valid GroupRequest groupRequest) {
 
