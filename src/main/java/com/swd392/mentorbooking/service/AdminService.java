@@ -180,7 +180,7 @@ public class AdminService {
                     .build();
             walletRepository.save(wallet);
 
-            String responseMessage = "Successful registration, please check your email for verification";
+            String responseMessage = "Email created successfully";
             RegisterResponseDTO response = new RegisterResponseDTO(responseMessage, null, 201, registerRequestDTO.getEmail());
 
             return new ResponseEntity<>(response, HttpStatus.CREATED);

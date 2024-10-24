@@ -24,9 +24,15 @@ public class BlogController {
     // ** BLOG SECTION ** //
 
     // View all blogs
-    @GetMapping("view/all")
+    @GetMapping("/view/all")
     public Response<List<Blog>> getAllBlog() {
         return blogService.viewAllBlogs();
+    }
+
+    // View current account posted blog
+    @GetMapping("/view/by-account")
+    public Response<List<Blog>> getAllBlogOfCurrentUser() {
+        return blogService.getAllBlogOfCurrentUser();
     }
 
     // View blog by id

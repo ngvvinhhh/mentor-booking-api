@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -78,7 +79,7 @@ public class BlogService {
         blog.setUpdatedAt(LocalDateTime.now());
         if (updateBlogRequestDTO.getTitle() != null) blog.setTitle(updateBlogRequestDTO.getTitle());
         if (updateBlogRequestDTO.getDescription() != null) blog.setDescription(updateBlogRequestDTO.getDescription());
-        if (updateBlogRequestDTO.getImage() != null) blog.setDescription(updateBlogRequestDTO.getTitle());
+        if (updateBlogRequestDTO.getImage() != null) blog.setImage(updateBlogRequestDTO.getImage());
 
         // Save and handle exceptions
         try {
@@ -108,6 +109,8 @@ public class BlogService {
         if (!blog.getAccount().getId().equals(account.getId())) {
             throw new ForbiddenException("This blog does not belong to you to delete");
         }
+
+        blog.setIsDeleted(true);
         blogRepository.save(blog);
 
         // Return response
@@ -162,5 +165,22 @@ public class BlogService {
         //Response message
         String message = "Retrieve topics successfully!";
         return new Response<>(200, message, data);
+    }
+
+    public Response<List<Blog>> getAllBlogOfCurrentUser() {
+        Account account = checkAccount();
+        // Get data
+        List<Blog> data = blogRepository.findAllByAccount(account).orElse(new ArrayList<>());
+
+        if (data.isEmpty()) {
+            //Response message
+            String message = "You have not posted any blog!";
+            return new Response<>(200, message, data);
+        }
+
+        //Response message
+        String message = "Retrieve topics successfully!";
+        return new Response<>(200, message, data);
+
     }
 }

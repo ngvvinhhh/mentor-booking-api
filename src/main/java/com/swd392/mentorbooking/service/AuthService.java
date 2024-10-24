@@ -222,7 +222,7 @@ public class AuthService implements UserDetailsService {
             emailService.sendForgotPasswordEmail(emailDetail);
 
             accountRepository.save(account);
-            ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse("Password reset token generated successfully.", null, 200);
+            ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse("Password reset token generated successfully. Please check your email", null, 200);
             return new ResponseEntity<>(forgotPasswordResponse, HttpStatus.OK);
         } catch (AuthAppException e) {
             ErrorCode errorCode = e.getErrorCode();
@@ -303,7 +303,6 @@ public class AuthService implements UserDetailsService {
         }
     }
 
-
     public ResponseEntity<ResetPasswordResponse> resetPassword(ResetPasswordRequest resetPasswordRequest, String token) {
         try {
             // AFTER USER CLICK LINK FORGOT PASSWORD IN EMAIL THEN REDIRECT TO API HERE (RESET PASSWORD)
@@ -331,8 +330,6 @@ public class AuthService implements UserDetailsService {
 
     }
 
-
-
     public boolean verifyAccount(String token) throws Exception {
         try {
             String email = jwtService.extractEmail(token);
@@ -348,8 +345,6 @@ public class AuthService implements UserDetailsService {
             throw new TokenExpiredException("Invalid or expired token!", Instant.now());
         }
     }
-
-
 
     public Response<String> deleteAccount() {
         // Get the current account
