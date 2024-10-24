@@ -7,6 +7,7 @@ import com.swd392.mentorbooking.dto.servicefeedback.ServicesFeedbackResponse;
 import com.swd392.mentorbooking.dto.servicefeedback.UpdateServiceFeedbackResquest;
 import com.swd392.mentorbooking.dto.servicefeedback.UpdateServicesFeedbackResponse;
 import com.swd392.mentorbooking.service.FeedbackServicessService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/service-feedback")
 @CrossOrigin("**")
+@SecurityRequirement(name = "api")
 public class ServicesFeedbackController {
     @Autowired
     private FeedbackServicessService serviceFeedbackService;

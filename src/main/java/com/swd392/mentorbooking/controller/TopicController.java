@@ -7,6 +7,7 @@ import com.swd392.mentorbooking.dto.topic.UpdateTopicRequest;
 import com.swd392.mentorbooking.dto.topic.UpdateTopicResponse;
 import com.swd392.mentorbooking.entity.Topic;
 import com.swd392.mentorbooking.service.TopicService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/topic")
 @CrossOrigin("**")
+@SecurityRequirement(name = "api")
 public class TopicController {
     @Autowired
     TopicService topicService;

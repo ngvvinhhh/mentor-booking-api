@@ -3,6 +3,7 @@ package com.swd392.mentorbooking.controller;
 
 import com.swd392.mentorbooking.dto.payment.PaymentRequest;
 import com.swd392.mentorbooking.service.PaymentService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/payment")
 @CrossOrigin("**")
+@SecurityRequirement(name = "api")
 public class PaymentController {
 
     @Autowired
