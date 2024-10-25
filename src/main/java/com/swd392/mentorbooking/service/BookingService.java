@@ -89,7 +89,7 @@ public class BookingService {
         notificationMentor.setMessage(BookingStatus.UNDECIDED.getMessage());
         notificationMentor.setDate(booking.getSchedule().getDate());
         notificationMentor.setStatus(BookingStatus.UNDECIDED);
-        notificationMentor.setAccount(booking.getAccount());
+        notificationMentor.setAccount(schedule.getAccount());
         notificationMentor.setBooking(booking);
         notificationMentor.setCreatedAt(LocalDateTime.now());
         notificationMentor.setIsDeleted(false);
