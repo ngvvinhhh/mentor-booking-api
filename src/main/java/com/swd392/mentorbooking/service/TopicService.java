@@ -53,10 +53,9 @@ public class TopicService {
         Account account = accountUtils.getCurrentAccount();
         if (account == null) return new Response<>(401, "Please login first", null);
 
-        Semester semester = semesterRepository.findById(topicRequest.getSemesterId()).orElseThrow(null);
-        if (semester == null) return new Response<>(404, "Semester not found", null);
-
-
+        // Fetch the current semester
+        Semester semester = semesterRepository.findByIsCurrentSemesterTrue()
+                .orElseThrow(() -> new NotFoundException("Current semester not found."));
 
         // Create topic and set fields
         Topic topic = new Topic();
@@ -96,28 +95,35 @@ public class TopicService {
         Topic topic = topicRepository.findById(topicId).orElse(null);
         if (topic == null) return new Response<>(404, "Topic not found", null);
 
-        // Find the semester
-        Semester semester = semesterRepository.findById(updateTopicRequest.getSemesterId()).orElseThrow(null);
-        if (semester == null) return new Response<>(404, "Semester not found", null);
-
+        // Fetch the current semester
+        Semester semester = semesterRepository.findByIsCurrentSemesterTrue()
+                .orElseThrow(() -> new NotFoundException("Current semester not found."));
 
         // Update service fields
         topic.setUpdatedAt(LocalDateTime.now());
         if (updateTopicRequest.getTopicName() != null) topic.setTopicName(updateTopicRequest.getTopicName());
         if (updateTopicRequest.getDescription() != null) topic.setDescription(updateTopicRequest.getDescription());
-        if (updateTopicRequest.getSemesterId() != null) topic.setSemester(semester);
+
+        // Set the semester to the current semester
+        topic.setSemester(semester);
 
         // Save and handle exceptions
         try {
             topicRepository.save(topic);
         } catch (Exception e) {
-            throw new TopicException("There was something wrong when updating the blog, please try again...", ErrorCode.TOPICS_NOT_FOUND);
+            throw new TopicException("There was something wrong when updating the topic, please try again...", ErrorCode.TOPICS_NOT_FOUND);
         }
 
         // Return response
-        UpdateTopicResponse data = new UpdateTopicResponse(topic.getId(), topic.getTopicName(), topic.getDescription(), topic.getUpdatedAt());
+        UpdateTopicResponse data = new UpdateTopicResponse(
+                topic.getId(),
+                topic.getTopicName(),
+                topic.getDescription(),
+                topic.getUpdatedAt()
+        );
         return new Response<>(200, "Topic updated successfully!", data);
     }
+
 
     public Response<String> deleteTopic(Long topicId) {
 
@@ -148,30 +154,29 @@ public class TopicService {
     }
 
     public Response<String> addTopicsFromExcel(MultipartFile file) {
-        Account account = accountUtils.getCurrentAccount(); // Lấy thông tin tài khoản hiện tại
+        Account account = accountUtils.getCurrentAccount(); // Get current account information
         if (account == null) {
-            return new Response<>(401, "Please login first", null); // Trả về phản hồi nếu chưa đăng nhập
+            return new Response<>(401, "Please login first", null); // Return response if not logged in
         }
 
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
-            Sheet sheet = workbook.getSheetAt(0); // Giả sử bạn đang đọc sheet đầu tiên
+            Sheet sheet = workbook.getSheetAt(0); // Assuming you are reading the first sheet
             for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue; // Bỏ qua hàng tiêu đề
+                if (row.getRowNum() == 0) continue; // Skip header row
 
                 String topicName = row.getCell(0).getStringCellValue();
                 String description = row.getCell(1).getStringCellValue();
-                Long semesterId = (long) row.getCell(2).getNumericCellValue();
 
-                // Kiểm tra Semester
-                Semester semester = semesterRepository.findById(semesterId)
-                        .orElseThrow(() -> new NotFoundException("Semester with ID " + semesterId + " not found."));
+                // Fetch the current semester
+                Semester semester = semesterRepository.findByIsCurrentSemesterTrue()
+                        .orElseThrow(() -> new NotFoundException("Current semester not found."));
 
-                // Tạo và lưu Topic
+                // Create and save Topic
                 Topic topic = new Topic();
                 topic.setTopicName(topicName);
                 topic.setDescription(description);
-                topic.setSemester(semester);
-                topic.setAccount(account); // Thiết lập tài khoản ở đây
+                topic.setSemester(semester); // Set the current semester
+                topic.setAccount(account); // Set the account here
                 topic.setCreatedAt(LocalDateTime.now());
                 topic.setUpdatedAt(LocalDateTime.now());
                 topic.setIsDeleted(false);
@@ -183,4 +188,6 @@ public class TopicService {
             return new Response<>(500, "Failed to process the Excel file: " + e.getMessage(), null);
         }
     }
+
 }
+

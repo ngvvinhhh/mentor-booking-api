@@ -1,5 +1,6 @@
 package com.swd392.mentorbooking.service;
 
+import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.payment.PaymentRequest;
 import com.swd392.mentorbooking.entity.Account;
 import com.swd392.mentorbooking.entity.Enum.PaymentStatusEnum;
@@ -12,6 +13,7 @@ import com.swd392.mentorbooking.repository.AccountRepository;
 import com.swd392.mentorbooking.repository.PaymentRepository;
 import com.swd392.mentorbooking.repository.WalletLogRepository;
 import com.swd392.mentorbooking.repository.WalletRepository;
+import com.swd392.mentorbooking.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,9 +43,11 @@ public class PaymentService {
     @Autowired
     WalletLogRepository walletLogRepository;
 
+    @Autowired
+    AccountUtils accountUtils;
+
     public Payment createPayment(PaymentRequest paymentRequest) {
-        Account customer = accountRepository.findById(paymentRequest.getUserId())
-                .orElseThrow(() -> new InvalidAccountException("Account not found."));
+        Account customer = accountUtils.getCurrentAccount();
         Payment payment = new Payment();
         payment.setAccount(customer);
         payment.setCreatedAt(LocalDateTime.now());

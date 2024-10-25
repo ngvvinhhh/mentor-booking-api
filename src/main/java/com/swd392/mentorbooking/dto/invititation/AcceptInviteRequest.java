@@ -7,9 +7,6 @@ import lombok.Data;
 
 @Data
 public class AcceptInviteRequest {
-    @NotNull(message = "Group ID is required")
-    private Long groupId;
-
     @NotNull(message = "Token is required")
     private String token;
 }

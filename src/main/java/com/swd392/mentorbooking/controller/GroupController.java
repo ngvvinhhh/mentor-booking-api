@@ -1,5 +1,6 @@
 package com.swd392.mentorbooking.controller;
 
+import com.swd392.mentorbooking.dto.booking.BookingResponse;
 import com.swd392.mentorbooking.dto.invititation.AcceptInviteRequest;
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.group.*;
@@ -52,9 +53,13 @@ public class GroupController {
     @PostMapping("/accept-invite")
     public Response<GroupResponse> acceptGroupInvitation(@Valid @RequestBody AcceptInviteRequest acceptInviteRequest) {
         return groupService.acceptGroupInvitation(
-                acceptInviteRequest.getGroupId(),
                 acceptInviteRequest.getToken()
         );
+    }
+
+    @GetMapping("/select-topic/{topicId}")
+    public Response<GroupResponse> rejectBooking(@PathVariable Long topicId) {
+        return groupService.selectTopicForGroup(topicId);
     }
 
 }

@@ -13,5 +13,4 @@ public class UpdateTopicRequest {
 
     private String description;
 
-    private Long semesterId;
 }

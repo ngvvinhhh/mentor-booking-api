@@ -1,6 +1,6 @@
 package com.swd392.mentorbooking.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.*;
 import com.swd392.mentorbooking.entity.Enum.*;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,7 +16,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "account")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -93,6 +94,7 @@ public class Account implements UserDetails {
     private Boolean isDeleted;
 
     @JsonIgnore
+    @JsonManagedReference
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
     private Wallet wallet;
 
