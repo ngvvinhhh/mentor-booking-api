@@ -1,7 +1,9 @@
 package com.swd392.mentorbooking.service;
 
 import com.swd392.mentorbooking.dto.account.UpdateProfileRequestDTO;
+import com.swd392.mentorbooking.dto.achievement.GetAchievementResponseDTO;
 import com.swd392.mentorbooking.dto.website_feedback.WebsiteFeedbackRequestDTO;
+import com.swd392.mentorbooking.entity.Achievement;
 import com.swd392.mentorbooking.entity.Enum.RoleEnum;
 import com.swd392.mentorbooking.entity.Enum.SpecializationEnum;
 import com.swd392.mentorbooking.dto.Response;
@@ -24,6 +26,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,6 +42,7 @@ public class AccountService {
 
     @Autowired
     private WebsiteFeedbackRepository websiteFeedbackRepository;
+
     @Autowired
     private WalletRepository walletRepository;
 
@@ -50,6 +54,16 @@ public class AccountService {
 
         // Return the result
         return returnProfile(account);
+    }
+
+    public Response<GetProfileResponse> getProfileById(long accountId) {
+        Account data = accountRepository.findById(accountId).orElse(null);
+
+        if (data != null) {
+            return returnProfile(data);
+        } else {
+            return new Response<>(200, "No profile was found!", null);
+        }
     }
 
     public Response<GetProfileResponse> updateProfile(@Valid UpdateProfileRequestDTO updateProfileRequestDTO) {
@@ -86,6 +100,20 @@ public class AccountService {
         // Get user wallet
         Wallet wallet = walletRepository.findByAccount(account);
 
+        List<GetAchievementResponseDTO> achievementList = new ArrayList<>();
+
+        if (!account.getAchievements().isEmpty()) {
+            for (Achievement achievement : account.getAchievements()) {
+                GetAchievementResponseDTO achievementResponseDTO = GetAchievementResponseDTO.builder()
+                        .id(achievement.getId())
+                        .achievementName(achievement.getAchievementName())
+                        .link(achievement.getLink())
+                        .description(achievement.getDescription())
+                        .build();
+                achievementList.add(achievementResponseDTO);
+            }
+        }
+
         GetProfileResponse response = GetProfileResponse.builder()
                 .id(account.getId())
                 .name(account.getName())
@@ -101,6 +129,7 @@ public class AccountService {
                 .walletPoint(wallet.getTotal())
                 // ** mentor ** //
                 .specializations(account.getSpecializations())
+                .achievements(achievementList)
                 .facebookLink(account.getFacebookLink())
                 .linkedinLink(account.getLinkedinLink())
                 .twitterLink(account.getTwitterLink())
@@ -173,5 +202,7 @@ public class AccountService {
 
         return new Response<>(201, "Feedback created successfully!", websiteFeedbackRequestDTO);
     }
+
+
 }
 

@@ -37,13 +37,18 @@ public class AccountController {
         return accountService.updateProfile(updateProfileRequestDTO);
     }
 
+    @GetMapping("profile/{accountId}")
+    public Response<GetProfileResponse> getProfileById(@PathVariable long accountId) {
+        return accountService.getProfileById(accountId);
+    }
+
     // ** SEARCH SECTION ** //
 
     @GetMapping("/search-mentor")
     public Response<List<SearchMentorResponseDTO>> searchMentor(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) Double minPrice,
-            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false, defaultValue = "0") Double minPrice,
+            @RequestParam(required = false, defaultValue = "999999") Double maxPrice,
             @RequestParam(required = false) List<SpecializationEnum> specializations,
             @RequestParam(required = false, defaultValue = "service.price,asc") String[] sort
     )

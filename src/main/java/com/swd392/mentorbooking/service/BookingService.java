@@ -3,8 +3,11 @@ package com.swd392.mentorbooking.service;
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.booking.BookingResponse;
 import com.swd392.mentorbooking.dto.booking.CreateBookingRequest;
+import com.swd392.mentorbooking.dto.booking.UpcomingBookingResponseDTO;
 import com.swd392.mentorbooking.entity.*;
 import com.swd392.mentorbooking.entity.Enum.BookingStatus;
+import com.swd392.mentorbooking.exception.ErrorCode;
+import com.swd392.mentorbooking.exception.auth.AuthAppException;
 import com.swd392.mentorbooking.exception.group.NotFoundException;
 import com.swd392.mentorbooking.repository.*;
 import com.swd392.mentorbooking.utils.AccountUtils;
@@ -13,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -34,6 +39,9 @@ public class BookingService {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
 
 
     @Transactional
@@ -67,7 +75,6 @@ public class BookingService {
                 .createdAt(LocalDateTime.now())
                 .isDeleted(false)
                 .build();
-
 
 
         // Save booking to database
@@ -110,4 +117,43 @@ public class BookingService {
         return new Response<>(200, "Booking created successfully!", bookingResponse);
     }
 
+    public Response<List<UpcomingBookingResponseDTO>> viewUpcomingBookings() {
+        Account account = checkAccount();
+
+        // Get group that contains this account
+        Group group = groupRepository.findByStudentsContaining(account).orElse(null);
+
+        // Filter and map the bookings to DTOs
+        List<UpcomingBookingResponseDTO> data = group.getBookings().stream()
+                .filter(booking -> booking.getStatus() == BookingStatus.PROCESSING || booking.getStatus() == BookingStatus.SUCCESSFUL)
+                .map(booking -> UpcomingBookingResponseDTO.builder()
+                        .bookingId(booking.getBookingId())
+                        .bookingDate(booking.getSchedule().getDate().toString())
+                        .startTime(booking.getSchedule().getStartTime().toString())
+                        .endTime(booking.getSchedule().getEndTime().toString())
+                        .location(booking.getLocation())
+                        .locationNote(booking.getLocationNote())
+                        .mentorId(booking.getAccount().getId())
+                        .mentorName(booking.getAccount().getName())
+                        .bookingStatus(booking.getStatus())
+                        .build())
+                .collect(Collectors.toList());
+
+        return new Response<>(200, "Retrieve booking successfully!", data);
+    }
+
+    public Account checkAccount() {
+        // Get the current account
+        Account account = accountUtils.getCurrentAccount();
+        if (account == null) {
+            throw new AuthAppException(ErrorCode.NOT_LOGIN);
+        }
+
+        account = accountRepository.findByEmail(account.getEmail()).orElse(null);
+        if (account == null) {
+            throw new AuthAppException(ErrorCode.ACCOUNT_NOT_FOUND);
+        }
+
+        return account;
+    }
 }

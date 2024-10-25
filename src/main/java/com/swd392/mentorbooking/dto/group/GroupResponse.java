@@ -15,7 +15,7 @@ public class GroupResponse {
 
     private Long groupId;
     private Long topicId;
-    List<Long> studentIds;
+    private List<Long> students;
     private Integer quantityMember;
     private LocalDateTime createdAt;
 }
