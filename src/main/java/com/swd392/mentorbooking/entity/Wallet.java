@@ -1,12 +1,14 @@
 package com.swd392.mentorbooking.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
 @Table(name = "wallet")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -18,6 +20,7 @@ public class Wallet {
     private Long id;
 
     @OneToOne
+    @JsonBackReference
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 

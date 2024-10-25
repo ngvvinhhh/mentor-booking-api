@@ -27,6 +27,9 @@ public class Semester {
     @Column(name = "end_date")
     private LocalDateTime endDate;
 
+    @Column(name = "is_current_semester", nullable = false)
+    private Boolean isCurrentSemester;
+
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
 }

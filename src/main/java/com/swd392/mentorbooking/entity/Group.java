@@ -21,7 +21,7 @@ public class Group {
     @Column(name = "group_id")
     private Long id;
 
-    @Column(name = "topic_id", nullable = false)
+    @Column(name = "topic_id", nullable = true)
     private Long topicId;
 
     @Column(name = "quantity_member")

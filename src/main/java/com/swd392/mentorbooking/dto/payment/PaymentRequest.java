@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class PaymentRequest {
-    private Long userId;
     private Double amount;
     private String description;
 }

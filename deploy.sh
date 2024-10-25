@@ -2,9 +2,9 @@ echo "Building app..."
 ./mvnw clean package -DskipTests
 
 echo "Deploy files to server..."
-scp -r -i C:/Users/nguye/OneDrive/Desktop/swd392 target/mentorbooking.jar root@167.71.220.5:/var/www/be/
+scp -r -i C:/Users/gmt/Desktop/swd392 target/mentorbooking.jar root@167.71.220.5:/var/www/be/
 
-ssh -i C:/Users/nguye/OneDrive/Desktop/swd392 root@167.71.220.5 <<EOF
+ssh -i C:/Users/gmt/Desktop/swd392 root@167.71.220.5 <<EOF
 pid=\$(sudo lsof -t -i :8080)
 
 if [ -z "\$pid" ]; then

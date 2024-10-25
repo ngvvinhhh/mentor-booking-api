@@ -14,6 +14,9 @@ import com.swd392.mentorbooking.exception.group.NotFoundException;
 import com.swd392.mentorbooking.exception.service.CreateServiceException;
 import com.swd392.mentorbooking.repository.*;
 import com.swd392.mentorbooking.utils.AccountUtils;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,10 +24,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,6 +49,10 @@ public class GroupService {
 
     @Autowired
     NotificationRepository notificationRepository;
+
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public Response<List<GroupResponse>> getAllGroups() {
         // Fetch all groups that are not deleted
@@ -184,84 +188,84 @@ public class GroupService {
         return new Response<>(200, "Group deleted successfully!", "Deleted group ID: " + groupId);
     }
 
+    @Transactional
     public Response<GroupResponse> addAccountToGroup(AddMemberRequest addMemberRequest) {
-        // Find the group by ID
-        Group group = groupRepository.findById(addMemberRequest.getGroupId())
-                .orElseThrow(() -> new InvalidAccountException("Group not found."));
-
-        // Check if the group has been deleted
-        if (group.getIsDeleted()) {
-            throw new InvalidAccountException("Cannot add account to a deleted group.");
-        }
-
-        // Get Sender email
         Account sender = accountUtils.getCurrentAccount();
         if (sender == null) return new Response<>(401, "Please login first", null);
 
-        // Find account by email using Optional
-        Optional<Account> accountOpt = accountRepository.findByEmail(addMemberRequest.getEmail());
+        Group group;
+        Optional<Group> existingGroup = groupRepository.findByAccountsContaining(sender);
 
-        // Generate a unique token for the invitation (could use UUID or similar)
+        if (existingGroup.isPresent()) {
+            group = existingGroup.get();
+        } else {
+            group = new Group();
+            group.setAccounts(new ArrayList<>());
+            group.getAccounts().add(entityManager.merge(sender));
+            sender.setGroup(group);
+            group.setTopicId(null);
+            group.setQuantityMember(1);
+            group.setCreatedAt(LocalDateTime.now());
+            group.setUpdatedAt(LocalDateTime.now());
+            group.setIsDeleted(false);
+            group = groupRepository.save(group);
+            accountRepository.save(sender);
+        }
+
+        if (group.getIsDeleted()) {
+            return new Response<>(400, "Cannot add account to a deleted group.", null);
+        }
+
+        Optional<Account> accountOpt = accountRepository.findByEmail(addMemberRequest.getEmail());
         String token = UUID.randomUUID().toString();
-        String joinLink = "https://circuit-project.vercel.app/joinGroup?email=" + addMemberRequest.getEmail() + "&groupId=" + group.getId() + "&token=" + token;
+
 
         EmailDetail emailDetail = new EmailDetail();
         emailDetail.setRecipient(addMemberRequest.getEmail());
 
-        if (accountOpt.isEmpty()) {
-            // Account does not exist, set attachment to registration link
-            String registrationLink = "https://circuit-project.vercel.app/signUp"; // Registration page URL
-            emailDetail.setAttachment(registrationLink);
-            emailDetail.setName("User");
 
+        if (accountOpt.isEmpty()) {
+            emailDetail.setAttachment("https://circuit-project.vercel.app/signUp");
+            emailDetail.setName("User");
         } else {
-            // Get the Account if present
-            Account account = accountOpt.get();
+            Account account = entityManager.merge(accountOpt.get());
+            String joinLink = "https://circuit-project.vercel.app/joinGroup?email=" + addMemberRequest.getEmail()
+                    + "&groupId=" + group.getId() + "&token=" + token;
+            emailDetail.setAttachment(joinLink);
             emailDetail.setName(account.getName());
 
-            // Check if the account is already in the group
-            if (group.getStudents().contains(account.getId())) {
+            if (account.getGroup() != null) {
                 throw new InvalidAccountException("Account is already a member of the group.");
             }
 
-            // If the account exists, set the attachment to the join link
-            emailDetail.setAttachment(joinLink);
         }
-        LocalDateTime currentDateTime = LocalDateTime.now();
 
-        // Store the invitation with PENDING status in a separate table or map
+        // Invitation creation and notification
         Invitation invitation = new Invitation();
         invitation.setSenderEmail(sender.getEmail());
-        invitation.setEmail(addMemberRequest.getEmail()); // Use the email from the request
+        invitation.setEmail(addMemberRequest.getEmail());
         invitation.setGroup(group);
         invitation.setToken(token);
         invitation.setStatus(BookingStatus.PENDING);
         invitation.setIsDeleted(false);
-
-
-
         invitaionRepository.save(invitation);
 
-        // Create new Notification object
         Notification notification = new Notification();
         notification.setAccount(accountOpt.orElse(null));
-        notification.setDate(Date.from(currentDateTime.atZone(ZoneId.systemDefault()).toInstant()));
+        notification.setDate(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
         notification.setMessage(invitation.getStatus().getMessage());
         notification.setStatus(invitation.getStatus());
         notification.setCreatedAt(LocalDateTime.now());
         notification.setInvitation(invitation);
         notification.setIsDeleted(false);
-
         notificationRepository.save(notification);
 
-        // Send invitation email
         emailService.sendEmailJoinGroup(emailDetail);
 
-        // Create a response entity
         GroupResponse groupResponse = new GroupResponse(
                 group.getId(),
                 group.getTopicId(),
-                group.getStudents(), // List of member IDs
+                group.getAccounts().stream().map(Account::getId).collect(Collectors.toList()),
                 group.getQuantityMember(),
                 group.getCreatedAt()
         );
@@ -269,42 +273,36 @@ public class GroupService {
         return new Response<>(200, "Invitation sent to the account successfully!", groupResponse);
     }
 
-
-
-    public Response<GroupResponse> acceptGroupInvitation(Long groupId, String token) {
-        // Find the invitation by token
+    @Transactional
+    public Response<GroupResponse> acceptGroupInvitation(String token) {
         Invitation invitation = invitaionRepository.findByToken(token)
                 .orElseThrow(() -> new InvalidAccountException("Invalid or expired invitation token."));
 
-        // Find the group associated with the invitation
-        Group group = groupRepository.findById(groupId)
+        Group group = groupRepository.findById(invitation.getGroup().getId())
                 .orElseThrow(() -> new InvalidAccountException("Group not found."));
 
-        // Find the account associated with the invitation email
         Account account = accountRepository.findByEmail(invitation.getEmail())
                 .orElseThrow(() -> new InvalidAccountException("Account not found."));
 
-        // Check if the account is already a member
-        if (group.getStudents().contains(account.getId())) {
+        if (account.getGroup() != null) {
             throw new InvalidAccountException("Account is already a member of the group.");
         }
 
-        // Add the student's account ID to the group
-        group.getStudents().add(account.getId());
-        group.setQuantityMember(group.getStudents().size());
-
-        // Update the invitation status to ACCEPTED
+        group.getAccounts().add(account);
+        group.setQuantityMember(group.getAccounts().size());
+        account.setGroup(group);
         invitation.setStatus(BookingStatus.ACCEPT);
         invitaionRepository.save(invitation);
 
-        // Save the updated group
         groupRepository.save(group);
+        accountRepository.save(account);
 
-        // Create a response entity
+
+
         GroupResponse groupResponse = new GroupResponse(
                 group.getId(),
                 group.getTopicId(),
-                group.getStudents(), // List of member IDs
+                group.getAccounts().stream().map(Account::getId).collect(Collectors.toList()),
                 group.getQuantityMember(),
                 group.getCreatedAt()
         );
@@ -312,6 +310,44 @@ public class GroupService {
         return new Response<>(200, "Successfully joined the group!", groupResponse);
     }
 
+
+    public Response<GroupResponse> selectTopicForGroup(Long topicId) {
+        // Get current account from token
+        Account currentAccount = accountUtils.getCurrentAccount();
+        if (currentAccount == null) {
+            return new Response<>(401, "Please login first", null);
+        }
+
+        // Find groups the current account is in
+        Group group = groupRepository.findByAccountsContaining(currentAccount)
+                .orElseThrow(() -> new NotFoundException("No group found for the current account."));
+
+        // Find topic by ID
+        Topic topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new NotFoundException("Topic not found with id: " + topicId));
+
+        // Update topic for group
+        group.setTopicId(topic.getId());
+        group.setUpdatedAt(LocalDateTime.now());
+
+        // Save updated group
+        try {
+            groupRepository.save(group);
+        } catch (Exception e) {
+            throw new CreateServiceException("There was something wrong when updating the group topic, please try again...");
+        }
+
+        // Tạo đối tượng phản hồi
+        GroupResponse groupResponse = new GroupResponse(
+                group.getId(),
+                group.getTopicId(),
+                group.getStudents(),
+                group.getQuantityMember(),
+                group.getUpdatedAt()
+        );
+
+        return new Response<>(200, "Topic updated successfully for the group!", groupResponse);
+    }
 
 
 
