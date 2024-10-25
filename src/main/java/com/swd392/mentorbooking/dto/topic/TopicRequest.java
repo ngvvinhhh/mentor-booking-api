@@ -15,5 +15,4 @@ public class TopicRequest {
     @NotBlank(message = "Description cannot be empty")
     private String description;
 
-    private Long semesterId;
 }

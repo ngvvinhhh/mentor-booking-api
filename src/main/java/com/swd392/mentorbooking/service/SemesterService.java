@@ -52,6 +52,7 @@ public class SemesterService {
         Semester semester = new Semester();
         semester.setSemesterName(semesterRequest.getSemesterName());
         semester.setStartDate(semesterRequest.getStartDate());
+        semester.setIsCurrentSemester(true);
         // Add 10 weeks to startDate to set endDate
         semester.setEndDate(semesterRequest.getStartDate().plusWeeks(10));
 

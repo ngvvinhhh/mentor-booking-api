@@ -92,6 +92,17 @@ public class BookingService {
         notification.setIsDeleted(false);
         notificationRepository.save(notification);
 
+        // Create new Notification for mentor object
+        Notification notificationMentor = new Notification();
+        notificationMentor.setMessage(BookingStatus.UNDECIDED.getMessage());
+        notificationMentor.setDate(booking.getSchedule().getDate());
+        notificationMentor.setStatus(BookingStatus.UNDECIDED);
+        notificationMentor.setAccount(booking.getAccount());
+        notificationMentor.setBooking(booking);
+        notificationMentor.setCreatedAt(LocalDateTime.now());
+        notificationMentor.setIsDeleted(false);
+        notificationRepository.save(notificationMentor);
+
 
         // Create response object
         BookingResponse bookingResponse = BookingResponse.builder()

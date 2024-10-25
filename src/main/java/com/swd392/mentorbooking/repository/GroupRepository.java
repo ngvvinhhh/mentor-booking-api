@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
@@ -13,5 +14,5 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     // Custom query method to fetch all non-deleted groups
     List<Group> findByIsDeletedFalse();
 
-    Group findByStudentsContaining(Account account);
+    Optional<Group> findByAccountsContaining(Account account);
 }
