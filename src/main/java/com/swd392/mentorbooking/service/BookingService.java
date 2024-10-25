@@ -122,7 +122,7 @@ public class BookingService {
         Account account = checkAccount();
 
         // Get group that contains this account
-        Group group = groupRepository.findByStudentsContaining(account);
+        Group group = groupRepository.findByStudentsContaining(account).orElse(null);
 
         // Filter and map the bookings to DTOs
         List<UpcomingBookingResponseDTO> data = group.getBookings().stream()

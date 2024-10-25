@@ -68,7 +68,7 @@ public class GroupService {
                 .map(group -> new GroupResponse(
                         group.getId(),
                         group.getTopicId(),
-                        group.getStudents(),
+                        group.getStudents().stream().map(Account::getId).collect(Collectors.toList()),
                         group.getQuantityMember(),
                         group.getCreatedAt()
                 ))
@@ -105,7 +105,7 @@ public class GroupService {
         // Create new Group and set up information fields
         Group group = new Group();
         group.setTopicId(topic.getId());
-        group.setAccounts(accounts);  // List of accounts including group creator
+        group.setStudents(accounts);  // List of accounts including group creator
         group.setQuantityMember(accounts.size());
         group.setCreatedAt(LocalDateTime.now());
         group.setUpdatedAt(LocalDateTime.now());
@@ -151,8 +151,7 @@ public class GroupService {
 
         // Update group fields
         existingGroup.setTopicId(topic.getId());
-        existingGroup.setStudents(groupRequest.getStudentIds());
-        existingGroup.setAccounts(accounts);
+        existingGroup.setStudents(accounts);
         existingGroup.setQuantityMember(accounts.size());
         existingGroup.setUpdatedAt(LocalDateTime.now());
 
@@ -194,14 +193,14 @@ public class GroupService {
         if (sender == null) return new Response<>(401, "Please login first", null);
 
         Group group;
-        Optional<Group> existingGroup = groupRepository.findByAccountsContaining(sender);
+        Optional<Group> existingGroup = groupRepository.findByStudentsContaining(sender);
 
         if (existingGroup.isPresent()) {
             group = existingGroup.get();
         } else {
             group = new Group();
-            group.setAccounts(new ArrayList<>());
-            group.getAccounts().add(entityManager.merge(sender));
+            group.setStudents(new ArrayList<>());
+            group.getStudents().add(entityManager.merge(sender));
             sender.setGroup(group);
             group.setTopicId(null);
             group.setQuantityMember(1);
@@ -265,7 +264,7 @@ public class GroupService {
         GroupResponse groupResponse = new GroupResponse(
                 group.getId(),
                 group.getTopicId(),
-                group.getAccounts().stream().map(Account::getId).collect(Collectors.toList()),
+                group.getStudents().stream().map(Account::getId).collect(Collectors.toList()),
                 group.getQuantityMember(),
                 group.getCreatedAt()
         );
@@ -288,8 +287,8 @@ public class GroupService {
             throw new InvalidAccountException("Account is already a member of the group.");
         }
 
-        group.getAccounts().add(account);
-        group.setQuantityMember(group.getAccounts().size());
+        group.getStudents().add(account);
+        group.setQuantityMember(group.getStudents().size());
         account.setGroup(group);
         invitation.setStatus(BookingStatus.ACCEPT);
         invitaionRepository.save(invitation);
@@ -302,7 +301,7 @@ public class GroupService {
         GroupResponse groupResponse = new GroupResponse(
                 group.getId(),
                 group.getTopicId(),
-                group.getAccounts().stream().map(Account::getId).collect(Collectors.toList()),
+                group.getStudents().stream().map(Account::getId).collect(Collectors.toList()),
                 group.getQuantityMember(),
                 group.getCreatedAt()
         );
@@ -319,7 +318,7 @@ public class GroupService {
         }
 
         // Find groups the current account is in
-        Group group = groupRepository.findByAccountsContaining(currentAccount)
+        Group group = groupRepository.findByStudentsContaining(currentAccount)
                 .orElseThrow(() -> new NotFoundException("No group found for the current account."));
 
         // Find topic by ID
@@ -341,7 +340,7 @@ public class GroupService {
         GroupResponse groupResponse = new GroupResponse(
                 group.getId(),
                 group.getTopicId(),
-                group.getStudents(),
+                group.getStudents().stream().map(Account::getId).collect(Collectors.toList()),
                 group.getQuantityMember(),
                 group.getUpdatedAt()
         );
@@ -371,9 +370,9 @@ public class GroupService {
         }
 
         // Remove the account from the group
-        group.getAccounts().remove(account);
+        group.getStudents().remove(account);
         group.getStudents().remove(removeMemberRequest.getAccountId());
-        group.setQuantityMember(group.getAccounts().size());
+        group.setQuantityMember(group.getStudents().size());
 
         // Save the updated group
         groupRepository.save(group);
@@ -382,14 +381,11 @@ public class GroupService {
         GroupResponse groupResponse = new GroupResponse(
                 group.getId(),
                 group.getTopicId(),
-                group.getStudents(),
+                group.getStudents().stream().map(Account::getId).collect(Collectors.toList()),
                 group.getQuantityMember(),
                 group.getCreatedAt()
         );
 
         return new Response<>(200, "Account removed from group successfully!", groupResponse);
     }
-
-
-
 }

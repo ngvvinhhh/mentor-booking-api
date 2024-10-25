@@ -14,5 +14,5 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     // Custom query method to fetch all non-deleted groups
     List<Group> findByIsDeletedFalse();
 
-    Optional<Group> findByAccountsContaining(Account account);
+    Optional<Group> findByStudentsContaining(Account account);
 }
