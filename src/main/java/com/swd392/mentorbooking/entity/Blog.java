@@ -1,11 +1,13 @@
 package com.swd392.mentorbooking.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.swd392.mentorbooking.entity.Enum.BlogCategoryEnum;
 import lombok.*;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 @Entity
 @Table(name = "blog")
@@ -45,6 +47,10 @@ public class Blog {
 
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
+
+    @Column(name = "category", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private BlogCategoryEnum blogCategoryEnum;
 
     @OneToMany(mappedBy = "blog", cascade = CascadeType.ALL)
     private List<Comment> comments;

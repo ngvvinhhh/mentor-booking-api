@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CreateAchievementResponseDTO {
+    private Long achievementId;
+
     private String achievementName;
 
     private String achievementLink;

@@ -3,6 +3,8 @@ package com.swd392.mentorbooking.service;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.auth.*;
+import com.swd392.mentorbooking.dto.otp.VerifyOTPRequestDTO;
+import com.swd392.mentorbooking.dto.otp.VerifyOTPResponseDTO;
 import com.swd392.mentorbooking.email.EmailDetail;
 import com.swd392.mentorbooking.email.EmailService;
 import com.swd392.mentorbooking.entity.Account;
@@ -131,6 +133,7 @@ public class AuthService implements UserDetailsService {
                     200,
                     responseString,
                     null,
+                    account.getRole(),
                     returnAccount.getTokens(),
                     returnAccount.getRefreshToken()
             );
@@ -144,6 +147,7 @@ public class AuthService implements UserDetailsService {
                     400,
                     e.getMessage(),
                     errorResponse,
+                    null,
                     null,
                     null
             );
@@ -330,7 +334,7 @@ public class AuthService implements UserDetailsService {
 
     }
 
-    public boolean verifyAccount(String token) throws Exception {
+    public boolean verifyAccount(String token) {
         try {
             String email = jwtService.extractEmail(token);
 
@@ -360,5 +364,16 @@ public class AuthService implements UserDetailsService {
         accountRepository.save(account);
 
         return new Response<>(200, "Delete account successfully.", "The account with email " + account.getEmail() + " is deleted");
+    }
+
+    public Response<VerifyOTPResponseDTO> validateOTP(VerifyOTPRequestDTO verifyOTPRequestDTO) {
+
+        if (otpService.validateOTP(verifyOTPRequestDTO.getEmail(), verifyOTPRequestDTO.getOtp())) {
+            VerifyOTPResponseDTO data = new VerifyOTPResponseDTO(verifyOTPRequestDTO.getOtp(), verifyOTPRequestDTO.getEmail(), true);
+            return new Response<>(200, "The OTP code is correct!", data);
+        }
+        VerifyOTPResponseDTO data = new VerifyOTPResponseDTO(verifyOTPRequestDTO.getOtp(), verifyOTPRequestDTO.getEmail(), false);
+        return new Response<>(1500, "The OTP code is not correct, please re-check it!", data);
+
     }
 }

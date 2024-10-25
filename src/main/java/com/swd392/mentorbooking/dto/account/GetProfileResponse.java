@@ -1,6 +1,7 @@
 package com.swd392.mentorbooking.dto.account;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.swd392.mentorbooking.dto.achievement.GetAchievementResponseDTO;
 import com.swd392.mentorbooking.entity.Enum.GenderEnum;
 import com.swd392.mentorbooking.entity.Enum.RoleEnum;
 import com.swd392.mentorbooking.entity.Enum.SpecializationEnum;
@@ -14,7 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-
 public class GetProfileResponse {
     private Long id;
     private String name;
@@ -33,6 +33,9 @@ public class GetProfileResponse {
     // ** mentor part ** //
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<SpecializationEnum> specializations;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<GetAchievementResponseDTO> achievements;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String facebookLink;

@@ -10,5 +10,9 @@ import java.util.Optional;
 
 @Repository
 public interface BlogRepository extends JpaRepository<Blog, Long> {
-    Optional<List<Blog>> findAllByAccount(Account account);
+    List<Blog> findAllByAccount(Account account);
+
+    List<Blog> findAllByIsDeletedFalse();
+
+    List<Blog> findAllByAccountAndIsDeletedFalse(Account account);
 }

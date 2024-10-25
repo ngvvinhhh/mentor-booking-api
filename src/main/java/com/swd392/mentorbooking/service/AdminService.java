@@ -4,7 +4,6 @@ import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.admin.AccountInfoAdmin;
 import com.swd392.mentorbooking.dto.auth.RegisterRequestDTO;
 import com.swd392.mentorbooking.dto.auth.RegisterResponseDTO;
-import com.swd392.mentorbooking.email.EmailDetail;
 
 import com.swd392.mentorbooking.entity.*;
 import com.swd392.mentorbooking.entity.Enum.AccountStatusEnum;
@@ -14,7 +13,6 @@ import com.swd392.mentorbooking.exception.ForbiddenException;
 import com.swd392.mentorbooking.exception.auth.AuthAppException;
 import com.swd392.mentorbooking.repository.*;
 import com.swd392.mentorbooking.utils.AccountUtils;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;

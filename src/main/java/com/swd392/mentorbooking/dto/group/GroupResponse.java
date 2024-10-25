@@ -1,6 +1,7 @@
 package com.swd392.mentorbooking.dto.group;
 
 
+import com.swd392.mentorbooking.entity.Account;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,7 @@ public class GroupResponse {
 
     private Long groupId;
     private Long topicId;
-    List<Long> studentIds;
+    List<Account> students;
     private Integer quantityMember;
     private LocalDateTime createdAt;
 }

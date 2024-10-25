@@ -2,6 +2,8 @@ package com.swd392.mentorbooking.controller;
 
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.auth.*;
+import com.swd392.mentorbooking.dto.otp.VerifyOTPRequestDTO;
+import com.swd392.mentorbooking.dto.otp.VerifyOTPResponseDTO;
 import com.swd392.mentorbooking.service.AuthService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -63,5 +65,10 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("http://localhost:5173/login")).build();
         }
         return null;
+    }
+
+    @PostMapping("/verify-otp")
+    public Response<VerifyOTPResponseDTO> verifyOTP(@RequestBody VerifyOTPRequestDTO verifyOTPRequestDTO){
+        return authService.validateOTP(verifyOTPRequestDTO);
     }
 }

@@ -3,10 +3,6 @@ package com.swd392.mentorbooking.service;
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.achievement.CreateAchievementRequestDTO;
 import com.swd392.mentorbooking.dto.achievement.CreateAchievementResponseDTO;
-import com.swd392.mentorbooking.dto.blog.CreateBlogRequestDTO;
-import com.swd392.mentorbooking.dto.blog.CreateBlogRespnseDTO;
-import com.swd392.mentorbooking.dto.blog.UpdateBlogRequestDTO;
-import com.swd392.mentorbooking.dto.blog.UpdateBlogResponseDTO;
 import com.swd392.mentorbooking.dto.booking.BookingGroupResponseDTO;
 import com.swd392.mentorbooking.dto.booking.BookingListResponseDTO;
 import com.swd392.mentorbooking.dto.booking.BookingMentorResponseDTO;
@@ -30,16 +26,10 @@ import com.swd392.mentorbooking.utils.AccountUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -193,21 +183,31 @@ public class MentorService {
         // Check the current logged in account
         Account account = checkAccount();
 
-        // If mentor have no specialization yet.
-        if (account.getSpecializations().isEmpty()) {
-            account.setSpecializations(updateSpecializationRequestDTO.getEnumList());
-        }
+        // Get the current list of specializations
+        List<SpecializationEnum> currentSpecializations = account.getSpecializations();
 
-        // Else add to the list
-        else {
-            for (SpecializationEnum specializationEnum : updateSpecializationRequestDTO.getEnumList()) {
-                if (!account.getSpecializations().contains(specializationEnum)) {
-                    account.getSpecializations().add(specializationEnum);
+        // If mentor has no specialization yet, set the new list
+        if (currentSpecializations.isEmpty()) {
+            account.setSpecializations(new ArrayList<>(updateSpecializationRequestDTO.getEnumList()));
+        } else {
+            // Update the list: add new specializations and remove those not in the new list
+            Set<SpecializationEnum> newSpecializations = new HashSet<>(updateSpecializationRequestDTO.getEnumList());
+
+            // Add specializations that are in newSpecializations but not in currentSpecializations
+            for (SpecializationEnum specializationEnum : newSpecializations) {
+                if (!currentSpecializations.contains(specializationEnum)) {
+                    currentSpecializations.add(specializationEnum);
                 }
             }
+
+            // Remove specializations that are in currentSpecializations but not in newSpecializations
+            currentSpecializations.removeIf(specializationEnum -> !newSpecializations.contains(specializationEnum));
         }
+
+        // Save the updated account
         accountRepository.save(account);
 
+        // Prepare the response
         UpdateSpecializationResponseDTO response = new UpdateSpecializationResponseDTO();
         response.setSpecializationList(account.getSpecializations());
         response.setName(account.getName());
@@ -216,6 +216,7 @@ public class MentorService {
         return new Response<>(202, "Specialization updated successfully!", response);
     }
 
+
     // ** ACHIEVEMENT SECTION ** //
 
     public Response<List<CreateAchievementResponseDTO>> getAllAchievements() {
@@ -223,11 +224,12 @@ public class MentorService {
         Account account = checkAccount();
 
         // Get all achievements for the current account
-        List<Achievement> achievements = achievementRepository.findAllByAccountId(account.getId());
+        List<Achievement> achievements = achievementRepository.findAllByAccountAndIsDeletedFalse(account);
 
         // Convert achievements to CreateAchievementResponseDTO
         List<CreateAchievementResponseDTO> responseDTOs = achievements.stream().map(achievement ->
                 CreateAchievementResponseDTO.builder()
+                        .achievementId(achievement.getId())
                         .achievementName(achievement.getAchievementName())
                         .achievementLink(achievement.getLink())
                         .achievementDescription(achievement.getDescription())
@@ -367,7 +369,7 @@ public class MentorService {
         List<BookingListResponseDTO> response = bookingRepository.findBookingsByAccountAndIsDeletedFalse(account)
                 .stream()
                 .map(booking -> {
-                    List<BookingGroupResponseDTO> groupResponseDTO = booking.getGroup().getAccounts().stream()
+                    List<BookingGroupResponseDTO> groupResponseDTO = booking.getGroup().getStudents().stream()
                             .map(account1 -> BookingGroupResponseDTO.builder()
                                     .accountId(account1.getId())
                                     .name(account1.getName())
