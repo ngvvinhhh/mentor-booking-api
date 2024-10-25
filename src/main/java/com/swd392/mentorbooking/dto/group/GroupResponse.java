@@ -1,7 +1,6 @@
 package com.swd392.mentorbooking.dto.group;
 
 
-import com.swd392.mentorbooking.entity.Account;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
