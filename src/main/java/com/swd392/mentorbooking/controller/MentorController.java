@@ -127,12 +127,12 @@ public class MentorController {
         return mentorService.getAllBooking();
     }
 
-    @GetMapping("/booking/approve/{bookingId}")
+    @PostMapping("/booking/approve/{bookingId}")
     public Response<BookingResponse> approveBooking(@PathVariable Long bookingId) {
         return mentorService.approveBooking(bookingId);
     }
 
-    @GetMapping("/booking/reject/{bookingId}")
+    @PostMapping("/booking/reject/{bookingId}")
     public Response<BookingResponse> rejectBooking(@PathVariable Long bookingId) {
         return mentorService.rejectBooking(bookingId);
     }

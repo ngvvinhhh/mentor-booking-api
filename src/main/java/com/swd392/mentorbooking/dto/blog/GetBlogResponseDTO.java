@@ -19,6 +19,8 @@ public class GetBlogResponseDTO {
 
     private String authorName;
 
+    private String authorAvatarUrl;
+
     private String image;
 
     private String title;

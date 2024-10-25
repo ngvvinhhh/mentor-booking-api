@@ -185,24 +185,5 @@ public class AccountService {
         return searchMentorResponseDTO;
     }
 
-    // ** WEBSITE FEEDBACK SECTION ** //
-
-    public Response<WebsiteFeedbackRequestDTO> createWebsiteFeedback(WebsiteFeedbackRequestDTO websiteFeedbackRequestDTO) {
-        Account account = checkAccount();
-
-        WebsiteFeedback websiteFeedback = WebsiteFeedback.builder()
-                .account(account)
-                .description(websiteFeedbackRequestDTO.getDescription())
-                .websiteFeedbackEnum(websiteFeedbackRequestDTO.getWebsiteFeedbackEnum())
-                .createdAt(LocalDateTime.now())
-                .isDeleted(false)
-                .build();
-
-        websiteFeedbackRepository.save(websiteFeedback);
-
-        return new Response<>(201, "Feedback created successfully!", websiteFeedbackRequestDTO);
-    }
-
-
 }
 

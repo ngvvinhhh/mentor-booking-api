@@ -5,6 +5,7 @@ import com.swd392.mentorbooking.dto.blog.*;
 import com.swd392.mentorbooking.entity.Account;
 import com.swd392.mentorbooking.entity.Blog;
 import com.swd392.mentorbooking.entity.Comment;
+import com.swd392.mentorbooking.entity.Enum.BlogCategoryEnum;
 import com.swd392.mentorbooking.exception.ErrorCode;
 import com.swd392.mentorbooking.exception.ForbiddenException;
 import com.swd392.mentorbooking.exception.auth.AuthAppException;
@@ -142,29 +143,7 @@ public class BlogService {
         List<GetBlogResponseDTO> data = new ArrayList<>();
 
         for (Blog blog : allBlogs) {
-            List<GetCommentResponseDTO> comments = new ArrayList<>();
-            for (Comment comment : blog.getComments()) {
-                GetCommentResponseDTO getCommentResponseDTO = GetCommentResponseDTO.builder()
-                        .id(comment.getId())
-                        .authorId(comment.getAccount().getId())
-                        .authorName(comment.getAccount().getName())
-                        .description(comment.getDescription())
-                        .build();
-                comments.add(getCommentResponseDTO);
-            }
-            GetBlogResponseDTO getBlogResponseDTO = GetBlogResponseDTO.builder()
-                    .id(blog.getId())
-                    .authorId(blog.getAccount().getId())
-                    .authorName(blog.getAccount().getName())
-                    .title(blog.getTitle())
-                    .image(blog.getImage())
-                    .category(blog.getBlogCategoryEnum())
-                    .description(blog.getDescription())
-                    .likeCount(blog.getLikeCount())
-                    .createdAt(blog.getCreatedAt())
-                    .isDeleted(blog.getIsDeleted())
-                    .comments(comments)
-                    .build();
+            GetBlogResponseDTO getBlogResponseDTO = returnOneBlogReponseData(blog);
             data.add(getBlogResponseDTO);
         }
 
@@ -175,7 +154,7 @@ public class BlogService {
         }
 
         //Response message
-        String message = "Retrieve topics successfully!";
+        String message = "Retrieve blogs successfully!";
         return new Response<>(200, message, data);
     }
 
@@ -189,31 +168,7 @@ public class BlogService {
             return new Response<>(200, message, null);
         }
 
-
-
-        List<GetCommentResponseDTO> comments = new ArrayList<>();
-        for (Comment comment : blog.getComments()) {
-            GetCommentResponseDTO getCommentResponseDTO = GetCommentResponseDTO.builder()
-                    .id(comment.getId())
-                    .authorId(comment.getAccount().getId())
-                    .authorName(comment.getAccount().getName())
-                    .description(comment.getDescription())
-                    .build();
-            comments.add(getCommentResponseDTO);
-        }
-        GetBlogResponseDTO data = GetBlogResponseDTO.builder()
-                .id(blog.getId())
-                .authorId(blog.getAccount().getId())
-                .authorName(blog.getAccount().getName())
-                .title(blog.getTitle())
-                .image(blog.getImage())
-                .category(blog.getBlogCategoryEnum())
-                .description(blog.getDescription())
-                .likeCount(blog.getLikeCount())
-                .createdAt(blog.getCreatedAt())
-                .isDeleted(blog.getIsDeleted())
-                .comments(comments)
-                .build();
+        GetBlogResponseDTO data = returnOneBlogReponseData(blog);
 
         if (data == null) {
             //Response message
@@ -222,7 +177,7 @@ public class BlogService {
         }
 
         //Response message
-        String message = "Retrieve topics successfully!";
+        String message = "Retrieve blogs successfully!";
         return new Response<>(200, message, data);
     }
 
@@ -236,29 +191,7 @@ public class BlogService {
         List<GetBlogResponseDTO> data = new ArrayList<>();
 
         for (Blog blog : allBlogs) {
-            List<GetCommentResponseDTO> comments = new ArrayList<>();
-            for (Comment comment : blog.getComments()) {
-                GetCommentResponseDTO getCommentResponseDTO = GetCommentResponseDTO.builder()
-                        .id(comment.getId())
-                        .authorId(comment.getAccount().getId())
-                        .authorName(comment.getAccount().getName())
-                        .description(comment.getDescription())
-                        .build();
-                comments.add(getCommentResponseDTO);
-            }
-            GetBlogResponseDTO getBlogResponseDTO = GetBlogResponseDTO.builder()
-                    .id(blog.getId())
-                    .authorId(blog.getAccount().getId())
-                    .authorName(blog.getAccount().getName())
-                    .title(blog.getTitle())
-                    .image(blog.getImage())
-                    .category(blog.getBlogCategoryEnum())
-                    .description(blog.getDescription())
-                    .likeCount(blog.getLikeCount())
-                    .createdAt(blog.getCreatedAt())
-                    .isDeleted(blog.getIsDeleted())
-                    .comments(comments)
-                    .build();
+            GetBlogResponseDTO getBlogResponseDTO = returnOneBlogReponseData(blog);
             data.add(getBlogResponseDTO);
         }
         if (data.isEmpty()) {
@@ -268,8 +201,92 @@ public class BlogService {
         }
 
         //Response message
-        String message = "Retrieve topics successfully!";
+        String message = "Retrieve blogs successfully!";
         return new Response<>(200, message, data);
+    }
 
+    public Response<List<GetBlogResponseDTO>> getFeaturedBlog() {
+        // Get data
+        List<Blog> allBlogs = blogRepository.findRandomBlogs();
+
+        List<GetBlogResponseDTO> data = new ArrayList<>();
+
+        for (Blog blog : allBlogs) {
+            GetBlogResponseDTO getBlogResponseDTO = returnOneBlogReponseData(blog);
+            data.add(getBlogResponseDTO);
+        }
+
+        if (data.isEmpty()) {
+            //Response message
+            String message = "No blog were found!";
+            return new Response<>(200, message, data);
+        }
+
+        //Response message
+        String message = "Retrieve 4 random blogs successfully!";
+        return new Response<>(200, message, data);
+    }
+
+    public Response<GetBlogResponseDTO> getMostCommentedBlog() {
+
+        Blog blog = blogRepository.findBlogWithMostComments().orElse(null);
+
+        if (blog == null) {
+            return new Response<>(404, "There is no blog with that such request!", null);
+        }
+
+        GetBlogResponseDTO data = returnOneBlogReponseData(blog);
+
+        //Response message
+        String message = "Retrieve blogs successfully!";
+        return new Response<>(200, message, data);
+    }
+
+    private static GetBlogResponseDTO returnOneBlogReponseData(Blog blog) {
+        List<GetCommentResponseDTO> comments = new ArrayList<>();
+        for (Comment comment : blog.getComments()) {
+            GetCommentResponseDTO getCommentResponseDTO = GetCommentResponseDTO.builder()
+                    .id(comment.getId())
+                    .authorId(comment.getAccount().getId())
+                    .authorName(comment.getAccount().getName())
+                    .authorAvatarUrl(comment.getAccount().getAvatar())
+                    .description(comment.getDescription())
+                    .build();
+            comments.add(getCommentResponseDTO);
+        }
+        GetBlogResponseDTO data = GetBlogResponseDTO.builder()
+                .id(blog.getId())
+                .authorId(blog.getAccount().getId())
+                .authorName(blog.getAccount().getName())
+                .authorAvatarUrl(blog.getAccount().getAvatar())
+                .title(blog.getTitle())
+                .image(blog.getImage())
+                .category(blog.getBlogCategoryEnum())
+                .description(blog.getDescription())
+                .likeCount(blog.getLikeCount())
+                .createdAt(blog.getCreatedAt())
+                .isDeleted(blog.getIsDeleted())
+                .comments(comments)
+                .build();
+        return data;
+    }
+
+    public Response<List<GetBlogResponseDTO>> getBlogsByCategory(BlogCategoryEnum category) {
+        // Get data
+        List<Blog> blogs = blogRepository.findBlogsByBlogCategoryEnum(category);
+
+        if (blogs.isEmpty()) {
+            return new Response<>(200, "No blogs with category " + category + " found!", null);
+        }
+        List<GetBlogResponseDTO> data = new ArrayList<>();
+
+        for (Blog blog : blogs) {
+            GetBlogResponseDTO getBlogResponseDTO = returnOneBlogReponseData(blog);
+            data.add(getBlogResponseDTO);
+        }
+
+        //Response message
+        String message = "Retrieve blogs successfully!";
+        return new Response<>(200, message, data);
     }
 }

@@ -15,5 +15,7 @@ public class GetCommentResponseDTO {
 
     private String authorName;
 
+    private String authorAvatarUrl;
+
     private String description;
 }
