@@ -18,6 +18,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,7 +54,9 @@ public class NotificationService {
                         notification.getId(),
                         notification.getMessage(),
                         notification.getDate(),
-                        notification.getStatus()))
+                        notification.getStatus(),
+                        Optional.ofNullable(notification.getBooking()).map(Booking::getBookingId).orElse(null),
+                        Optional.ofNullable(notification.getInvitation()).map(Invitation::getId).orElse(null)))
                 .collect(Collectors.toList());
 
         return new Response<>(200, "Notifications retrieved successfully", notificationResponses);
