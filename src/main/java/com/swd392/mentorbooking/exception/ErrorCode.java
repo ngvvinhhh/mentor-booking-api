@@ -14,6 +14,7 @@ public enum ErrorCode {
     USER_NOT_FOUND(1004, "User not found", HttpStatus.NOT_FOUND),
     PASSWORD_INVALID(1005, "Password must be at least 8 characters", HttpStatus.BAD_REQUEST),
     TOKEN_INVALID(1006, "Invalid token", HttpStatus.BAD_REQUEST),
+    TOKEN_EXPIRED(1021, "Token has expired", HttpStatus.BAD_REQUEST),
     ACCOUNT_NOT_VERIFY(1007, "This account has not been verified", HttpStatus.BAD_REQUEST),
     INTERNAL_SERVER_ERROR(1008, "Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR),
     OLD_PASSWORD_INCORRECT(1009, "Old password incorrect", HttpStatus.BAD_REQUEST),

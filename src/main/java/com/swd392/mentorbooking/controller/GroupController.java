@@ -1,6 +1,5 @@
 package com.swd392.mentorbooking.controller;
 
-import com.swd392.mentorbooking.dto.booking.BookingResponse;
 import com.swd392.mentorbooking.dto.invititation.AcceptInviteRequest;
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.group.*;

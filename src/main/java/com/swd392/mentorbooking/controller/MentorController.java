@@ -3,10 +3,6 @@ package com.swd392.mentorbooking.controller;
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.achievement.CreateAchievementRequestDTO;
 import com.swd392.mentorbooking.dto.achievement.CreateAchievementResponseDTO;
-import com.swd392.mentorbooking.dto.blog.CreateBlogRequestDTO;
-import com.swd392.mentorbooking.dto.blog.CreateBlogRespnseDTO;
-import com.swd392.mentorbooking.dto.blog.UpdateBlogRequestDTO;
-import com.swd392.mentorbooking.dto.blog.UpdateBlogResponseDTO;
 import com.swd392.mentorbooking.dto.booking.BookingListResponseDTO;
 import com.swd392.mentorbooking.dto.booking.BookingResponse;
 import com.swd392.mentorbooking.dto.mentor.*;
@@ -56,25 +52,6 @@ public class MentorController {
         return mentorService.updateService(serviceId, updateServiceRequestDTO);
     }
 
-    // ** BLOG SECTION ** //
-
-    // Create a blog
-    @PostMapping("/blog/create")
-    public Response<CreateBlogRespnseDTO> createBlog(@Valid @RequestBody CreateBlogRequestDTO createBlogRequestDTO) {
-        return mentorService.createBlog(createBlogRequestDTO);
-    }
-
-    // Update a blog
-    @PutMapping("/blog/update/{blogId}")
-    public Response<UpdateBlogResponseDTO> updateService(@PathVariable Long blogId, @Valid @RequestBody UpdateBlogRequestDTO updateServiceRequestDTO) {
-        return mentorService.updateBlog(blogId, updateServiceRequestDTO);
-    }
-
-    @DeleteMapping("/blog/delete/{blogId}")
-    public Response<UpdateBlogResponseDTO> deleteBlog(@PathVariable Long blogId) {
-        return mentorService.deleteBlog(blogId);
-    }
-
     // ** CV SECTION ** //
 
     // Create a CV
@@ -102,7 +79,7 @@ public class MentorController {
         return mentorService.getAllAvailableSpecialization();
     }
 
-    @PostMapping("/specialization/update")
+    @PutMapping("/specialization/update")
     public Response<UpdateSpecializationResponseDTO> updateSpecialization(@RequestBody UpdateSpecializationRequestDTO updateSpecializationRequestDTO) {
         return mentorService.updateSpecialization(updateSpecializationRequestDTO);
     }
@@ -114,7 +91,7 @@ public class MentorController {
         return mentorService.getAllAchievements();
     }
 
-    @GetMapping("/achievement/create")
+    @PostMapping("/achievement/create")
     public Response<CreateAchievementResponseDTO> createAchievement(@Valid @RequestBody CreateAchievementRequestDTO createAchievementRequestDTO) {
         return mentorService.createAchievement(createAchievementRequestDTO);
     }

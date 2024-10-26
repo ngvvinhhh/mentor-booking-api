@@ -1,5 +1,6 @@
 package com.swd392.mentorbooking.dto.blog;
 
+import com.swd392.mentorbooking.entity.Enum.BlogCategoryEnum;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,4 +19,6 @@ public class CreateBlogRequestDTO {
     private String description;
 
     private String image;
+
+    private BlogCategoryEnum blogCategoryEnum;
 }
