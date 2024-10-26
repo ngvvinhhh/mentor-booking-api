@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BlogService {
@@ -80,7 +81,8 @@ public class BlogService {
         if (updateBlogRequestDTO.getTitle() != null) blog.setTitle(updateBlogRequestDTO.getTitle());
         if (updateBlogRequestDTO.getDescription() != null) blog.setDescription(updateBlogRequestDTO.getDescription());
         if (updateBlogRequestDTO.getImage() != null) blog.setImage(updateBlogRequestDTO.getImage());
-        if (updateBlogRequestDTO.getBlogCategoryEnum() != null) blog.setBlogCategoryEnum(updateBlogRequestDTO.getBlogCategoryEnum());
+        if (updateBlogRequestDTO.getBlogCategoryEnum() != null)
+            blog.setBlogCategoryEnum(updateBlogRequestDTO.getBlogCategoryEnum());
 
         // Save and handle exceptions
         try {
@@ -143,7 +145,7 @@ public class BlogService {
         List<GetBlogResponseDTO> data = new ArrayList<>();
 
         for (Blog blog : allBlogs) {
-            GetBlogResponseDTO getBlogResponseDTO = returnOneBlogReponseData(blog);
+            GetBlogResponseDTO getBlogResponseDTO = returnOneBlogResponseData(blog);
             data.add(getBlogResponseDTO);
         }
 
@@ -168,7 +170,7 @@ public class BlogService {
             return new Response<>(200, message, null);
         }
 
-        GetBlogResponseDTO data = returnOneBlogReponseData(blog);
+        GetBlogResponseDTO data = returnOneBlogResponseData(blog);
 
         if (data == null) {
             //Response message
@@ -191,7 +193,7 @@ public class BlogService {
         List<GetBlogResponseDTO> data = new ArrayList<>();
 
         for (Blog blog : allBlogs) {
-            GetBlogResponseDTO getBlogResponseDTO = returnOneBlogReponseData(blog);
+            GetBlogResponseDTO getBlogResponseDTO = returnOneBlogResponseData(blog);
             data.add(getBlogResponseDTO);
         }
         if (data.isEmpty()) {
@@ -212,7 +214,7 @@ public class BlogService {
         List<GetBlogResponseDTO> data = new ArrayList<>();
 
         for (Blog blog : allBlogs) {
-            GetBlogResponseDTO getBlogResponseDTO = returnOneBlogReponseData(blog);
+            GetBlogResponseDTO getBlogResponseDTO = returnOneBlogResponseData(blog);
             data.add(getBlogResponseDTO);
         }
 
@@ -235,26 +237,26 @@ public class BlogService {
             return new Response<>(404, "There is no blog with that such request!", null);
         }
 
-        GetBlogResponseDTO data = returnOneBlogReponseData(blog);
+        GetBlogResponseDTO data = returnOneBlogResponseData(blog);
 
         //Response message
         String message = "Retrieve blogs successfully!";
         return new Response<>(200, message, data);
     }
 
-    private static GetBlogResponseDTO returnOneBlogReponseData(Blog blog) {
-        List<GetCommentResponseDTO> comments = new ArrayList<>();
-        for (Comment comment : blog.getComments()) {
-            GetCommentResponseDTO getCommentResponseDTO = GetCommentResponseDTO.builder()
-                    .id(comment.getId())
-                    .authorId(comment.getAccount().getId())
-                    .authorName(comment.getAccount().getName())
-                    .authorAvatarUrl(comment.getAccount().getAvatar())
-                    .description(comment.getDescription())
-                    .build();
-            comments.add(getCommentResponseDTO);
-        }
-        GetBlogResponseDTO data = GetBlogResponseDTO.builder()
+    private static GetBlogResponseDTO returnOneBlogResponseData(Blog blog) {
+        List<GetCommentResponseDTO> comments = blog.getComments().stream()
+                .filter(comment -> !comment.isDeleted())
+                .map(comment -> GetCommentResponseDTO.builder()
+                        .id(comment.getId())
+                        .authorId(comment.getAccount().getId())
+                        .authorName(comment.getAccount().getName())
+                        .authorAvatarUrl(comment.getAccount().getAvatar())
+                        .description(comment.getDescription())
+                        .build())
+                .collect(Collectors.toList());
+
+        return GetBlogResponseDTO.builder()
                 .id(blog.getId())
                 .authorId(blog.getAccount().getId())
                 .authorName(blog.getAccount().getName())
@@ -268,8 +270,8 @@ public class BlogService {
                 .isDeleted(blog.getIsDeleted())
                 .comments(comments)
                 .build();
-        return data;
     }
+
 
     public Response<List<GetBlogResponseDTO>> getBlogsByCategory(BlogCategoryEnum category) {
         // Get data
@@ -281,7 +283,7 @@ public class BlogService {
         List<GetBlogResponseDTO> data = new ArrayList<>();
 
         for (Blog blog : blogs) {
-            GetBlogResponseDTO getBlogResponseDTO = returnOneBlogReponseData(blog);
+            GetBlogResponseDTO getBlogResponseDTO = returnOneBlogResponseData(blog);
             data.add(getBlogResponseDTO);
         }
 
