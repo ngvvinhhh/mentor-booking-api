@@ -18,4 +18,8 @@ public class NotificationResponse {
     private Date date;
 
     private BookingStatus status;
+
+    private Long bookingId;
+
+    private Long invitationId;
 }
