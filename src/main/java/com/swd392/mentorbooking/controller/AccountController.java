@@ -64,14 +64,4 @@ public class AccountController {
         return new Response<>(200, "Retrieve data successfully!", Arrays.stream(SpecializationEnum.values()).toList());
     }
 
-    // ** WEBSITE FEEDBACK SECTION ** //
-
-    // Create website feedback
-    @PostMapping("/website/create-feedback")
-    public Response<WebsiteFeedbackRequestDTO> createWebsiteFeedback(@RequestBody WebsiteFeedbackRequestDTO websiteFeedbackEnum) {
-        return accountService.createWebsiteFeedback(websiteFeedbackEnum);
-    }
-
-    // ** WEBSITE FEEDBACK SECTION ** //
-
 }

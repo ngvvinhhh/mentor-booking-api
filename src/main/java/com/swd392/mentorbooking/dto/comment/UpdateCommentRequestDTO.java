@@ -7,7 +7,6 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateCommentRequestDTO {
-    private long blogId;
+public class UpdateCommentRequestDTO {
     private String comment;
 }

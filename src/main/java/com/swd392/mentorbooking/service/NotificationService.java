@@ -6,17 +6,11 @@ import com.swd392.mentorbooking.entity.Account;
 import com.swd392.mentorbooking.entity.Booking;
 import com.swd392.mentorbooking.entity.Invitation;
 import com.swd392.mentorbooking.entity.Notification;
-import com.swd392.mentorbooking.repository.InvitaionRepository;
 import com.swd392.mentorbooking.repository.NotificationRepository;
-import com.swd392.mentorbooking.repository.BookingRepository;
 import com.swd392.mentorbooking.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,12 +22,6 @@ public class NotificationService {
 
     @Autowired
     private AccountUtils accountUtils;
-
-    @Autowired
-    private BookingRepository bookingRepository;
-
-    @Autowired
-    private InvitaionRepository invitaionRepository;
 
     public Response<List<NotificationResponse>> getAllNotificationsForAccount() {
         // Lấy thông tin tài khoản hiện tại

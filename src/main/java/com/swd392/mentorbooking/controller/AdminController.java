@@ -4,14 +4,18 @@ import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.admin.AccountInfoAdmin;
 import com.swd392.mentorbooking.dto.auth.RegisterRequestDTO;
 import com.swd392.mentorbooking.dto.auth.RegisterResponseDTO;
+import com.swd392.mentorbooking.dto.websitefeedback.WebsiteFeedbackResponse;
 import com.swd392.mentorbooking.entity.Blog;
 import com.swd392.mentorbooking.entity.Booking;
 import com.swd392.mentorbooking.entity.Topic;
+import com.swd392.mentorbooking.entity.WebsiteFeedback;
 import com.swd392.mentorbooking.service.AdminService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +24,7 @@ import java.util.List;
 @RequestMapping("/admin")
 @CrossOrigin("**")
 @SecurityRequirement(name = "api")
+@PreAuthorize("hasAnyAuthority('ADMIN')")
 public class AdminController {
 
     @Autowired
@@ -68,5 +73,15 @@ public class AdminController {
     @GetMapping("/blogs")
     public Response<List<Blog>> getAllBlog() {
         return adminService.getAllBlog();
+    }
+
+    // ** WEBSITE FEEDBACK SECTION ** //
+
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @GetMapping("/website-feedbacks")
+    @Operation(summary = "Lấy tất cả website feedbacks ra cho admin đọc",
+            description = "Phương thức này trả về các blog kể cả đã bị xoá cho admin đọc.")
+    public Response<List<WebsiteFeedbackResponse>> getAllFeedbackWebsite() {
+        return adminService.getAllFeedbackWebsite();
     }
 }

@@ -5,6 +5,7 @@ import com.swd392.mentorbooking.dto.admin.AccountInfoAdmin;
 import com.swd392.mentorbooking.dto.auth.RegisterRequestDTO;
 import com.swd392.mentorbooking.dto.auth.RegisterResponseDTO;
 
+import com.swd392.mentorbooking.dto.websitefeedback.WebsiteFeedbackResponse;
 import com.swd392.mentorbooking.entity.*;
 import com.swd392.mentorbooking.entity.Enum.AccountStatusEnum;
 import com.swd392.mentorbooking.entity.Enum.RoleEnum;
@@ -44,6 +45,9 @@ public class AdminService {
 
     @Autowired
     private WalletRepository walletRepository;
+
+    @Autowired
+    private WebsiteFeedbackRepository websiteFeedbackRepository;
 
     @Autowired
     @Lazy
@@ -116,6 +120,22 @@ public class AdminService {
         //Response message
         String message = "Retrieve topics successfully!";
         return new Response<>(200, message, data);
+    }
+
+    public Response<List<WebsiteFeedbackResponse>> getAllFeedbackWebsite() {
+        // Lấy tất cả phản hồi không bị xóa (isDeleted = false)
+        List<WebsiteFeedback> feedbackList = websiteFeedbackRepository.findAll();
+
+        // Chuyển đổi danh sách phản hồi thành danh sách WebsiteFeedbackResponse
+        List<WebsiteFeedbackResponse> feedbackResponses = feedbackList.stream()
+                .map(feedback -> new WebsiteFeedbackResponse(
+                        feedback.getId(),
+                        feedback.getDescription(),
+                        feedback.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
+
+        return new Response<>(200, "Successfully fetched all feedbacks!", feedbackResponses);
     }
 
     public Response<AccountInfoAdmin> deleteAccount(Long accountId) {
