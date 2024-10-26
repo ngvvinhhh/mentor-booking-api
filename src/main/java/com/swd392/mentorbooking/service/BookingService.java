@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -122,25 +123,32 @@ public class BookingService {
 
         // Get group that contains this account
         Group group = groupRepository.findByStudentsContaining(account).orElse(null);
+        if (group == null || group.getBookings() == null) {
+            return new Response<>(404, "No group or bookings found for the account.", Collections.emptyList());
+        }
 
         // Filter and map the bookings to DTOs
         List<UpcomingBookingResponseDTO> data = group.getBookings().stream()
                 .filter(booking -> booking.getStatus() == BookingStatus.PROCESSING || booking.getStatus() == BookingStatus.SUCCESSFUL)
-                .map(booking -> UpcomingBookingResponseDTO.builder()
-                        .bookingId(booking.getBookingId())
-                        .bookingDate(booking.getSchedule().getDate().toString())
-                        .startTime(booking.getSchedule().getStartTime().toString())
-                        .endTime(booking.getSchedule().getEndTime().toString())
-                        .location(booking.getLocation())
-                        .locationNote(booking.getLocationNote())
-                        .mentorId(booking.getAccount().getId())
-                        .mentorName(booking.getAccount().getName())
-                        .bookingStatus(booking.getStatus())
-                        .build())
+                .map(booking -> {
+                    Schedule schedule = booking.getSchedule();
+                    return UpcomingBookingResponseDTO.builder()
+                            .bookingId(booking.getBookingId())
+                            .bookingDate(schedule != null ? schedule.getDate().toString() : "N/A")
+                            .startTime(schedule != null ? schedule.getStartTime().toString() : "N/A")
+                            .endTime(schedule != null ? schedule.getEndTime().toString() : "N/A")
+                            .location(booking.getLocation() != null ? booking.getLocation() : "N/A")
+                            .locationNote(booking.getLocationNote() != null ? booking.getLocationNote() : "N/A")
+                            .mentorId(booking.getAccount() != null ? booking.getAccount().getId() : null)
+                            .mentorName(booking.getAccount() != null ? booking.getAccount().getName() : "N/A")
+                            .bookingStatus(booking.getStatus())
+                            .build();
+                })
                 .collect(Collectors.toList());
 
         return new Response<>(200, "Retrieve booking successfully!", data);
     }
+
 
     public Account checkAccount() {
         // Get the current account

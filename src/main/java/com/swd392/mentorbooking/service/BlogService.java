@@ -4,7 +4,6 @@ import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.blog.*;
 import com.swd392.mentorbooking.entity.Account;
 import com.swd392.mentorbooking.entity.Blog;
-import com.swd392.mentorbooking.entity.Comment;
 import com.swd392.mentorbooking.entity.Enum.BlogCategoryEnum;
 import com.swd392.mentorbooking.exception.ErrorCode;
 import com.swd392.mentorbooking.exception.ForbiddenException;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -185,27 +185,24 @@ public class BlogService {
 
     public Response<List<GetBlogResponseDTO>> getAllBlogOfCurrentUser() {
         Account account = checkAccount();
+
         // Get data
         List<Blog> allBlogs = blogRepository.findAllByAccountAndIsDeletedFalse(account);
+
         if (allBlogs.isEmpty()) {
-            return new Response<>(200, "No blogs found!", null);
-        }
-        List<GetBlogResponseDTO> data = new ArrayList<>();
-
-        for (Blog blog : allBlogs) {
-            GetBlogResponseDTO getBlogResponseDTO = returnOneBlogResponseData(blog);
-            data.add(getBlogResponseDTO);
-        }
-        if (data.isEmpty()) {
-            //Response message
-            String message = "You have not posted any blog!";
-            return new Response<>(200, message, data);
+            return new Response<>(200, "No blogs found!", Collections.emptyList());
         }
 
-        //Response message
+        // Convert blogs to DTOs
+        List<GetBlogResponseDTO> data = allBlogs.stream()
+                .map(this::returnOneBlogResponseData)
+                .collect(Collectors.toList());
+
+        // Response message
         String message = "Retrieve blogs successfully!";
         return new Response<>(200, message, data);
     }
+
 
     public Response<List<GetBlogResponseDTO>> getFeaturedBlog() {
         // Get data
@@ -244,7 +241,7 @@ public class BlogService {
         return new Response<>(200, message, data);
     }
 
-    private static GetBlogResponseDTO returnOneBlogResponseData(Blog blog) {
+    private GetBlogResponseDTO returnOneBlogResponseData(Blog blog) {
         List<GetCommentResponseDTO> comments = blog.getComments().stream()
                 .filter(comment -> !comment.isDeleted())
                 .map(comment -> GetCommentResponseDTO.builder()
