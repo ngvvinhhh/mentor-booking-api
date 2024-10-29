@@ -44,9 +44,6 @@ public class MentorService {
     private ServiceRepository serviceRepository;
 
     @Autowired
-    private BlogRepository blogRepository;
-
-    @Autowired
     private AchievementRepository achievementRepository;
 
     @Autowired
@@ -54,9 +51,6 @@ public class MentorService {
 
     @Autowired
     private BookingRepository bookingRepository;
-
-    @Autowired
-    private GroupRepository groupRepository;
 
     @Autowired NotificationRepository notificationRepository;
 
@@ -215,7 +209,6 @@ public class MentorService {
 
         return new Response<>(202, "Specialization updated successfully!", response);
     }
-
 
     // ** ACHIEVEMENT SECTION ** //
 

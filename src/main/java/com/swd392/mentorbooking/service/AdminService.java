@@ -5,6 +5,8 @@ import com.swd392.mentorbooking.dto.admin.AccountInfoAdmin;
 import com.swd392.mentorbooking.dto.auth.RegisterRequestDTO;
 import com.swd392.mentorbooking.dto.auth.RegisterResponseDTO;
 
+import com.swd392.mentorbooking.dto.blog.GetBlogResponseDTO;
+import com.swd392.mentorbooking.dto.blog.GetCommentResponseDTO;
 import com.swd392.mentorbooking.dto.websitefeedback.WebsiteFeedbackResponse;
 import com.swd392.mentorbooking.entity.*;
 import com.swd392.mentorbooking.entity.Enum.AccountStatusEnum;
@@ -22,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -104,13 +107,53 @@ public class AdminService {
         return new Response<>(200, message, data);
     }
 
-    public Response<List<Blog>> getAllBlog() {
+    public Response<List<GetBlogResponseDTO>> viewAllBlogs() {
         // Get data
-        List<Blog> data = blogRepository.findAll();
+        List<Blog> allBlogs = blogRepository.findAllByIsDeletedFalse();
+        List<GetBlogResponseDTO> data = new ArrayList<>();
+
+        for (Blog blog : allBlogs) {
+            GetBlogResponseDTO getBlogResponseDTO = returnOneBlogResponseData(blog);
+            data.add(getBlogResponseDTO);
+        }
+
+        if (data.isEmpty()) {
+            //Response message
+            String message = "No blog were found!";
+            return new Response<>(200, message, data);
+        }
 
         //Response message
-        String message = "Retrieve topics successfully!";
+        String message = "Retrieve blogs successfully!";
         return new Response<>(200, message, data);
+    }
+
+    private GetBlogResponseDTO returnOneBlogResponseData(Blog blog) {
+        List<GetCommentResponseDTO> comments = blog.getComments().stream()
+                .filter(comment -> !comment.isDeleted())
+                .map(comment -> GetCommentResponseDTO.builder()
+                        .id(comment.getId())
+                        .authorId(comment.getAccount().getId())
+                        .authorName(comment.getAccount().getName())
+                        .authorAvatarUrl(comment.getAccount().getAvatar())
+                        .description(comment.getDescription())
+                        .build())
+                .collect(Collectors.toList());
+
+        return GetBlogResponseDTO.builder()
+                .id(blog.getId())
+                .authorId(blog.getAccount().getId())
+                .authorName(blog.getAccount().getName())
+                .authorAvatarUrl(blog.getAccount().getAvatar())
+                .title(blog.getTitle())
+                .image(blog.getImage())
+                .category(blog.getBlogCategoryEnum())
+                .description(blog.getDescription())
+                .likeCount(blog.getLikeCount())
+                .createdAt(blog.getCreatedAt())
+                .isDeleted(blog.getIsDeleted())
+                .comments(comments)
+                .build();
     }
 
     public Response<List<Booking>> getAllBooking() {

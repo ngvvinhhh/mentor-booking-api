@@ -14,7 +14,9 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateScheduleRequestDTO {
+
     private Date date;
+
     @JsonProperty("startFrom")
     private LocalTime startFrom;
 
