@@ -396,38 +396,29 @@ public class MentorService {
 
     @Transactional
     public Response<BookingResponse> approveBooking(Long bookingId) {
-        // Get current account (mentor)
         Account mentorAccount = accountUtils.getCurrentAccount();
         if (mentorAccount == null) return new Response<>(401, "Please login first", null);
 
-        // Find the booking by ID
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Booking not found with id: " + bookingId));
 
-        // Check if the booking is currently in PROCESSING status
         if (!booking.getStatus().equals(BookingStatus.PROCESSING)) {
             return new Response<>(400, "Booking cannot be approved as it is not in processing status.", null);
         }
 
-        // Update booking status to SUCCESSFUL
+
         booking.setStatus(BookingStatus.SUCCESSFUL);
         bookingRepository.save(booking);
 
-        // Create notification for the approval
-        Notification notification = new Notification();
-        notification.setMessage(booking.getStatus().getMessage());
-        notification.setDate(booking.getSchedule().getDate());
-        notification.setStatus(booking.getStatus());
-        notification.setAccount(booking.getAccount());
-        notification.setBooking(booking);
-        notification.setCreatedAt(LocalDateTime.now());
-        notification.setIsDeleted(false);
+        Notification notification = notificationRepository.findByBookingAndAccount(booking, mentorAccount)
+                .orElse(new Notification());
 
-        // Save updated booking and notification to the database
+        notification.setMessage(booking.getStatus().getMessage());
+        notification.setStatus(booking.getStatus());
 
         notificationRepository.save(notification);
 
-        // Create response object
+        // Tạo đối tượng phản hồi
         BookingResponse bookingResponse = BookingResponse.builder()
                 .bookingId(booking.getBookingId())
                 .location(booking.getLocation())
@@ -440,6 +431,7 @@ public class MentorService {
 
         return new Response<>(200, "Booking approved successfully!", bookingResponse);
     }
+
 
     @Transactional
     public Response<BookingResponse> rejectBooking(Long bookingId) {
@@ -460,15 +452,11 @@ public class MentorService {
         booking.setStatus(BookingStatus.DECLINED);
         bookingRepository.save(booking);
 
-        // Create notification for the approval
-        Notification notification = new Notification();
+        Notification notification = notificationRepository.findByBookingAndAccount(booking, mentorAccount)
+                .orElse(new Notification());
+
         notification.setMessage(booking.getStatus().getMessage());
-        notification.setDate(booking.getSchedule().getDate());
-        notification.setAccount(booking.getAccount());
         notification.setStatus(booking.getStatus());
-        notification.setBooking(booking);
-        notification.setCreatedAt(LocalDateTime.now());
-        notification.setIsDeleted(false);
 
         // Save updated booking and notification to the database
 
