@@ -411,6 +411,7 @@ public class MentorService {
 
         // Update booking status to SUCCESSFUL
         booking.setStatus(BookingStatus.SUCCESSFUL);
+        bookingRepository.save(booking);
 
         // Create notification for the approval
         Notification notification = new Notification();
@@ -423,7 +424,7 @@ public class MentorService {
         notification.setIsDeleted(false);
 
         // Save updated booking and notification to the database
-        bookingRepository.save(booking);
+
         notificationRepository.save(notification);
 
         // Create response object
@@ -457,6 +458,7 @@ public class MentorService {
 
         // Update booking status to DECLINED
         booking.setStatus(BookingStatus.DECLINED);
+        bookingRepository.save(booking);
 
         // Create notification for the approval
         Notification notification = new Notification();
@@ -469,7 +471,7 @@ public class MentorService {
         notification.setIsDeleted(false);
 
         // Save updated booking and notification to the database
-        bookingRepository.save(booking);
+
         notificationRepository.save(notification);
 
         // Create response object
