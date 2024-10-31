@@ -19,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin")
@@ -36,6 +37,24 @@ public class AdminController {
     @GetMapping("/accounts")
     public Response<List<AccountInfoAdmin>> getAllAccountByRole(@RequestParam(value = "role", required = false) String role) {
         return adminService.getAllAccountByRole(role);
+    }
+
+    @GetMapping("/user-counts")
+    public Response<Map<String, Long>> getUserCounts() {
+        return adminService.getUserCounts();
+    }
+
+    @GetMapping("/top-users-payment")
+    public Response<List<Map<String, Object>>> getStudentsWithTotalPaymentsResponse() {
+        List<Map<String, Object>> studentPayments = adminService.getStudentsOrderedByTotalPayments();
+        String message = "Retrieved student accounts with total payments successfully!";
+        return new Response<>(200, message, studentPayments);
+    }
+
+    @GetMapping("/specialization-counts")
+    public Response<Map<String, Object>> getSpecializationCounts() {
+        Map<String, Object> data = adminService.getSpecializationCounts();
+        return new Response<>(200, "Retrieved mentor and specialization counts successfully!", data);
     }
 
     // Delete account

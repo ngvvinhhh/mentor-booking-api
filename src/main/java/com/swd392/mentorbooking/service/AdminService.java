@@ -8,10 +8,7 @@ import com.swd392.mentorbooking.dto.auth.RegisterResponseDTO;
 import com.swd392.mentorbooking.dto.booking.BookingResponse;
 import com.swd392.mentorbooking.dto.websitefeedback.WebsiteFeedbackResponse;
 import com.swd392.mentorbooking.entity.*;
-import com.swd392.mentorbooking.entity.Enum.AccountStatusEnum;
-import com.swd392.mentorbooking.entity.Enum.BookingStatus;
-import com.swd392.mentorbooking.entity.Enum.RoleEnum;
-import com.swd392.mentorbooking.entity.Enum.WalletLogType;
+import com.swd392.mentorbooking.entity.Enum.*;
 import com.swd392.mentorbooking.exception.ErrorCode;
 import com.swd392.mentorbooking.exception.ForbiddenException;
 import com.swd392.mentorbooking.exception.auth.AuthAppException;
@@ -27,7 +24,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -109,6 +109,31 @@ public class AdminService {
         }
     }
 
+    public Response<Map<String, Long>> getUserCounts() {
+        // Tính tổng số account không bị xóa
+        long totalActiveUsers = accountRepository.countActiveUsers() - 1; // trừ 1 tài khoản admin
+
+        // Tính số lượng account có role 'student' và không bị xóa
+        long studentCount = accountRepository.countByRoleAndNotDeleted(RoleEnum.STUDENT);
+
+        // Tính số lượng account có role 'mentor' và không bị xóa
+        long mentorCount = accountRepository.countByRoleAndNotDeleted(RoleEnum.MENTOR);
+
+        // Tính tổng số lượng booking không bị xóa
+        long totalBookings = bookingRepository.countActiveBookings();
+
+        // Tạo một Map để chứa thông tin
+        Map<String, Long> userCounts = new HashMap<>();
+        userCounts.put("totalUsers", totalActiveUsers);
+        userCounts.put("studentCount", studentCount);
+        userCounts.put("mentorCount", mentorCount);
+        userCounts.put("totalBookings", totalBookings);
+
+        // Trả về phản hồi
+        String message = "Retrieved user counts successfully!";
+        return new Response<>(200, message, userCounts);
+    }
+
     public Response<List<Topic>> getAllTopic() {
         // Get data
         List<Topic> data = topicRepository.findAll();
@@ -134,6 +159,50 @@ public class AdminService {
         //Response message
         String message = "Retrieve topics successfully!";
         return new Response<>(200, message, data);
+    }
+
+    public List<Map<String, Object>> getStudentsOrderedByTotalPayments() {
+        // Lấy danh sách sinh viên cùng tổng số tiền thanh toán
+        List<Account> results = accountRepository.findStudentsOrderedByTotalPayments(RoleEnum.STUDENT);
+        List<Map<String, Object>> studentPaymentInfo = new ArrayList<>();
+
+        for (Account account : results) {
+            // Truy cập vào total từ Wallet
+            Double totalPayments = account.getWallet() != null ? account.getWallet().getTotal() : 0.0;
+
+            Map<String, Object> info = new HashMap<>();
+            info.put("accountId", account.getId());
+            info.put("accountName", account.getName()); // Giả sử có trường name trong Account
+            info.put("email", account.getEmail()); // Lấy email từ Account
+            info.put("avatar", account.getAvatar()); // Lấy avatar từ Account
+            info.put("totalPayments", totalPayments);
+
+            studentPaymentInfo.add(info);
+        }
+
+        // Sắp xếp danh sách theo tổng số tiền thanh toán
+        studentPaymentInfo.sort((o1, o2) -> Double.compare((Double) o2.get("totalPayments"), (Double) o1.get("totalPayments")));
+
+        return studentPaymentInfo;
+    }
+
+    public Map<String, Object> getSpecializationCounts() {
+
+        // Lấy số lượng theo specialization
+        List<Object[]> specializationCounts = accountRepository.countBySpecialization();
+        Map<String, Integer> specializationMap = new HashMap<>();
+
+        for (Object[] result : specializationCounts) {
+            SpecializationEnum specialization = (SpecializationEnum) result[0];
+            Long count = (Long) result[1];
+            specializationMap.put(specialization.name(), count.intValue());
+        }
+
+        // Tạo kết quả trả về
+        Map<String, Object> data = new HashMap<>();
+        data.put("specializationCounts", specializationMap);
+
+        return data;
     }
 
     public Response<List<WebsiteFeedbackResponse>> getAllFeedbackWebsite() {

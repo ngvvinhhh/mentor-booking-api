@@ -124,6 +124,7 @@ public class SemesterService {
 
         // Soft delete by setting isDeleted to true
         semester.setIsDeleted(true);
+        semester.setIsCurrentSemester(false);
 
         // Save semester with updated delete status
         try {
