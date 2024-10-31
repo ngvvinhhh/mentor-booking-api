@@ -21,6 +21,8 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
 
     Optional<Account> findFirstByEmail(String email);
 
+    Optional<Account> findByRole(RoleEnum role);
+
 
     Account findAccountByEmail(String email);
 }

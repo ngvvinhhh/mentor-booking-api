@@ -4,11 +4,11 @@ import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.admin.AccountInfoAdmin;
 import com.swd392.mentorbooking.dto.auth.RegisterRequestDTO;
 import com.swd392.mentorbooking.dto.auth.RegisterResponseDTO;
+import com.swd392.mentorbooking.dto.booking.BookingResponse;
 import com.swd392.mentorbooking.dto.websitefeedback.WebsiteFeedbackResponse;
 import com.swd392.mentorbooking.entity.Blog;
 import com.swd392.mentorbooking.entity.Booking;
 import com.swd392.mentorbooking.entity.Topic;
-import com.swd392.mentorbooking.entity.WebsiteFeedback;
 import com.swd392.mentorbooking.service.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -83,5 +83,15 @@ public class AdminController {
             description = "Phương thức này trả về các blog kể cả đã bị xoá cho admin đọc.")
     public Response<List<WebsiteFeedbackResponse>> getAllFeedbackWebsite() {
         return adminService.getAllFeedbackWebsite();
+    }
+
+    @PostMapping("/booking/complete/{bookingId}")
+    public Response<BookingResponse> approveBooking(@PathVariable Long bookingId) {
+        return adminService.completeBooking(bookingId);
+    }
+
+    @PostMapping("/booking/cancel/{bookingId}")
+    public Response<BookingResponse> rejectBooking(@PathVariable Long bookingId) {
+        return adminService.cancelBooking(bookingId);
     }
 }
