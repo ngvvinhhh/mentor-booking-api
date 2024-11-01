@@ -30,6 +30,8 @@ public class BookingService {
     private final GroupRepository groupRepository;
     private final NotificationRepository notificationRepository;
     private final AccountRepository accountRepository;
+    private final WalletRepository walletRepository;
+    private final ServiceRepository serviceRepository;
 
     @Autowired
     public BookingService(AccountUtils accountUtils,
@@ -37,13 +39,17 @@ public class BookingService {
                           ScheduleRepository scheduleRepository,
                           GroupRepository groupRepository,
                           NotificationRepository notificationRepository,
-                          AccountRepository accountRepository) {
+                          AccountRepository accountRepository,
+                          WalletRepository walletRepository,
+                          ServiceRepository serviceRepository) {
         this.accountUtils = accountUtils;
         this.bookingRepository = bookingRepository;
         this.scheduleRepository = scheduleRepository;
         this.groupRepository = groupRepository;
         this.notificationRepository = notificationRepository;
         this.accountRepository = accountRepository;
+        this.walletRepository = walletRepository;
+        this.serviceRepository = serviceRepository;
     }
 
     @Transactional
@@ -60,6 +66,22 @@ public class BookingService {
             throw new NotFoundException("Booking already exists with the same schedule and account!");
         }
 
+        Wallet wallet = walletRepository.findByAccount(account);
+        if (wallet == null) {
+            throw new NotFoundException("Wallet not found!!");
+        }
+
+        Services services = serviceRepository.findByAccount(schedule.getAccount());
+        if (services == null) {
+            throw new NotFoundException("Service not found!!");
+        }
+
+        if(wallet.getTotal() < services.getPrice()){
+            return new Response<>(400, "Insufficient balance to book this service.", null);
+        }
+
+
+
         Booking booking = createNewBooking(bookingRequest, account, group, schedule);
         bookingRepository.save(booking);
 
@@ -69,6 +91,8 @@ public class BookingService {
         BookingResponse bookingResponse = buildBookingResponse(booking, schedule);
         return new Response<>(200, "Booking created successfully!", bookingResponse);
     }
+
+
 
     public Response<List<UpcomingBookingResponseDTO>> viewUpcomingBookings() {
         Account account = checkAccount();

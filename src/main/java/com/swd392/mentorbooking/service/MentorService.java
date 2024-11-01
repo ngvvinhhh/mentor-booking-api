@@ -1,5 +1,6 @@
 package com.swd392.mentorbooking.service;
 
+
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.achievement.CreateAchievementRequestDTO;
 import com.swd392.mentorbooking.dto.achievement.CreateAchievementResponseDTO;
@@ -13,9 +14,7 @@ import com.swd392.mentorbooking.dto.service.CreateServiceResponseDTO;
 import com.swd392.mentorbooking.dto.service.UpdateServiceRequestDTO;
 import com.swd392.mentorbooking.dto.service.UpdateServiceResponseDTO;
 import com.swd392.mentorbooking.entity.*;
-import com.swd392.mentorbooking.entity.Enum.BookingStatus;
-import com.swd392.mentorbooking.entity.Enum.ScheduleStatus;
-import com.swd392.mentorbooking.entity.Enum.SpecializationEnum;
+import com.swd392.mentorbooking.entity.Enum.*;
 import com.swd392.mentorbooking.exception.ErrorCode;
 import com.swd392.mentorbooking.exception.auth.AuthAppException;
 import com.swd392.mentorbooking.exception.ForbiddenException;
@@ -58,7 +57,14 @@ public class MentorService {
     @Autowired
     private GroupRepository groupRepository;
 
-    @Autowired NotificationRepository notificationRepository;
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private WalletRepository walletRepository;
+
+    @Autowired
+    private WalletLogRepository walletLogRepository;
 
     public Response<UpdateSocialLinkResponseDTO> updateSocialLink(UpdateSocialLinkRequestDTO updateSocialLinkRequestDTO) {
         // Check the current logged in account
@@ -406,6 +412,47 @@ public class MentorService {
             return new Response<>(400, "Booking cannot be approved as it is not in processing status.", null);
         }
 
+        Wallet wallet = walletRepository.findByAccount(booking.getAccount());
+        if (wallet == null) {
+            throw new NotFoundException("Wallet not found!!");
+        }
+
+        Account admin = accountRepository.findByRole(RoleEnum.ADMIN)
+                .orElseThrow(() -> new NotFoundException("Admin account not found"));
+
+        Wallet walletAdmin = walletRepository.findByAccount(admin);
+        if (walletAdmin == null) {
+            throw new NotFoundException("Wallet admin not found!!");
+        }
+
+        Services services = serviceRepository.findByAccount(mentorAccount);
+        if (services == null) {
+            throw new NotFoundException("Service not found!!");
+        }
+
+        //Wallet log for student
+        WalletLog walletLogStudent = new WalletLog();
+        walletLogStudent.setWallet(wallet);
+        walletLogStudent.setAmount(services.getPrice());
+        walletLogStudent.setFrom(booking.getAccount().getId());
+        walletLogStudent.setTo(admin.getId());
+        walletLogStudent.setTypeOfLog(WalletLogType.TRANSFER);
+        walletLogStudent.setCreatedAt(LocalDateTime.now());
+            walletLogRepository.save(walletLogStudent);
+
+        wallet.setTotal(wallet.getTotal() - services.getPrice());
+
+        //Wallet log for admin
+        WalletLog walletLogAdmin = new WalletLog();
+        walletLogAdmin.setWallet(walletAdmin);
+        walletLogAdmin.setAmount(services.getPrice());
+        walletLogAdmin.setFrom(booking.getAccount().getId());
+        walletLogAdmin.setTo(admin.getId());
+        walletLogAdmin.setTypeOfLog(WalletLogType.TRANSFER);
+        walletLogAdmin.setCreatedAt(LocalDateTime.now());
+        walletLogRepository.save(walletLogAdmin);
+
+        walletAdmin.setTotal(walletAdmin.getTotal() + services.getPrice());
 
         booking.setStatus(BookingStatus.SUCCESSFUL);
         bookingRepository.save(booking);
@@ -458,8 +505,6 @@ public class MentorService {
         notification.setMessage(booking.getStatus().getMessage());
         notification.setStatus(booking.getStatus());
 
-        // Save updated booking and notification to the database
-
         notificationRepository.save(notification);
 
         // Create response object
@@ -474,6 +519,37 @@ public class MentorService {
                 .build();
 
         return new Response<>(200, "Booking approved successfully!", bookingResponse);
+    }
+
+    @Transactional
+    public Response<String> withdrawFunds(Double amount) {
+        Account mentorAccount = accountUtils.getCurrentAccount();
+        if (mentorAccount == null) return new Response<>(401, "Please login first", null);
+
+        Wallet wallet = walletRepository.findByAccount(mentorAccount);
+        if (wallet == null) {
+            return new Response<>(404, "Wallet not found", null);
+        }
+
+        if (wallet.getTotal() < amount) {
+            return new Response<>(400, "Insufficient funds", null);
+        }
+
+        // Reduce the amount in the wallet
+        wallet.setTotal(wallet.getTotal() - amount);
+        walletRepository.save(wallet);
+
+        // Transaction Logging
+        WalletLog walletLog = new WalletLog();
+        walletLog.setWallet(wallet);
+        walletLog.setAmount(amount);
+        walletLog.setFrom(mentorAccount.getId());
+        walletLog.setTo(null);
+        walletLog.setTypeOfLog(WalletLogType.WITHDRAWAL);
+        walletLog.setCreatedAt(LocalDateTime.now());
+        walletLogRepository.save(walletLog);
+
+        return new Response<>(200, "Withdrawal successful", "You have withdrawn: " + amount);
     }
 
 }

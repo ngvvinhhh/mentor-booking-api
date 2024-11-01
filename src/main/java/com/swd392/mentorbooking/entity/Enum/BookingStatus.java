@@ -29,6 +29,8 @@ public enum BookingStatus {
                 return "Your invitation to group is accept.";
             case UNDECIDED:
                 return "Your decision on the booking request is still undecided.";
+            case COMPLETED:
+                return "Your booking has been completed.";
             default:
                 return "";
         }

@@ -4,11 +4,11 @@ import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.admin.AccountInfoAdmin;
 import com.swd392.mentorbooking.dto.auth.RegisterRequestDTO;
 import com.swd392.mentorbooking.dto.auth.RegisterResponseDTO;
+import com.swd392.mentorbooking.dto.booking.BookingResponse;
 import com.swd392.mentorbooking.dto.websitefeedback.WebsiteFeedbackResponse;
 import com.swd392.mentorbooking.entity.Blog;
 import com.swd392.mentorbooking.entity.Booking;
 import com.swd392.mentorbooking.entity.Topic;
-import com.swd392.mentorbooking.entity.WebsiteFeedback;
 import com.swd392.mentorbooking.service.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -19,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin")
@@ -36,6 +37,24 @@ public class AdminController {
     @GetMapping("/accounts")
     public Response<List<AccountInfoAdmin>> getAllAccountByRole(@RequestParam(value = "role", required = false) String role) {
         return adminService.getAllAccountByRole(role);
+    }
+
+    @GetMapping("/user-counts")
+    public Response<Map<String, Long>> getUserCounts() {
+        return adminService.getUserCounts();
+    }
+
+    @GetMapping("/top-users-payment")
+    public Response<List<Map<String, Object>>> getStudentsWithTotalPaymentsResponse() {
+        List<Map<String, Object>> studentPayments = adminService.getStudentsOrderedByTotalPayments();
+        String message = "Retrieved student accounts with total payments successfully!";
+        return new Response<>(200, message, studentPayments);
+    }
+
+    @GetMapping("/specialization-counts")
+    public Response<Map<String, Object>> getSpecializationCounts() {
+        Map<String, Object> data = adminService.getSpecializationCounts();
+        return new Response<>(200, "Retrieved mentor and specialization counts successfully!", data);
     }
 
     // Delete account
@@ -83,5 +102,15 @@ public class AdminController {
             description = "Phương thức này trả về các blog kể cả đã bị xoá cho admin đọc.")
     public Response<List<WebsiteFeedbackResponse>> getAllFeedbackWebsite() {
         return adminService.getAllFeedbackWebsite();
+    }
+
+    @PostMapping("/booking/complete/{bookingId}")
+    public Response<BookingResponse> approveBooking(@PathVariable Long bookingId) {
+        return adminService.completeBooking(bookingId);
+    }
+
+    @PostMapping("/booking/cancel/{bookingId}")
+    public Response<BookingResponse> rejectBooking(@PathVariable Long bookingId) {
+        return adminService.cancelBooking(bookingId);
     }
 }
