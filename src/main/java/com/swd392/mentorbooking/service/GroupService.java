@@ -241,8 +241,8 @@ public class GroupService {
             emailDetail.setAttachment(joinLink);
             emailDetail.setName(account.getName());
 
-            if (account.getGroup() != null) {
-                throw new InvalidAccountException("Account is already a member of the group.");
+          if (account.getGroup() != null) {
+               return new Response<>(400, "Account is already a member of the group.", null);
             }
 
         }
@@ -292,7 +292,7 @@ public class GroupService {
                 .orElseThrow(() -> new InvalidAccountException("Account not found."));
 
         if (account.getGroup() != null) {
-            throw new InvalidAccountException("Account is already a member of the group.");
+            return new Response<>(400, "Account is already a member of the group.", null);
         }
 
         group.getStudents().add(account);

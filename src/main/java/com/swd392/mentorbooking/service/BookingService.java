@@ -59,16 +59,19 @@ public class BookingService {
         Schedule schedule = scheduleRepository.findById(bookingRequest.getScheduleId())
                 .orElseThrow(() -> new NotFoundException("Schedule not found with id: " + bookingRequest.getScheduleId()));
 
-        Group group = groupRepository.findById(bookingRequest.getGroupId())
-                .orElseThrow(() -> new NotFoundException("Group not found with id: " + bookingRequest.getGroupId()));
+        Group group = account.getGroup();
 
         if (bookingRepository.findByAccountAndScheduleAndIsDeletedFalse(account, schedule).isPresent()) {
             throw new NotFoundException("Booking already exists with the same schedule and account!");
         }
 
+        if (bookingRepository.findByGroupAndSchedule(group, schedule).isPresent()) {
+            return new Response<>(400, "A member from the same group has already booked this schedule.", null);
+        }
+
         Wallet wallet = walletRepository.findByAccount(account);
         if (wallet == null) {
-            throw new NotFoundException("Wallet not found!!");
+            throw new NotFoundException("Wallet not found for this account!");
         }
 
         Services services = serviceRepository.findByAccount(schedule.getAccount());
