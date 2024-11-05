@@ -118,6 +118,7 @@ public class PaymentService {
             urlBuilder.append("&");
         }
         urlBuilder.deleteCharAt(urlBuilder.length() - 1); // Remove last '&'
+        addToWallet(payment.getAccount().getWallet(), payment.getTotal());
 
         return urlBuilder.toString();
     }
