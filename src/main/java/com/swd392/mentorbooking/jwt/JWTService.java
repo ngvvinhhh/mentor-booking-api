@@ -54,7 +54,7 @@ public class JWTService {
                 .setSubject(email)
                 .setIssuedAt(now)
                 .setExpiration(expirationDate)
-                .signWith(SignatureAlgorithm.HS512, getSigningKey())
+                .signWith(SignatureAlgorithm.HS256, getSigningKey())
                 .compact();
         return refresh_token;
     }

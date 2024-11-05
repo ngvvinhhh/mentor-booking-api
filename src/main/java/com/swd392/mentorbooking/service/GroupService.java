@@ -50,6 +50,8 @@ public class GroupService {
 
     @PersistenceContext
     private EntityManager entityManager;
+    @Autowired
+    private ProjectProgressRepository projectProgressRepository;
 
     public Response<List<GroupResponse>> getAllGroups() {
         // Fetch all groups that are not deleted
@@ -207,6 +209,15 @@ public class GroupService {
             group = groupRepository.save(group);
             accountRepository.save(sender);
         }
+
+        ProjectProgress projectProgress = ProjectProgress.builder()
+                .group(group)
+                .description("Project progress for group " + group.getId())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .isDeleted(false)
+                .build();
+        projectProgressRepository.save(projectProgress);
 
         if (group.getIsDeleted()) {
             return new Response<>(400, "Cannot add account to a deleted group.", null);

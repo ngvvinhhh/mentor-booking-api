@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @SecurityRequirement(name = "api")
 public class ScheduleController {
 
-
+    // Get mentor's active schedule
+    
 
 }

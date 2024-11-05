@@ -1,10 +1,10 @@
 package com.swd392.mentorbooking.dto.admin;
 
+import com.swd392.mentorbooking.dto.group.GroupResponse;
 import com.swd392.mentorbooking.entity.Account;
 import com.swd392.mentorbooking.entity.Enum.AccountStatusEnum;
 import com.swd392.mentorbooking.entity.Enum.GenderEnum;
 import com.swd392.mentorbooking.entity.Enum.RoleEnum;
-import com.swd392.mentorbooking.entity.Group;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,7 +24,7 @@ public class AccountInfoAdmin {
     private String className;
     private AccountStatusEnum status;
     private Boolean isDeleted;
-    private Group group;
+    private GroupResponse group;
 
 
     public static AccountInfoAdmin fromAccount(Account account) {
@@ -40,7 +40,6 @@ public class AccountInfoAdmin {
         accountInfoAdmin.setClassName(account.getClassName());
         accountInfoAdmin.setStatus(account.getStatus());
         accountInfoAdmin.setIsDeleted(account.getIsDeleted());
-        accountInfoAdmin.setGroup(account.getGroup());
         return accountInfoAdmin;
     }
 }

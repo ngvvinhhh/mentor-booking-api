@@ -7,6 +7,7 @@ import com.swd392.mentorbooking.dto.auth.RegisterResponseDTO;
 
 import com.swd392.mentorbooking.dto.blog.GetBlogResponseDTO;
 import com.swd392.mentorbooking.dto.blog.GetCommentResponseDTO;
+import com.swd392.mentorbooking.dto.group.GroupResponse;
 import com.swd392.mentorbooking.dto.websitefeedback.WebsiteFeedbackResponse;
 import com.swd392.mentorbooking.entity.*;
 import com.swd392.mentorbooking.entity.Enum.AccountStatusEnum;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,46 +57,46 @@ public class AdminService {
     @Autowired
     @Lazy
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private GroupRepository groupRepository;
 
     public Response<List<AccountInfoAdmin>> getAllAccountByRole(String role) {
 
-        List<Account> data;
-
         try {
-            if (role == null) {
-                // Get all accounts
-                data = accountRepository.findAccountsByIsDeletedFalse();
-            } else if (role.equalsIgnoreCase("mentor")) {
-                // Get accounts by mentor role
-                data = accountRepository.findAccountsByRoleAndIsDeletedFalse(RoleEnum.MENTOR);
-            } else if (role.equalsIgnoreCase("student")) {
-                // Get accounts by student role
-                data = accountRepository.findAccountsByRoleAndIsDeletedFalse(RoleEnum.STUDENT);
-            } else {
-                // Role not supported
-                String message = "Your role is not supported!";
-                return new Response<>(400, message, null); // Return 400 Bad Request
+            // Lấy danh sách tài khoản theo vai trò
+            RoleEnum roleEnum = role != null ? RoleEnum.valueOf(role.toUpperCase()) : null;
+            List<Account> data = accountRepository.findAccountsByRole(roleEnum);
+
+            if (data.isEmpty()) {
+                return new Response<>(404, "No data found!", null);
             }
 
-            // Check if data is not null or empty
-            if (data == null || data.isEmpty()) {
-                String message = "No data found!";
-                return new Response<>(404, message, null); // Return 404 Not Found
-            }
-
-            // Convert list of Account to list of AccountInfoAdmin
             List<AccountInfoAdmin> returnData = data.stream()
                     .map(AccountInfoAdmin::fromAccount)
                     .collect(Collectors.toList());
 
-            // Return response
-            String message = "Retrieve data successfully!";
-            return new Response<>(200, message, returnData);
+            // Lấy ID của tất cả các tài khoản
+            List<Long> accountIds = returnData.stream()
+                    .map(AccountInfoAdmin::getId)
+                    .collect(Collectors.toList());
+
+            // Lấy các nhóm theo ID tài khoản một lần duy nhất
+            Map<Long, Group> accountGroupMap = groupRepository.findGroupsByStudentIds(accountIds)
+                    .stream()
+                    .flatMap(group -> group.getStudents().stream()
+                            .map(student -> Map.entry(student.getId(), group)))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+            // Gán GroupResponse vào từng AccountInfoAdmin
+            for (AccountInfoAdmin accountInfoAdmin : returnData) {
+                Group group = accountGroupMap.get(accountInfoAdmin.getId());
+                accountInfoAdmin.setGroup(group != null ? GroupResponse.fromGroup(group) : null);
+            }
+
+            return new Response<>(200, "Retrieve data successfully!", returnData);
 
         } catch (Exception e) {
-            // Log the exception
-            String message = "Error occurred while processing request!";
-            return new Response<>(500, message, null); // Return 500 Internal Server Error
+            return new Response<>(500, "Error occurred while processing request!", null);
         }
     }
 

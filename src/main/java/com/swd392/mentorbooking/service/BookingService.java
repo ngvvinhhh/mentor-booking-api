@@ -63,7 +63,9 @@ public class BookingService {
         Booking booking = createNewBooking(bookingRequest, account, group, schedule);
         bookingRepository.save(booking);
 
+        //Student
         createNotification(booking, booking.getStatus().getMessage(), booking.getAccount());
+        //Mentor
         createNotification(booking, BookingStatus.UNDECIDED.getMessage(), schedule.getAccount());
 
         BookingResponse bookingResponse = buildBookingResponse(booking, schedule);
@@ -109,6 +111,7 @@ public class BookingService {
         notification.setCreatedAt(LocalDateTime.now());
         notification.setIsDeleted(false);
         notificationRepository.save(notification);
+
     }
 
     private BookingResponse buildBookingResponse(Booking booking, Schedule schedule) {

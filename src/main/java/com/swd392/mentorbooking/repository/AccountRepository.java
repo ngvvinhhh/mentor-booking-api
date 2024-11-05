@@ -4,6 +4,8 @@ import com.swd392.mentorbooking.entity.Account;
 import com.swd392.mentorbooking.entity.Enum.RoleEnum;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -23,4 +25,7 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
 
 
     Account findAccountByEmail(String email);
+
+    @Query("SELECT a FROM Account a WHERE a.isDeleted = false AND (:role IS NULL OR a.role = :role)")
+    List<Account> findAccountsByRole(@Param("role") RoleEnum role);
 }

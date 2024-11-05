@@ -2,7 +2,6 @@ package com.swd392.mentorbooking.service;
 
 import com.swd392.mentorbooking.dto.account.UpdateProfileRequestDTO;
 import com.swd392.mentorbooking.dto.achievement.GetAchievementResponseDTO;
-import com.swd392.mentorbooking.dto.website_feedback.WebsiteFeedbackRequestDTO;
 import com.swd392.mentorbooking.entity.Achievement;
 import com.swd392.mentorbooking.entity.Enum.RoleEnum;
 import com.swd392.mentorbooking.entity.Enum.SpecializationEnum;
@@ -11,7 +10,6 @@ import com.swd392.mentorbooking.dto.account.SearchMentorResponseDTO;
 import com.swd392.mentorbooking.dto.account.GetProfileResponse;
 import com.swd392.mentorbooking.entity.Account;
 import com.swd392.mentorbooking.entity.Wallet;
-import com.swd392.mentorbooking.entity.WebsiteFeedback;
 import com.swd392.mentorbooking.exception.ErrorCode;
 import com.swd392.mentorbooking.exception.auth.AuthAppException;
 import com.swd392.mentorbooking.repository.AccountRepository;
@@ -21,11 +19,11 @@ import com.swd392.mentorbooking.utils.AccountSpecification;
 import com.swd392.mentorbooking.utils.AccountUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -155,22 +153,19 @@ public class AccountService {
 
     // ** SEARCH SECTION ** //
 
-    public Response<List<SearchMentorResponseDTO>> searchMentor(String name, Double minPrice, Double maxPrice, List<SpecializationEnum> specializations, Sort sort) {
-
+    public List<SearchMentorResponseDTO> searchMentor(String name, Double minPrice, Double maxPrice, List<SpecializationEnum> specializations, Pageable pageable) {
         Specification<Account> specification = Specification.where(AccountSpecification.hasName(name))
                 .and(AccountSpecification.hasRole(RoleEnum.MENTOR))
                 .and(AccountSpecification.hasPriceBetween(minPrice, maxPrice))
                 .and(AccountSpecification.hasAllSpecializations(specializations));
 
-        // Fetch all accounts that match the specification and sort them
-        List<Account> accounts = accountRepository.findAll(specification, sort);
+        // Fetch all accounts that match the specification with pagination
+        Page<Account> accountPage = accountRepository.findAll(specification, pageable);
 
-        List<SearchMentorResponseDTO> returnData = accounts.stream()
+        // Chuyển đổi danh sách tài khoản thành danh sách DTO
+        return accountPage.getContent().stream()
                 .map(this::convertToSearchMentorResponseDTO)
                 .collect(Collectors.toList());
-
-        // Fetch the accounts and map them to AccountDTO
-        return new Response<>(200, "Retrieve data successfully!", returnData);
     }
 
     private SearchMentorResponseDTO convertToSearchMentorResponseDTO(Account account) {
