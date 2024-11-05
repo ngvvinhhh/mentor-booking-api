@@ -179,6 +179,5 @@ public class AccountService {
         searchMentorResponseDTO.setAvatar(account.getAvatar());
         return searchMentorResponseDTO;
     }
-
 }
 

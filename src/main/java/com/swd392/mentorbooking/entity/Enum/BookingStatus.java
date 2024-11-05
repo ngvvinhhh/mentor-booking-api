@@ -12,16 +12,27 @@ public enum BookingStatus {
     UNDECIDED;
 
     public String getMessage() {
-        return switch (this) {
-            case PROCESSING -> "Your Booking request has been processing.";
-            case SUCCESSFUL -> "Your Booking request has been confirmed.";
-            case DECLINED -> "You have declined the booking request.";
-            case PENDING -> "Your invitation to group is pending.";
-            case CONFIRMED -> "Your booking is confirmed.";
-            case CANCELLED -> "Your booking has been cancelled.";
-            case ACCEPT -> "Your invitation to group is accept.";
-            case UNDECIDED -> "Your decision on the booking request is still undecided.";
-            default -> "";
-        };
+        switch (this) {
+            case PROCESSING:
+                return "Your Booking request has been processing.";
+            case SUCCESSFUL:
+                return "Your Booking request has been confirmed.";
+            case DECLINED:
+                return "You have declined the booking request.";
+            case PENDING:
+                return "Your invitation to group is pending.";
+            case CONFIRMED:
+                return "Your booking is confirmed.";
+            case CANCELLED:
+                return "Your booking has been cancelled.";
+            case ACCEPT:
+                return "Your invitation to group is accept.";
+            case UNDECIDED:
+                return "Your decision on the booking request is still undecided.";
+            case COMPLETED:
+                return "Your booking has been completed.";
+            default:
+                return "";
+        }
     }
 }

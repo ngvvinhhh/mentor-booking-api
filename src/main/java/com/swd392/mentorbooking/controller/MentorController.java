@@ -15,6 +15,7 @@ import com.swd392.mentorbooking.service.MentorService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -141,5 +142,11 @@ public class MentorController {
     @PostMapping("/booking/reject/{bookingId}")
     public Response<BookingResponse> rejectBooking(@PathVariable Long bookingId) {
         return mentorService.rejectBooking(bookingId);
+    }
+
+    @PostMapping("/withdraw")
+    public ResponseEntity<Response<String>> withdrawFunds(@RequestParam Double amount) {
+        Response<String> response = mentorService.withdrawFunds(amount);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getCode()));
     }
 }
