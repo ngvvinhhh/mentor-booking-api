@@ -15,5 +15,4 @@ public class CreateBookingRequest {
     private String location;
     private String locationNote;
     private Long scheduleId;
-    private Long groupId;
 }

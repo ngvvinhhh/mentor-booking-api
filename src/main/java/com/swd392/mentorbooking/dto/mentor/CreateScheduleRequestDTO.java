@@ -1,5 +1,6 @@
 package com.swd392.mentorbooking.dto.mentor;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,7 +15,10 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateScheduleRequestDTO {
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date date;
+
     @JsonProperty("startFrom")
     private LocalTime startFrom;
 

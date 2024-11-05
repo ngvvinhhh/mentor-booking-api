@@ -6,6 +6,10 @@ import com.swd392.mentorbooking.dto.auth.RegisterRequestDTO;
 import com.swd392.mentorbooking.dto.auth.RegisterResponseDTO;
 
 import com.swd392.mentorbooking.dto.booking.BookingResponse;
+import com.swd392.mentorbooking.dto.booking.BookingResponse;
+import com.swd392.mentorbooking.dto.blog.GetBlogResponseDTO;
+import com.swd392.mentorbooking.dto.blog.GetCommentResponseDTO;
+import com.swd392.mentorbooking.dto.group.GroupResponse;
 import com.swd392.mentorbooking.dto.websitefeedback.WebsiteFeedbackResponse;
 import com.swd392.mentorbooking.entity.*;
 import com.swd392.mentorbooking.entity.Enum.*;
@@ -64,6 +68,9 @@ public class AdminService {
     private WalletLogRepository walletLogRepository;
 
     @Autowired
+    private GroupRepository groupRepository;
+
+    @Autowired
     @Lazy
     private PasswordEncoder passwordEncoder;
 
@@ -72,25 +79,12 @@ public class AdminService {
         List<Account> data;
 
         try {
-            if (role == null) {
-                // Get all accounts
-                data = accountRepository.findAccountsByIsDeletedFalse();
-            } else if (role.equalsIgnoreCase("mentor")) {
-                // Get accounts by mentor role
-                data = accountRepository.findAccountsByRoleAndIsDeletedFalse(RoleEnum.MENTOR);
-            } else if (role.equalsIgnoreCase("student")) {
-                // Get accounts by student role
-                data = accountRepository.findAccountsByRoleAndIsDeletedFalse(RoleEnum.STUDENT);
-            } else {
-                // Role not supported
-                String message = "Your role is not supported!";
-                return new Response<>(400, message, null); // Return 400 Bad Request
-            }
+            // Lấy danh sách tài khoản theo vai trò
+            RoleEnum roleEnum = role != null ? RoleEnum.valueOf(role.toUpperCase()) : null;
+            data = accountRepository.findAccountsByRole(roleEnum);
 
-            // Check if data is not null or empty
-            if (data == null || data.isEmpty()) {
-                String message = "No data found!";
-                return new Response<>(404, message, null); // Return 404 Not Found
+            if (data.isEmpty()) {
+                return new Response<>(404, "No data found!", null);
             }
 
             // Convert list of Account to list of AccountInfoAdmin
@@ -98,9 +92,25 @@ public class AdminService {
                     .map(AccountInfoAdmin::fromAccount)
                     .collect(Collectors.toList());
 
-            // Return response
-            String message = "Retrieve data successfully!";
-            return new Response<>(200, message, returnData);
+            // Lấy ID của tất cả các tài khoản
+            List<Long> accountIds = returnData.stream()
+                    .map(AccountInfoAdmin::getId)
+                    .collect(Collectors.toList());
+
+            // Lấy các nhóm theo ID tài khoản một lần duy nhất
+            Map<Long, Group> accountGroupMap = groupRepository.findGroupsByStudentIds(accountIds)
+                    .stream()
+                    .flatMap(group -> group.getStudents().stream()
+                            .map(student -> Map.entry(student.getId(), group)))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+            // Gán GroupResponse vào từng AccountInfoAdmin
+            for (AccountInfoAdmin accountInfoAdmin : returnData) {
+                Group group = accountGroupMap.get(accountInfoAdmin.getId());
+                accountInfoAdmin.setGroup(group != null ? GroupResponse.fromGroup(group) : null);
+            }
+
+            return new Response<>(200, "Retrieve data successfully!", returnData);
 
         } catch (Exception e) {
             // Log the exception
@@ -143,13 +153,53 @@ public class AdminService {
         return new Response<>(200, message, data);
     }
 
-    public Response<List<Blog>> getAllBlog() {
+    public Response<List<GetBlogResponseDTO>> viewAllBlogs() {
         // Get data
-        List<Blog> data = blogRepository.findAll();
+        List<Blog> allBlogs = blogRepository.findAllByIsDeletedFalse();
+        List<GetBlogResponseDTO> data = new ArrayList<>();
+
+        for (Blog blog : allBlogs) {
+            GetBlogResponseDTO getBlogResponseDTO = returnOneBlogResponseData(blog);
+            data.add(getBlogResponseDTO);
+        }
+
+        if (data.isEmpty()) {
+            //Response message
+            String message = "No blog were found!";
+            return new Response<>(200, message, data);
+        }
 
         //Response message
         String message = "Retrieve topics successfully!";
         return new Response<>(200, message, data);
+    }
+
+    private GetBlogResponseDTO returnOneBlogResponseData(Blog blog) {
+        List<GetCommentResponseDTO> comments = blog.getComments().stream()
+                .filter(comment -> !comment.isDeleted())
+                .map(comment -> GetCommentResponseDTO.builder()
+                        .id(comment.getId())
+                        .authorId(comment.getAccount().getId())
+                        .authorName(comment.getAccount().getName())
+                        .authorAvatarUrl(comment.getAccount().getAvatar())
+                        .description(comment.getDescription())
+                        .build())
+                .collect(Collectors.toList());
+
+        return GetBlogResponseDTO.builder()
+                .id(blog.getId())
+                .authorId(blog.getAccount().getId())
+                .authorName(blog.getAccount().getName())
+                .authorAvatarUrl(blog.getAccount().getAvatar())
+                .title(blog.getTitle())
+                .image(blog.getImage())
+                .category(blog.getBlogCategoryEnum())
+                .description(blog.getDescription())
+                .likeCount(blog.getLikeCount())
+                .createdAt(blog.getCreatedAt())
+                .isDeleted(blog.getIsDeleted())
+                .comments(comments)
+                .build();
     }
 
     public Response<List<Booking>> getAllBooking() {

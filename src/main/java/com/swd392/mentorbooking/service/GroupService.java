@@ -50,6 +50,8 @@ public class GroupService {
 
     @PersistenceContext
     private EntityManager entityManager;
+    @Autowired
+    private ProjectProgressRepository projectProgressRepository;
 
     public Response<List<GroupResponse>> getAllGroups() {
         // Fetch all groups that are not deleted
@@ -208,6 +210,15 @@ public class GroupService {
             accountRepository.save(sender);
         }
 
+        ProjectProgress projectProgress = ProjectProgress.builder()
+                .group(group)
+                .description("Project progress for group " + group.getId())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .isDeleted(false)
+                .build();
+        projectProgressRepository.save(projectProgress);
+
         if (group.getIsDeleted()) {
             return new Response<>(400, "Cannot add account to a deleted group.", null);
         }
@@ -230,8 +241,8 @@ public class GroupService {
             emailDetail.setAttachment(joinLink);
             emailDetail.setName(account.getName());
 
-            if (account.getGroup() != null) {
-                throw new InvalidAccountException("Account is already a member of the group.");
+          if (account.getGroup() != null) {
+               return new Response<>(400, "Account is already a member of the group.", null);
             }
 
         }
@@ -281,7 +292,7 @@ public class GroupService {
                 .orElseThrow(() -> new InvalidAccountException("Account not found."));
 
         if (account.getGroup() != null) {
-            throw new InvalidAccountException("Account is already a member of the group.");
+            return new Response<>(400, "Account is already a member of the group.", null);
         }
 
         group.getStudents().add(account);

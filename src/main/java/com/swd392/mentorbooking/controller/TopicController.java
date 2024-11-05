@@ -10,6 +10,7 @@ import com.swd392.mentorbooking.service.TopicService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,15 +25,20 @@ public class TopicController {
     @Autowired
     TopicService topicService;
 
-    @PostMapping("create")
+    @PostMapping(value ="/create", produces = MediaType.APPLICATION_JSON_VALUE)
     public Response<TopicResponse> createTopic(@Valid @RequestBody TopicRequest topicRequest){
         return topicService.createTopic(topicRequest);
     }
 
-    @GetMapping("view")
+    @GetMapping("/view")
     public ResponseEntity getAllTopics(){
         List<Topic> topics = topicService.getAllTopics();
         return ResponseEntity.ok(topics);
+    }
+
+    @GetMapping("/view/by-account")
+    public Response<List<TopicResponse>> getAllTopicsByAccount(){
+        return topicService.getAllTopicsByAccount();
     }
 
     @PutMapping("/update/{topicId}")

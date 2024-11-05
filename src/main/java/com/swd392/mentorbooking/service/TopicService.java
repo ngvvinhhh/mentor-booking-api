@@ -9,9 +9,11 @@ import com.swd392.mentorbooking.entity.Account;
 import com.swd392.mentorbooking.entity.Semester;
 import com.swd392.mentorbooking.entity.Topic;
 import com.swd392.mentorbooking.exception.ErrorCode;
+import com.swd392.mentorbooking.exception.auth.AuthAppException;
 import com.swd392.mentorbooking.exception.group.NotFoundException;
 import com.swd392.mentorbooking.exception.service.CreateServiceException;
 import com.swd392.mentorbooking.exception.topic.TopicException;
+import com.swd392.mentorbooking.repository.AccountRepository;
 import com.swd392.mentorbooking.repository.SemesterRepository;
 import com.swd392.mentorbooking.repository.TopicRepository;
 import com.swd392.mentorbooking.utils.AccountUtils;
@@ -25,7 +27,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+
 
 @Service
 public class TopicService {
@@ -37,6 +42,8 @@ public class TopicService {
 
     @Autowired
     AccountUtils accountUtils;
+    @Autowired
+    private AccountRepository accountRepository;
 
 
     public Topic getTopicById(Long id) {
@@ -189,5 +196,37 @@ public class TopicService {
         }
     }
 
+    public Response<List<TopicResponse>> getAllTopicsByAccount() {
+        Account account = checkAccount();
+
+        List<Topic> topicList = topicRepository.findAllByAccountAndIsDeletedFalse(account);
+        List<TopicResponse> topicResponseList = new ArrayList<>();
+        // Create a response entity
+        for (Topic topic : topicList) {
+            TopicResponse topicResponse = new TopicResponse(
+                    topic.getId(),
+                    topic.getTopicName(),
+                    topic.getDescription(),
+                    topic.getCreatedAt()
+            );
+            topicResponseList.add(topicResponse);
+        }
+        return new Response<>(200, "Retrieve data successfully!", topicResponseList);
+    }
+
+    public Account checkAccount() {
+        // Get the current account
+        Account account = accountUtils.getCurrentAccount();
+        if (account == null) {
+            throw new AuthAppException(ErrorCode.NOT_LOGIN);
+        }
+
+        account = accountRepository.findByEmail(account.getEmail()).orElse(null);
+        if (account == null) {
+            throw new AuthAppException(ErrorCode.ACCOUNT_NOT_FOUND);
+        }
+
+        return account;
+    }
 }
 

@@ -367,6 +367,30 @@ public class MentorService {
         return new Response<>(200, "Schedule with scheduleId " + scheduleId + " is deleted!", true);
     }
 
+    public Response<List<GetScheduleResponseDTO>> getActiveSchedules() {
+        Account account = checkAccount();
+        List<Schedule> listSchedule = scheduleRepository.findAllByAccountAndStatusAndIsDeletedFalse(account, ScheduleStatus.ACTIVE)
+                .orElseGet(Collections::emptyList);
+
+        if (listSchedule.isEmpty()) {
+            return new Response<>(204, "There is no active schedules", null);
+        }
+
+        List<GetScheduleResponseDTO> data = listSchedule.stream()
+                .map(schedule -> GetScheduleResponseDTO.builder()
+                        .scheduleId(schedule.getId())
+                        .date(schedule.getDate())
+                        .startTime(schedule.getStartTime())
+                        .endTime(schedule.getEndTime())
+                        .status(schedule.getStatus())
+                        .createdAt(schedule.getCreatedAt())
+                        .isDeleted(schedule.getIsDeleted())
+                        .build())
+                .collect(Collectors.toList());
+
+        return new Response<>(200, "Retrieved data successfully!", data);
+    }
+
     // ** BOOKING SECTION ** //
 
     public Response<List<BookingListResponseDTO>> getAllBooking() {

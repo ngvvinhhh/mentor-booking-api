@@ -44,4 +44,7 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
     List<Account> findStudentsOrderedByTotalPayments(@Param("role") RoleEnum role);
 
     Account findAccountByEmail(String email);
+
+    @Query("SELECT a FROM Account a WHERE a.isDeleted = false AND (:role IS NULL OR a.role = :role)")
+    List<Account> findAccountsByRole(@Param("role") RoleEnum role);
 }

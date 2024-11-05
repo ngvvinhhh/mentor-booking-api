@@ -1,5 +1,6 @@
 package com.swd392.mentorbooking.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ public class Topic {
 
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
+    @JsonIgnore
     private Account account;
 
     @ManyToOne
@@ -28,6 +30,7 @@ public class Topic {
     @Column(name = "topic_name", nullable = false)
     private String topicName;
 
+    @Lob
     @Column(name = "description", nullable = false)
     private String description;
 

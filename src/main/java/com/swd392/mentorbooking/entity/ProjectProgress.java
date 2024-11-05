@@ -3,7 +3,9 @@ package com.swd392.mentorbooking.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "project_progress")
@@ -34,5 +36,8 @@ public class ProjectProgress {
 
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
+
+    @OneToMany(mappedBy = "projectProgress", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProgressColumn> progressColumns;
 }
 

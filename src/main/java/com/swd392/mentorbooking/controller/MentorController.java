@@ -121,6 +121,12 @@ public class MentorController {
         return mentorService.deleteSchedule(scheduleId);
     }
 
+    // Get Active Schedule
+    @GetMapping("/schedule/get/active")
+    public Response<List<GetScheduleResponseDTO>> getActiveSchedules() {
+        return mentorService.getActiveSchedules();
+    }
+
     // ** BOOKING SECTION ** //
 
     @GetMapping("/booking/view")
