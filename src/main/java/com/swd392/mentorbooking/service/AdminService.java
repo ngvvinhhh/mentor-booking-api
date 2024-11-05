@@ -448,7 +448,7 @@ public class AdminService {
         }
 
         // Get student's wallet
-        Wallet walletStudent = walletRepository.findByAccount(booking.getAccount());
+        Wallet walletStudent = walletRepository.findByAccount(booking.getGroup().getStudents().getFirst());
         if (walletStudent == null) {
             throw new NotFoundException("Student's wallet not found!!");
         }
