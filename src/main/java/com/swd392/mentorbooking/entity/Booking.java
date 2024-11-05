@@ -29,10 +29,12 @@ public class Booking {
     @Column(name = "status", nullable = false)
     private BookingStatus status;
 
+    //Mentor account
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
+    //Student group account
     @ManyToOne
     @JoinColumn(name = "group_id")
     private Group group;

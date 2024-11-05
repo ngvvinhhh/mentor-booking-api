@@ -427,6 +427,7 @@ public class MentorService {
     @Transactional
     public Response<BookingResponse> approveBooking(Long bookingId) {
         Account mentorAccount = accountUtils.getCurrentAccount();
+
         if (mentorAccount == null) return new Response<>(401, "Please login first", null);
 
         Booking booking = bookingRepository.findById(bookingId)
@@ -503,7 +504,6 @@ public class MentorService {
         return new Response<>(200, "Booking approved successfully!", bookingResponse);
     }
 
-
     @Transactional
     public Response<BookingResponse> rejectBooking(Long bookingId) {
         // Get current account (mentor)
@@ -516,7 +516,7 @@ public class MentorService {
 
         // Check if the booking is currently in PROCESSING status
         if (!booking.getStatus().equals(BookingStatus.PROCESSING)) {
-            return new Response<>(400, "Booking cannot be approved as it is not in processing status.", null);
+            return new Response<>(400, "Booking cannot be rejected as it is not in processing status.", null);
         }
 
         // Update booking status to DECLINED
@@ -542,7 +542,7 @@ public class MentorService {
                 .mentorName(booking.getSchedule().getAccount().getName()) // Mentor name
                 .build();
 
-        return new Response<>(200, "Booking approved successfully!", bookingResponse);
+        return new Response<>(200, "Booking rejected successfully!", bookingResponse);
     }
 
     @Transactional

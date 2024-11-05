@@ -32,7 +32,7 @@ public class JWTService {
 
     public String generateToken(String email) {
         Date now = new Date(); // get current time
-        long EXPIRATION = 24 * 60 * 60 * 1000;
+        long EXPIRATION = 2 * 24 * 60 * 60 * 1000;
         Date expirationDate = new Date(now.getTime() + EXPIRATION);
 
         String token = Jwts.builder()
@@ -54,7 +54,7 @@ public class JWTService {
                 .setSubject(email)
                 .setIssuedAt(now)
                 .setExpiration(expirationDate)
-                .signWith(SignatureAlgorithm.HS256, getSigningKey())
+                .signWith(SignatureAlgorithm.HS512, getSigningKey())
                 .compact();
         return refresh_token;
     }

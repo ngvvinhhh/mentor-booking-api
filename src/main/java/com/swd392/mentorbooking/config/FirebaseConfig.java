@@ -39,4 +39,17 @@ public class FirebaseConfig {
         FirebaseApp app = FirebaseApp.initializeApp(firebaseOptions, "mentor-booking-app");
         return FirebaseMessaging.getInstance(app);
     }
+
+    @Bean
+    public FirebaseApp firebaseApp() throws IOException {
+        GoogleCredentials googleCredentials = GoogleCredentials
+                .fromStream(
+                        new ClassPathResource("circuit-project-8bdd7-firebase-adminsdk-xu19u-d65fd612f3.json").getInputStream());
+
+        FirebaseOptions options = new FirebaseOptions.Builder()
+                .setCredentials(googleCredentials)
+                .build();
+
+        return FirebaseApp.initializeApp(options);
+    }
 }
