@@ -4,6 +4,7 @@ import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.admin.AccountInfoAdmin;
 import com.swd392.mentorbooking.dto.auth.RegisterRequestDTO;
 import com.swd392.mentorbooking.dto.auth.RegisterResponseDTO;
+import com.swd392.mentorbooking.dto.blog.GetBlogResponseDTO;
 import com.swd392.mentorbooking.dto.booking.BookingResponse;
 import com.swd392.mentorbooking.dto.websitefeedback.WebsiteFeedbackResponse;
 import com.swd392.mentorbooking.entity.Blog;
@@ -90,8 +91,8 @@ public class AdminController {
 
     // Get all blogs
     @GetMapping("/blogs")
-    public Response<List<Blog>> getAllBlog() {
-        return adminService.getAllBlog();
+    public Response<List<GetBlogResponseDTO>> getAllBlog() {
+        return adminService.viewAllBlogs();
     }
 
     // ** WEBSITE FEEDBACK SECTION ** //
