@@ -432,11 +432,17 @@ public class MentorService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Booking not found with id: " + bookingId));
 
+        Long scheduleId = booking.getSchedule().getId();
+        System.out.println("Schedule ID: " + scheduleId);
+        Schedule schedule = scheduleRepository.findById(booking.getSchedule().getId())
+                .orElseThrow(() -> new NotFoundException("Schedule not found for the provided account and booking"));
+
+
         if (!booking.getStatus().equals(BookingStatus.PROCESSING)) {
             return new Response<>(400, "Booking cannot be approved as it is not in processing status.", null);
         }
 
-        Wallet wallet = walletRepository.findByAccount(booking.getAccount());
+        Wallet wallet = walletRepository.findByAccount(booking.getGroup().getStudents().getFirst());
         if (wallet == null) {
             throw new NotFoundException("Wallet not found!!");
         }
@@ -478,8 +484,11 @@ public class MentorService {
 
         walletAdmin.setTotal(walletAdmin.getTotal() + services.getPrice());
 
+
         booking.setStatus(BookingStatus.SUCCESSFUL);
+        schedule.setStatus(ScheduleStatus.INACTIVE);
         bookingRepository.save(booking);
+        scheduleRepository.save(schedule);
 
         Notification notification = notificationRepository.findByBookingAndAccount(booking, mentorAccount)
                 .orElse(new Notification());

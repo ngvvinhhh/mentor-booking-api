@@ -1,15 +1,15 @@
 package com.swd392.mentorbooking.entity.Enum;
 
 public enum BookingStatus {
-    PENDING,
-    CONFIRMED,
-    CANCELLED,
-    COMPLETED,
-    PROCESSING,
-    SUCCESSFUL,
-    DECLINED,
-    ACCEPT,
-    UNDECIDED;
+    PENDING,        //  Invitation when sent
+    CONFIRMED,      //  Not used
+    CANCELLED,      //  ADMIN cancel booking
+    COMPLETED,      //  ADMIN complete booking
+    PROCESSING,     //  Booking when STUDENT book
+    SUCCESSFUL,     //  Booking when Mentor approve
+    DECLINED,       //  Booking when Mentor reject
+    ACCEPT,         //  Invitation when accept
+    UNDECIDED;      //  Notification for MENTOR booked
 
     public String getMessage() {
         switch (this) {
