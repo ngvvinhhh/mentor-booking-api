@@ -6,6 +6,7 @@ import com.swd392.mentorbooking.dto.auth.RegisterRequestDTO;
 import com.swd392.mentorbooking.dto.auth.RegisterResponseDTO;
 
 import com.swd392.mentorbooking.dto.booking.BookingResponse;
+import com.swd392.mentorbooking.dto.booking.BookingResponse;
 import com.swd392.mentorbooking.dto.blog.GetBlogResponseDTO;
 import com.swd392.mentorbooking.dto.blog.GetCommentResponseDTO;
 import com.swd392.mentorbooking.dto.group.GroupResponse;
@@ -109,8 +110,35 @@ public class AdminService {
             return new Response<>(200, "Retrieve data successfully!", returnData);
 
         } catch (Exception e) {
-            return new Response<>(500, "Error occurred while processing request!", null);
+            // Log the exception
+            String message = "Error occurred while processing request!";
+            return new Response<>(500, message, null); // Return 500 Internal Server Error
         }
+    }
+
+    public Response<Map<String, Long>> getUserCounts() {
+        // Tính tổng số account không bị xóa
+        long totalActiveUsers = accountRepository.countActiveUsers() - 1; // trừ 1 tài khoản admin
+
+        // Tính số lượng account có role 'student' và không bị xóa
+        long studentCount = accountRepository.countByRoleAndNotDeleted(RoleEnum.STUDENT);
+
+        // Tính số lượng account có role 'mentor' và không bị xóa
+        long mentorCount = accountRepository.countByRoleAndNotDeleted(RoleEnum.MENTOR);
+
+        // Tính tổng số lượng booking không bị xóa
+        long totalBookings = bookingRepository.countActiveBookings();
+
+        // Tạo một Map để chứa thông tin
+        Map<String, Long> userCounts = new HashMap<>();
+        userCounts.put("totalUsers", totalActiveUsers);
+        userCounts.put("studentCount", studentCount);
+        userCounts.put("mentorCount", mentorCount);
+        userCounts.put("totalBookings", totalBookings);
+
+        // Trả về phản hồi
+        String message = "Retrieved user counts successfully!";
+        return new Response<>(200, message, userCounts);
     }
 
     public Response<Map<String, Long>> getUserCounts() {
@@ -164,7 +192,7 @@ public class AdminService {
         }
 
         //Response message
-        String message = "Retrieve blogs successfully!";
+        String message = "Retrieve topics successfully!";
         return new Response<>(200, message, data);
     }
 

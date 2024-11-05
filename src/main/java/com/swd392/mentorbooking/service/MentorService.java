@@ -529,8 +529,6 @@ public class MentorService {
         notification.setMessage(booking.getStatus().getMessage());
         notification.setStatus(booking.getStatus());
 
-        // Save updated booking and notification to the database
-
         notificationRepository.save(notification);
 
         // Create response object
