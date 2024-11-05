@@ -85,11 +85,11 @@ public class BookingService {
 
 
 
-        Booking booking = createNewBooking(bookingRequest, account, group, schedule);
+        Booking booking = createNewBooking(bookingRequest, schedule.getAccount(), group, schedule);
         bookingRepository.save(booking);
 
         //Student
-        createNotification(booking, booking.getStatus().getMessage(), booking.getAccount());
+        createNotification(booking, booking.getStatus().getMessage(), account);
         //Mentor
         createNotification(booking, BookingStatus.UNDECIDED.getMessage(), schedule.getAccount());
 
