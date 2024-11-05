@@ -75,8 +75,8 @@ public class PaymentService {
         double money = payment.getTotal() * 100;
         String amount = String.valueOf((int) money);
 
-        String tmnCode = "C2CFQOTD";
-        String secretKey = "867ZAJFLY3FAR95N9MHKC4SHN7VGCZLN";
+        String tmnCode = "CT4QG49Y";
+        String secretKey = "SK312A8PEUV5CSZVLJ8U5LCYH4F13X5H";
         String vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         String returnUrl = "https://circuit-project.vercel.app/payment/payment-pending?id=" + payment.getId();
         String currCode = "VND";
