@@ -32,6 +32,9 @@ public class GetProfileResponse {
     private double walletPoint;
     // ** mentor part ** //
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    private double servicePrice;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<SpecializationEnum> specializations;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

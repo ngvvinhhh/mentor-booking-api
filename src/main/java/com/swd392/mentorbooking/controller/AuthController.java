@@ -48,8 +48,9 @@ public class AuthController {
         return authService.checkLogin(loginRequestDTO);
     }
 
-    @PostMapping("/auth/google")
+    @PostMapping("login/google")
     public ResponseEntity<LoginResponseDTO> googleLogin(@RequestBody Map<String, String> payload) {
+
         String idToken = payload.get("token");
 
         try {

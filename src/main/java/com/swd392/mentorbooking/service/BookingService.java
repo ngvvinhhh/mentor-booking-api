@@ -83,8 +83,6 @@ public class BookingService {
             return new Response<>(400, "Insufficient balance to book this service.", null);
         }
 
-
-
         Booking booking = createNewBooking(bookingRequest, schedule.getAccount(), group, schedule);
         bookingRepository.save(booking);
 

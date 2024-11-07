@@ -9,10 +9,12 @@ import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.account.SearchMentorResponseDTO;
 import com.swd392.mentorbooking.dto.account.GetProfileResponse;
 import com.swd392.mentorbooking.entity.Account;
+import com.swd392.mentorbooking.entity.Services;
 import com.swd392.mentorbooking.entity.Wallet;
 import com.swd392.mentorbooking.exception.ErrorCode;
 import com.swd392.mentorbooking.exception.auth.AuthAppException;
 import com.swd392.mentorbooking.repository.AccountRepository;
+import com.swd392.mentorbooking.repository.ServiceRepository;
 import com.swd392.mentorbooking.repository.WalletRepository;
 import com.swd392.mentorbooking.repository.WebsiteFeedbackRepository;
 import com.swd392.mentorbooking.utils.AccountSpecification;
@@ -43,6 +45,8 @@ public class AccountService {
 
     @Autowired
     private WalletRepository walletRepository;
+    @Autowired
+    private ServiceRepository serviceRepository;
 
     // ** PROFILE SECTION ** //
 
@@ -98,6 +102,8 @@ public class AccountService {
         // Get user wallet
         Wallet wallet = walletRepository.findByAccount(account);
 
+        Services services = serviceRepository.findByAccount(account);
+
         List<GetAchievementResponseDTO> achievementList = new ArrayList<>();
 
         if (!account.getAchievements().isEmpty()) {
@@ -126,6 +132,7 @@ public class AccountService {
                 .walletId(wallet.getId())
                 .walletPoint(wallet.getTotal())
                 // ** mentor ** //
+                .servicePrice(services.getPrice())
                 .specializations(account.getSpecializations())
                 .achievements(achievementList)
                 .facebookLink(account.getFacebookLink())

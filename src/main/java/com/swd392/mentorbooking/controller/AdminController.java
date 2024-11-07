@@ -75,7 +75,7 @@ public class AdminController {
 
     // Get all bookings
     @GetMapping("/bookings")
-    public Response<List<Booking>> getAllBooking() {
+    public Response<List<BookingResponse>> getAllBooking() {
         return adminService.getAllBooking();
     }
 
