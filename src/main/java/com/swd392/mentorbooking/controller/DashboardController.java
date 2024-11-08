@@ -1,5 +1,6 @@
 package com.swd392.mentorbooking.controller;
 
+import com.swd392.mentorbooking.dto.dashboard.BarChartBox;
 import com.swd392.mentorbooking.dto.dashboard.ChartBox;
 import com.swd392.mentorbooking.dto.dashboard.DashboardData;
 import com.swd392.mentorbooking.dto.dashboard.TopDealUser;
@@ -51,4 +52,15 @@ public class DashboardController {
         return dashboardService.getChartBoxStudent();
     }
 
+    @Operation(summary = "Lấy tổng số revenue")
+    @GetMapping("/chart-box-revenue")
+    public ChartBox chartBoxRevenue() {
+        return dashboardService.getTotalRevenue();
+    }
+
+    @Operation(summary = "Lấy tổng số revenue theo tuần")
+    @GetMapping("/weekly-revenue")
+    public BarChartBox weeklyRevenue() {
+        return dashboardService.getWeeklyRevenue();
+    }
 }

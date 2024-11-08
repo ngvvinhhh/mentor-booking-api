@@ -61,12 +61,12 @@ public class AuthController {
     }
 
     @PostMapping("/login/google")
-    public ResponseEntity<LoginResponseDTO> googleLogin(@RequestBody String idTokenEmail) {
+    public ResponseEntity<LoginResponseDTO> googleLogin(@RequestBody ResigsterGoogleDTO resigsterGoogleDTO) {
 
-        String email = idTokenEmail;
+        String email = resigsterGoogleDTO.getEmail();
         String name = email.split("@")[0];
 
-        Account existingUser = accountRepository.findByEmail(idTokenEmail).orElse(null);
+        Account existingUser = accountRepository.findByEmail(email).orElse(null);
 
         //Tạo tài khoản
         if (existingUser == null) {

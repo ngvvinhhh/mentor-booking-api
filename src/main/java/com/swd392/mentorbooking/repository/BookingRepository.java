@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -30,4 +31,16 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Optional<Booking> findByGroupAndSchedule(@Param("group") Group group, @Param("schedule") Schedule schedule);
 
     List<Booking> findBookingsByAccountAndStatusAndIsDeletedFalse(Account account, BookingStatus bookingStatus);
+
+    @Query("SELECT SUM(b.total) FROM Booking b WHERE b.status = 'COMPLETED' AND b.isDeleted = false")
+    String findTotalRevenueOfCompletedBookings();
+
+    @Query("SELECT FUNCTION('DAYOFWEEK', b.createdAt), SUM(b.total) " +
+            "FROM Booking b " +
+            "WHERE b.status = 'COMPLETED' " +
+            "AND b.createdAt BETWEEN :startOfWeek AND :endOfWeek " +
+            "GROUP BY FUNCTION('DAYOFWEEK', b.createdAt) " +
+            "ORDER BY FUNCTION('DAYOFWEEK', b.createdAt)")
+    List<Object[]> findWeeklyRevenue(@Param("startOfWeek") LocalDateTime startOfWeek,
+                                     @Param("endOfWeek") LocalDateTime endOfWeek);
 }

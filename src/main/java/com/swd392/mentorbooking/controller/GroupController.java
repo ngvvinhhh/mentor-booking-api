@@ -77,7 +77,7 @@ public class GroupController {
         System.out.println("GroupId: " + groupId);
         System.out.println("Token: " + token);
         groupService.acceptGroupInvitation(token);
-        return new RedirectView("http://localhost:5173/projectManagement");
+        return new RedirectView("http://localhost:5173/");
     }
 
     @GetMapping("/select-topic/{topicId}")
