@@ -9,10 +9,12 @@ import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.account.SearchMentorResponseDTO;
 import com.swd392.mentorbooking.dto.account.GetProfileResponse;
 import com.swd392.mentorbooking.entity.Account;
+import com.swd392.mentorbooking.entity.Services;
 import com.swd392.mentorbooking.entity.Wallet;
 import com.swd392.mentorbooking.exception.ErrorCode;
 import com.swd392.mentorbooking.exception.auth.AuthAppException;
 import com.swd392.mentorbooking.repository.AccountRepository;
+import com.swd392.mentorbooking.repository.ServiceRepository;
 import com.swd392.mentorbooking.repository.WalletRepository;
 import com.swd392.mentorbooking.repository.WebsiteFeedbackRepository;
 import com.swd392.mentorbooking.utils.AccountSpecification;
@@ -43,6 +45,8 @@ public class AccountService {
 
     @Autowired
     private WalletRepository walletRepository;
+    @Autowired
+    private ServiceRepository serviceRepository;
 
     // ** PROFILE SECTION ** //
 
@@ -98,6 +102,8 @@ public class AccountService {
         // Get user wallet
         Wallet wallet = walletRepository.findByAccount(account);
 
+        Services services = serviceRepository.findByAccount(account);
+
         List<GetAchievementResponseDTO> achievementList = new ArrayList<>();
 
         if (!account.getAchievements().isEmpty()) {
@@ -112,27 +118,48 @@ public class AccountService {
             }
         }
 
-        GetProfileResponse response = GetProfileResponse.builder()
-                .id(account.getId())
-                .name(account.getName())
-                .email(account.getEmail())
-                .role(account.getRole())
-                .dayOfBirth(account.getDayOfBirth())
-                .gender(account.getGender())
-                .phone(account.getPhone())
-                .avatar(account.getAvatar())
-                .className(account.getClassName())
-                // ** wallet ** //
-                .walletId(wallet.getId())
-                .walletPoint(wallet.getTotal())
-                // ** mentor ** //
-                .specializations(account.getSpecializations())
-                .achievements(achievementList)
-                .facebookLink(account.getFacebookLink())
-                .linkedinLink(account.getLinkedinLink())
-                .twitterLink(account.getTwitterLink())
-                .youtubeLink(account.getYoutubeLink())
-                .build();
+        GetProfileResponse response = null;
+        if (services != null) {
+            response = GetProfileResponse.builder()
+                    .id(account.getId())
+                    .name(account.getName())
+                    .email(account.getEmail())
+                    .role(account.getRole())
+                    .dayOfBirth(account.getDayOfBirth())
+                    .gender(account.getGender())
+                    .phone(account.getPhone())
+                    .avatar(account.getAvatar())
+                    .className(account.getClassName())
+                    // ** wallet ** //
+                    .walletId(wallet.getId())
+                    .walletPoint(wallet.getTotal())
+                    // ** mentor ** //
+                    .serviceId(services.getId())
+                    .servicePrice(services.getPrice())
+                    .specializations(account.getSpecializations())
+                    .achievements(achievementList)
+                    .facebookLink(account.getFacebookLink())
+                    .linkedinLink(account.getLinkedinLink())
+                    .twitterLink(account.getTwitterLink())
+                    .youtubeLink(account.getYoutubeLink())
+                    .build();
+        }
+        else {
+            response = GetProfileResponse.builder()
+                    .id(account.getId())
+                    .name(account.getName())
+                    .email(account.getEmail())
+                    .role(account.getRole())
+                    .dayOfBirth(account.getDayOfBirth())
+                    .gender(account.getGender())
+                    .phone(account.getPhone())
+                    .avatar(account.getAvatar())
+                    .className(account.getClassName())
+                    // ** wallet ** //
+                    .walletId(wallet.getId())
+                    .walletPoint(wallet.getTotal())
+                    .build();
+        }
         return new Response<>(200, "Retrieve data successfully", response);
     }
 

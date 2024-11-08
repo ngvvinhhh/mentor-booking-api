@@ -19,24 +19,43 @@ public class FirebaseConfig {
 
     @Bean
     public Storage firebaseStorage() throws Exception {
-        InputStream inputStream = FirebaseConfig.class.getClassLoader().getResourceAsStream("mentor-booking-3d46a-firebase-adminsdk-ohqij-8f07903118.json"); // Đổi tên file phù hợp
+        InputStream inputStream = FirebaseConfig.class.getClassLoader().getResourceAsStream("circuit-project-8bdd7-firebase-adminsdk-xu19u-20e1166d5f.json"); // Đổi tên file phù hợp
         Credentials credentials = null;
         if (inputStream != null) {
             credentials = GoogleCredentials.fromStream(inputStream);
         }
-        return StorageOptions.newBuilder().setCredentials(credentials).build().getService();
+        return StorageOptions.newBuilder()
+                .setCredentials(credentials)
+                .setProjectId("circuit-project-8bdd7")
+                .build().getService();
     }
 
     @Bean
     public FirebaseMessaging firebaseMessaging() throws IOException {
         GoogleCredentials googleCredentials = GoogleCredentials
                 .fromStream(
-                        new ClassPathResource("mentor-booking-3d46a-firebase-adminsdk-ohqij-8f07903118.json").getInputStream());
-        FirebaseOptions firebaseOptions = FirebaseOptions
-                .builder()
+                        new ClassPathResource("circuit-project-8bdd7-firebase-adminsdk-xu19u-20e1166d5f.json").getInputStream());
+        FirebaseOptions firebaseOptions = FirebaseOptions.builder()
                 .setCredentials(googleCredentials)
+                .setProjectId("circuit-project-8bdd7")
                 .build();
-        FirebaseApp app = FirebaseApp.initializeApp(firebaseOptions, "mentor-booking-app");
+        FirebaseApp app = FirebaseApp.initializeApp(firebaseOptions, "circuit-project-8bdd7");
         return FirebaseMessaging.getInstance(app);
     }
+
+    @Bean
+    public FirebaseApp firebaseApp() throws IOException {
+        // Đường dẫn tới file serviceAccountKey.json mà bạn tải từ Firebase Console
+        GoogleCredentials googleCredentials = GoogleCredentials
+                .fromStream(
+                        new ClassPathResource("circuit-project-8bdd7-firebase-adminsdk-xu19u-20e1166d5f.json").getInputStream());
+
+        FirebaseOptions options = new FirebaseOptions.Builder()
+                .setCredentials(googleCredentials)
+                .setProjectId("circuit-project-8bdd7")
+                .build();
+
+        return FirebaseApp.initializeApp(options);
+    }
+
 }

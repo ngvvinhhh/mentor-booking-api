@@ -20,8 +20,9 @@ public class Group {
     @Column(name = "group_id")
     private Long id;
 
-    @Column(name = "topic_id", nullable = true)
-    private Long topicId;
+    @ManyToOne
+    @JoinColumn(name = "topic_id", nullable = true)
+    private Topic topic;
 
     @Column(name = "quantity_member")
     private Integer quantityMember;
@@ -44,7 +45,6 @@ public class Group {
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     private List<Account> students;
-
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     @JsonManagedReference

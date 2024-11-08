@@ -35,7 +35,7 @@ public class Account implements UserDetails {
     private String email;
 
     @JsonIgnore
-    @Column(name = "password", nullable = false)
+    @Column(name = "password", nullable = true)
     private String password;
 
     @Column(name = "day_of_birth", nullable = true)

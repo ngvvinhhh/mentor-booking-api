@@ -3,12 +3,17 @@ package com.swd392.mentorbooking.controller;
 import com.swd392.mentorbooking.dto.invititation.AcceptInviteRequest;
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.group.*;
+import com.swd392.mentorbooking.entity.Enum.SpecializationEnum;
 import com.swd392.mentorbooking.service.GroupService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -24,8 +29,13 @@ public class GroupController {
         return groupService.getAllGroups();
     }
 
+    @GetMapping("/view-my-group")
+    public Response<GetMyGroupResponseDTO> getMyGroup() {
+        return groupService.getMyGroup();
+    }
+
     @PostMapping("create")
-    public Response<GroupResponse> createGroup(@Valid @RequestBody GroupRequest groupRequest){
+    public Response<GroupResponse> createGroup(@Valid @RequestBody GroupRequest groupRequest) {
         return groupService.createGroup(groupRequest);
     }
 
@@ -54,6 +64,20 @@ public class GroupController {
         return groupService.acceptGroupInvitation(
                 acceptInviteRequest.getToken()
         );
+    }
+
+    @GetMapping("/joinGroup")
+    public RedirectView acceptGroupInvitation
+            (
+                    @RequestParam String email,
+                    @RequestParam int groupId,
+                    @RequestParam String token
+            ) {
+        System.out.println("Email: " + email);
+        System.out.println("GroupId: " + groupId);
+        System.out.println("Token: " + token);
+        groupService.acceptGroupInvitation(token);
+        return new RedirectView("http://localhost:5173/projectManagement");
     }
 
     @GetMapping("/select-topic/{topicId}")

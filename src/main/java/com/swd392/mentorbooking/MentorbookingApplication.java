@@ -1,5 +1,6 @@
 package com.swd392.mentorbooking;
 
+import com.google.firebase.auth.FirebaseAuth;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -17,6 +18,8 @@ public class MentorbookingApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(MentorbookingApplication.class, args);
+		System.out.println("Mentor Booking API started");
+		System.out.println(FirebaseAuth.getInstance().toString());
 	}
 
 }

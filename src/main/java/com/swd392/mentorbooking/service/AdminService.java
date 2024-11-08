@@ -202,13 +202,30 @@ public class AdminService {
                 .build();
     }
 
-    public Response<List<Booking>> getAllBooking() {
+    public Response<List<BookingResponse>> getAllBooking() {
         // Get data
         List<Booking> data = bookingRepository.findAll();
 
+        List<BookingResponse> responses = new ArrayList<>();
+
         //Response message
         String message = "Retrieve topics successfully!";
-        return new Response<>(200, message, data);
+        for (Booking booking : data) {
+            BookingResponse bookingResponse = BookingResponse.builder()
+                    .bookingId(booking.getBookingId())
+                    .location(booking.getLocation())
+                    .locationNote(booking.getLocationNote())
+                    .scheduleId(booking.getSchedule().getId())
+                    .status(booking.getStatus())
+                    .mentorName(booking.getSchedule().getAccount().getName())
+                    .groupId(booking.getGroup().getId())
+                    .date(booking.getSchedule().getDate())
+                    .startTime(booking.getSchedule().getStartTime())
+                    .endTime(booking.getSchedule().getEndTime())
+                    .build();
+            responses.add(bookingResponse);
+        }
+        return new Response<>(200, message, responses);
     }
 
     public List<Map<String, Object>> getStudentsOrderedByTotalPayments() {

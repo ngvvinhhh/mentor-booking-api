@@ -6,6 +6,7 @@ import com.swd392.mentorbooking.dto.booking.CreateBookingRequest;
 import com.swd392.mentorbooking.dto.booking.UpcomingBookingResponseDTO;
 import com.swd392.mentorbooking.entity.*;
 import com.swd392.mentorbooking.entity.Enum.BookingStatus;
+import com.swd392.mentorbooking.entity.Enum.ScheduleStatus;
 import com.swd392.mentorbooking.exception.ErrorCode;
 import com.swd392.mentorbooking.exception.auth.AuthAppException;
 import com.swd392.mentorbooking.exception.group.NotFoundException;
@@ -61,6 +62,10 @@ public class BookingService {
 
         Group group = account.getGroup();
 
+        if (group == null) {
+            return new Response<>(400, "You must be in a group or create a group before booking.", null);
+        }
+
         if (bookingRepository.findByAccountAndScheduleAndIsDeletedFalse(account, schedule).isPresent()) {
             throw new NotFoundException("Booking already exists with the same schedule and account!");
         }
@@ -83,8 +88,6 @@ public class BookingService {
             return new Response<>(400, "Insufficient balance to book this service.", null);
         }
 
-
-
         Booking booking = createNewBooking(bookingRequest, schedule.getAccount(), group, schedule);
         bookingRepository.save(booking);
 
@@ -94,6 +97,10 @@ public class BookingService {
         createNotification(booking, BookingStatus.UNDECIDED.getMessage(), schedule.getAccount());
 
         BookingResponse bookingResponse = buildBookingResponse(booking, schedule);
+
+        schedule.setStatus(ScheduleStatus.PENDING);
+        scheduleRepository.save(schedule);
+
         return new Response<>(200, "Booking created successfully!", bookingResponse);
     }
 
@@ -108,7 +115,7 @@ public class BookingService {
         }
 
         List<UpcomingBookingResponseDTO> data = group.getBookings().stream()
-                .filter(booking -> booking.getStatus() == BookingStatus.PROCESSING || booking.getStatus() == BookingStatus.SUCCESSFUL)
+                .filter(booking -> booking.getStatus() == BookingStatus.PROCESSING || booking.getStatus() == BookingStatus.SUCCESSFUL || booking.getStatus() == BookingStatus.DECLINED)
                 .map(this::mapToUpcomingBookingResponseDTO)
                 .collect(Collectors.toList());
 
@@ -164,6 +171,9 @@ public class BookingService {
                 .locationNote(booking.getLocationNote() != null ? booking.getLocationNote() : "N/A")
                 .mentorId(booking.getAccount() != null ? booking.getAccount().getId() : null)
                 .mentorName(booking.getAccount() != null ? booking.getAccount().getName() : "N/A")
+                .mentorAvatar(booking.getAccount() != null ? booking.getAccount().getAvatar() : "N/A")
+                .mentorPrice(booking.getAccount() != null ? booking.getAccount().getService().getPrice() : 0)
+                .mentorSpecializations(booking.getAccount() != null ? booking.getAccount().getSpecializations() : null)
                 .bookingStatus(booking.getStatus())
                 .build();
     }
@@ -175,6 +185,10 @@ public class BookingService {
         }
         return accountRepository.findByEmail(account.getEmail())
                 .orElseThrow(() -> new AuthAppException(ErrorCode.ACCOUNT_NOT_FOUND));
+    }
+
+    public Response<BookingResponse> cancelBooking(Long bookingId) {
+        return null;
     }
 }
 

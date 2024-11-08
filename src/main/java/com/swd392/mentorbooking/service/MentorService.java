@@ -92,6 +92,10 @@ public class MentorService {
         // Check the current logged in account
         Account account = checkAccount();
 
+        if (account.getService() != null) {
+            return new Response<>(200, "You have already had a service!", null);
+        }
+
         Services service = new Services();
         service.setCreatedAt(LocalDateTime.now());
         service.setUpdatedAt(LocalDateTime.now());
@@ -393,7 +397,7 @@ public class MentorService {
 
     // ** BOOKING SECTION ** //
 
-    public Response<List<BookingListResponseDTO>> getAllBooking() {
+    public Response<List<BookingListResponseDTO>> getAllProcessingBooking() {
         Account account = checkAccount();
 
         List<BookingListResponseDTO> response = bookingRepository.findBookingsByAccountAndIsDeletedFalse(account)
@@ -427,6 +431,7 @@ public class MentorService {
     @Transactional
     public Response<BookingResponse> approveBooking(Long bookingId) {
         Account mentorAccount = accountUtils.getCurrentAccount();
+
         if (mentorAccount == null) return new Response<>(401, "Please login first", null);
 
         Booking booking = bookingRepository.findById(bookingId)
@@ -512,7 +517,6 @@ public class MentorService {
         return new Response<>(200, "Booking approved successfully!", bookingResponse);
     }
 
-
     @Transactional
     public Response<BookingResponse> rejectBooking(Long bookingId) {
         // Get current account (mentor)
@@ -525,12 +529,16 @@ public class MentorService {
 
         // Check if the booking is currently in PROCESSING status
         if (!booking.getStatus().equals(BookingStatus.PROCESSING)) {
-            return new Response<>(400, "Booking cannot be approved as it is not in processing status.", null);
+            return new Response<>(400, "Booking cannot be rejected as it is not in processing status.", null);
         }
 
         // Update booking status to DECLINED
         booking.setStatus(BookingStatus.DECLINED);
         bookingRepository.save(booking);
+
+        Schedule schedule = scheduleRepository.findById(booking.getSchedule().getId()).orElse(null);
+        schedule.setStatus(ScheduleStatus.ACTIVE);
+        scheduleRepository.save(schedule);
 
         Notification notification = notificationRepository.findByBookingAndAccount(booking, mentorAccount)
                 .orElse(new Notification());
@@ -551,7 +559,7 @@ public class MentorService {
                 .mentorName(booking.getSchedule().getAccount().getName()) // Mentor name
                 .build();
 
-        return new Response<>(200, "Booking approved successfully!", bookingResponse);
+        return new Response<>(200, "Booking rejected successfully!", bookingResponse);
     }
 
     @Transactional
@@ -585,4 +593,34 @@ public class MentorService {
         return new Response<>(200, "Withdrawal successful", "You have withdrawn: " + amount);
     }
 
+    public Response<List<BookingListResponseDTO>> getAllUpcomingBooking() {
+        Account account = checkAccount();
+
+        List<BookingListResponseDTO> response = bookingRepository.findBookingsByAccountAndStatusAndIsDeletedFalse(account, BookingStatus.SUCCESSFUL)
+                .stream()
+                .map(booking -> {
+                    List<BookingGroupResponseDTO> groupResponseDTO = booking.getGroup().getStudents().stream()
+                            .map(account1 -> BookingGroupResponseDTO.builder()
+                                    .accountId(account1.getId())
+                                    .name(account1.getName())
+                                    .email(account1.getEmail())
+                                    .build())
+                            .collect(Collectors.toList());
+
+                    return BookingListResponseDTO.builder()
+                            .bookingId(booking.getBookingId())
+                            .location(booking.getLocation())
+                            .note(booking.getLocationNote())
+                            .bookingDate(booking.getSchedule().getDate())
+                            .startTime(booking.getSchedule().getStartTime())
+                            .endTime(booking.getSchedule().getEndTime())
+                            .mentor(new BookingMentorResponseDTO(account.getId(), account.getName()))
+                            .group(groupResponseDTO)
+                            .status(booking.getStatus())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return new Response<>(200, "Retrieve booking list successfully!", response);
+    }
 }
