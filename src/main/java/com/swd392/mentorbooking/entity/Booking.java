@@ -43,6 +43,9 @@ public class Booking {
     @JoinColumn(name = "schedule_id", nullable = false)
     private Schedule schedule;
 
+    @Column(name = "total", nullable = false)
+    private Double total;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

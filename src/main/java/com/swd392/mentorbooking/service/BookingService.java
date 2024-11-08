@@ -16,6 +16,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -84,11 +87,18 @@ public class BookingService {
             throw new NotFoundException("Service not found!!");
         }
 
-        if(wallet.getTotal() < services.getPrice()){
+        double hoursBooked = Duration.between(schedule.getStartTime(), schedule.getEndTime()).toMinutes() / 60.0;
+        double totalCost = hoursBooked * services.getPrice();
+        BigDecimal totalCostRounded = new BigDecimal(totalCost).setScale(2, RoundingMode.HALF_UP); // làm tròn đến 2 số
+        totalCost = totalCostRounded.doubleValue();
+
+        if(wallet.getTotal() < totalCost){
             return new Response<>(400, "Insufficient balance to book this service.", null);
         }
 
-        Booking booking = createNewBooking(bookingRequest, schedule.getAccount(), group, schedule);
+
+
+        Booking booking = createNewBooking(bookingRequest, schedule.getAccount(), group, schedule, totalCost);
         bookingRepository.save(booking);
 
         //Student
@@ -96,7 +106,7 @@ public class BookingService {
         //Mentor
         createNotification(booking, BookingStatus.UNDECIDED.getMessage(), schedule.getAccount());
 
-        BookingResponse bookingResponse = buildBookingResponse(booking, schedule);
+        BookingResponse bookingResponse = buildBookingResponse(booking, schedule, totalCost);
 
         schedule.setStatus(ScheduleStatus.PENDING);
         scheduleRepository.save(schedule);
@@ -122,10 +132,11 @@ public class BookingService {
         return new Response<>(200, "Retrieve booking successfully!", data);
     }
 
-    private Booking createNewBooking(CreateBookingRequest bookingRequest, Account account, Group group, Schedule schedule) {
+    private Booking createNewBooking(CreateBookingRequest bookingRequest, Account account, Group group, Schedule schedule, Double total) {
         return Booking.builder()
                 .location(bookingRequest.getLocation())
                 .locationNote(bookingRequest.getLocationNote())
+                .total(total)
                 .status(BookingStatus.PROCESSING)
                 .account(account)
                 .group(group)
@@ -148,11 +159,12 @@ public class BookingService {
 
     }
 
-    private BookingResponse buildBookingResponse(Booking booking, Schedule schedule) {
+    private BookingResponse buildBookingResponse(Booking booking, Schedule schedule, Double total) {
         return BookingResponse.builder()
                 .bookingId(booking.getBookingId())
                 .location(booking.getLocation())
                 .locationNote(booking.getLocationNote())
+                .total(total)
                 .scheduleId(schedule.getId())
                 .message(booking.getStatus().getMessage())
                 .status(booking.getStatus())

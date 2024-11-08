@@ -468,26 +468,26 @@ public class MentorService {
         //Wallet log for student
         WalletLog walletLogStudent = new WalletLog();
         walletLogStudent.setWallet(wallet);
-        walletLogStudent.setAmount(services.getPrice());
-        walletLogStudent.setFrom(booking.getAccount().getId());
+        walletLogStudent.setAmount(booking.getTotal());
+        walletLogStudent.setFrom(booking.getGroup().getStudents().getFirst().getId());
         walletLogStudent.setTo(admin.getId());
         walletLogStudent.setTypeOfLog(WalletLogType.TRANSFER);
         walletLogStudent.setCreatedAt(LocalDateTime.now());
             walletLogRepository.save(walletLogStudent);
 
-        wallet.setTotal(wallet.getTotal() - services.getPrice());
+        wallet.setTotal(wallet.getTotal() - booking.getTotal());
 
         //Wallet log for admin
         WalletLog walletLogAdmin = new WalletLog();
         walletLogAdmin.setWallet(walletAdmin);
-        walletLogAdmin.setAmount(services.getPrice());
-        walletLogAdmin.setFrom(booking.getAccount().getId());
+        walletLogAdmin.setAmount(booking.getTotal());
+        walletLogAdmin.setFrom(booking.getGroup().getStudents().getFirst().getId());
         walletLogAdmin.setTo(admin.getId());
         walletLogAdmin.setTypeOfLog(WalletLogType.TRANSFER);
         walletLogAdmin.setCreatedAt(LocalDateTime.now());
         walletLogRepository.save(walletLogAdmin);
 
-        walletAdmin.setTotal(walletAdmin.getTotal() + services.getPrice());
+        walletAdmin.setTotal(walletAdmin.getTotal() + booking.getTotal());
 
 
         booking.setStatus(BookingStatus.SUCCESSFUL);
@@ -503,11 +503,12 @@ public class MentorService {
 
         notificationRepository.save(notification);
 
-        // Tạo đối tượng phản hồi
+        // Create response object
         BookingResponse bookingResponse = BookingResponse.builder()
                 .bookingId(booking.getBookingId())
                 .location(booking.getLocation())
                 .locationNote(booking.getLocationNote())
+                .total(booking.getTotal())
                 .scheduleId(booking.getSchedule().getId())
                 .message(notification.getMessage())
                 .status(booking.getStatus())
@@ -553,6 +554,7 @@ public class MentorService {
                 .bookingId(booking.getBookingId())
                 .location(booking.getLocation())
                 .locationNote(booking.getLocationNote())
+                .total(booking.getTotal())
                 .scheduleId(booking.getSchedule().getId())
                 .message(notification.getMessage())
                 .status(booking.getStatus())
