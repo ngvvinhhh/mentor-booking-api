@@ -4,6 +4,7 @@ import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.account.SearchMentorResponseDTO;
 import com.swd392.mentorbooking.dto.account.GetProfileResponse;
 import com.swd392.mentorbooking.dto.account.UpdateProfileRequestDTO;
+import com.swd392.mentorbooking.dto.booking.BookingResponse;
 import com.swd392.mentorbooking.entity.Enum.SpecializationEnum;
 import com.swd392.mentorbooking.service.AccountService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -69,5 +70,10 @@ public class AccountController {
     @GetMapping("/specialization/get-all")
     public Response<List<SpecializationEnum>> getSpecializations() {
         return new Response<>(200, "Retrieve data successfully!", Arrays.stream(SpecializationEnum.values()).toList());
+    }
+
+    @PostMapping("/booking/cancel/{bookingId}")
+    public Response<BookingResponse> rejectBooking(@PathVariable Long bookingId) {
+        return accountService.cancelBooking(bookingId);
     }
 }
