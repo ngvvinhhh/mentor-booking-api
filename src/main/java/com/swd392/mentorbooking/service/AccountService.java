@@ -118,28 +118,48 @@ public class AccountService {
             }
         }
 
-        GetProfileResponse response = GetProfileResponse.builder()
-                .id(account.getId())
-                .name(account.getName())
-                .email(account.getEmail())
-                .role(account.getRole())
-                .dayOfBirth(account.getDayOfBirth())
-                .gender(account.getGender())
-                .phone(account.getPhone())
-                .avatar(account.getAvatar())
-                .className(account.getClassName())
-                // ** wallet ** //
-                .walletId(wallet.getId())
-                .walletPoint(wallet.getTotal())
-                // ** mentor ** //
-                .servicePrice(services.getPrice())
-                .specializations(account.getSpecializations())
-                .achievements(achievementList)
-                .facebookLink(account.getFacebookLink())
-                .linkedinLink(account.getLinkedinLink())
-                .twitterLink(account.getTwitterLink())
-                .youtubeLink(account.getYoutubeLink())
-                .build();
+        GetProfileResponse response = null;
+        if (services != null) {
+            response = GetProfileResponse.builder()
+                    .id(account.getId())
+                    .name(account.getName())
+                    .email(account.getEmail())
+                    .role(account.getRole())
+                    .dayOfBirth(account.getDayOfBirth())
+                    .gender(account.getGender())
+                    .phone(account.getPhone())
+                    .avatar(account.getAvatar())
+                    .className(account.getClassName())
+                    // ** wallet ** //
+                    .walletId(wallet.getId())
+                    .walletPoint(wallet.getTotal())
+                    // ** mentor ** //
+                    .serviceId(services.getId())
+                    .servicePrice(services.getPrice())
+                    .specializations(account.getSpecializations())
+                    .achievements(achievementList)
+                    .facebookLink(account.getFacebookLink())
+                    .linkedinLink(account.getLinkedinLink())
+                    .twitterLink(account.getTwitterLink())
+                    .youtubeLink(account.getYoutubeLink())
+                    .build();
+        }
+        else {
+            response = GetProfileResponse.builder()
+                    .id(account.getId())
+                    .name(account.getName())
+                    .email(account.getEmail())
+                    .role(account.getRole())
+                    .dayOfBirth(account.getDayOfBirth())
+                    .gender(account.getGender())
+                    .phone(account.getPhone())
+                    .avatar(account.getAvatar())
+                    .className(account.getClassName())
+                    // ** wallet ** //
+                    .walletId(wallet.getId())
+                    .walletPoint(wallet.getTotal())
+                    .build();
+        }
         return new Response<>(200, "Retrieve data successfully", response);
     }
 

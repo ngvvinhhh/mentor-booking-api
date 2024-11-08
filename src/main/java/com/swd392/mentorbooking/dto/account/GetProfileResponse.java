@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class GetProfileResponse {
-    private Long id;
+    private long id;
     private String name;
     private String email;
     private RoleEnum role;
@@ -32,6 +32,7 @@ public class GetProfileResponse {
     private double walletPoint;
     // ** mentor part ** //
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    private long serviceId;
     private double servicePrice;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

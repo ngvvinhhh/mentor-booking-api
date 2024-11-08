@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.List;
 @CrossOrigin("**")
 @RequestMapping("/mentor")
 @SecurityRequirement(name = "api")
+
 public class MentorController {
 
     @Autowired
@@ -43,6 +45,7 @@ public class MentorController {
 
     // Create a service - Determine price per hour of mentor
     @PostMapping("/service/create")
+    @PreAuthorize("hasAnyAuthority('MENTOR')")
     public Response<CreateServiceResponseDTO> createService(@Valid @RequestBody CreateServiceRequestDTO createServiceRequestDTO) {
         return mentorService.createService(createServiceRequestDTO);
     }
@@ -129,9 +132,15 @@ public class MentorController {
 
     // ** BOOKING SECTION ** //
 
+    // Lấy danh sách booking cần dược duyệt
     @GetMapping("/booking/view")
-    public Response<List<BookingListResponseDTO>> getAllBooking() {
-        return mentorService.getAllBooking();
+    public Response<List<BookingListResponseDTO>> getAllProcessingBooking() {
+        return mentorService.getAllProcessingBooking();
+    }
+
+    @GetMapping("/booking/view-upcoming")
+    public Response<List<BookingListResponseDTO>> getAllUpcomingBooking() {
+        return mentorService.getAllUpcomingBooking();
     }
 
     @PostMapping("/booking/approve/{bookingId}")

@@ -27,7 +27,7 @@ public class GroupResponse {
     public static GroupResponse fromGroup(Group group) {
         GroupResponse groupResponse = new GroupResponse();
         groupResponse.setGroupId(group.getId());
-        groupResponse.setTopicId(group.getTopicId());
+        groupResponse.setTopicId(group.getTopic().getId());
         groupResponse.setQuantityMember(group.getQuantityMember());
         // Chuyển đổi danh sách sinh viên từ Group sang GroupResponse
         groupResponse.setStudents(

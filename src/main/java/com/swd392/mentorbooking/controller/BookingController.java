@@ -35,5 +35,10 @@ public class BookingController {
         return bookingService.viewUpcomingBookings();
     }
 
+    @PostMapping("/student/booking/cancel/{bookingId}")
+    public Response<BookingResponse> approveBooking(@PathVariable Long bookingId) {
+        return bookingService.cancelBooking(bookingId);
+    }
+
     // ** MENTOR SECTION ** //
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "topic")
@@ -42,5 +43,9 @@ public class Topic {
 
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
+
+    // Quan hệ 1 topic có thể có nhiều group
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL)
+    private List<Group> groups;
 }
 

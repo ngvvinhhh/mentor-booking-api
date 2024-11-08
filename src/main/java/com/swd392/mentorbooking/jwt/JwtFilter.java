@@ -32,7 +32,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String userName = null;
         String uri = request.getRequestURI();
         try {
-            if (uri.contains("/auth/login") || uri.contains("/auth/register") || uri.contains("/auth/forgot-password")) {
+            if (uri.contains("/auth/login") || uri.contains("/auth/register") || uri.contains("/auth/forgot-password") || uri.contains("/auth/login/google") || uri.contains("/auth/login/google/mobile")) {
                 filterChain.doFilter(request, response);
                 return;
             }

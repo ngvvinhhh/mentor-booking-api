@@ -66,7 +66,7 @@ public class GroupService {
         List<GroupResponse> groupResponses = groups.stream()
                 .map(group -> new GroupResponse(
                         group.getId(),
-                        group.getTopicId(),
+                        ((group.getTopic() == null) ? 0 : group.getTopic().getId()),
                         group.getStudents().stream().map(Account::getId).collect(Collectors.toList()),
                         group.getQuantityMember(),
                         group.getCreatedAt()
@@ -103,7 +103,7 @@ public class GroupService {
 
         // Create new Group and set up information fields
         Group group = new Group();
-        group.setTopicId(topic.getId());
+        group.setTopic(topic);
         group.setStudents(accounts);  // List of accounts including group creator
         group.setQuantityMember(accounts.size());
         group.setCreatedAt(LocalDateTime.now());
@@ -120,7 +120,7 @@ public class GroupService {
         // Create GroupResponse
         GroupResponse groupResponse = new GroupResponse(
                 group.getId(),
-                group.getTopicId(),
+                group.getTopic().getId(),
                 groupRequest.getStudentIds(),
                 group.getQuantityMember(),
                 group.getCreatedAt()
@@ -128,7 +128,6 @@ public class GroupService {
 
         return new Response<>(200, "Group created successfully!", groupResponse);
     }
-
 
     public Response<UpdateGroupResponse> updateGroup(Long groupId, @Valid GroupRequest groupRequest) {
 
@@ -149,7 +148,7 @@ public class GroupService {
                 .orElseThrow(() -> new NotFoundException("Topic not found with id: " + groupRequest.getTopicId()));
 
         // Update group fields
-        existingGroup.setTopicId(topic.getId());
+        existingGroup.setTopic(topic);
         existingGroup.setStudents(accounts);
         existingGroup.setQuantityMember(accounts.size());
         existingGroup.setUpdatedAt(LocalDateTime.now());
@@ -164,7 +163,7 @@ public class GroupService {
         // Create a response entity
         UpdateGroupResponse groupResponse = new UpdateGroupResponse(
                 existingGroup.getId(),
-                existingGroup.getTopicId(),
+                existingGroup.getTopic().getId(),
                 existingGroup.getStudents(),
                 existingGroup.getQuantityMember(),
                 existingGroup.getUpdatedAt()
@@ -201,7 +200,7 @@ public class GroupService {
             group.setStudents(new ArrayList<>());
             group.getStudents().add(entityManager.merge(sender));
             sender.setGroup(group);
-            group.setTopicId(null);
+            group.setTopic(null);
             group.setQuantityMember(1);
             group.setCreatedAt(LocalDateTime.now());
             group.setUpdatedAt(LocalDateTime.now());
@@ -232,17 +231,17 @@ public class GroupService {
 
 
         if (accountOpt.isEmpty()) {
-            emailDetail.setAttachment("https://circuit-project.vercel.app/signUp");
+            emailDetail.setAttachment("http://localhost:5173/signUp");
             emailDetail.setName("User");
         } else {
             Account account = entityManager.merge(accountOpt.get());
-            String joinLink = "https://circuit-project.vercel.app/joinGroup?email=" + addMemberRequest.getEmail()
+            String joinLink = "http://167.71.220.5:8080/group/joinGroup?email=" + addMemberRequest.getEmail()
                     + "&groupId=" + group.getId() + "&token=" + token;
             emailDetail.setAttachment(joinLink);
             emailDetail.setName(account.getName());
 
-          if (account.getGroup() != null) {
-               return new Response<>(400, "Account is already a member of the group.", null);
+            if (account.getGroup() != null) {
+                return new Response<>(400, "Account is already a member of the group.", null);
             }
 
         }
@@ -271,7 +270,7 @@ public class GroupService {
 
         GroupResponse groupResponse = new GroupResponse(
                 group.getId(),
-                group.getTopicId(),
+                (group.getTopic() == null) ? 0 : group.getTopic().getId(),
                 group.getStudents().stream().map(Account::getId).collect(Collectors.toList()),
                 group.getQuantityMember(),
                 group.getCreatedAt()
@@ -304,11 +303,9 @@ public class GroupService {
         groupRepository.save(group);
         accountRepository.save(account);
 
-
-
         GroupResponse groupResponse = new GroupResponse(
                 group.getId(),
-                group.getTopicId(),
+                (group.getTopic() == null) ? 0 : group.getTopic().getId(),
                 group.getStudents().stream().map(Account::getId).collect(Collectors.toList()),
                 group.getQuantityMember(),
                 group.getCreatedAt()
@@ -316,7 +313,6 @@ public class GroupService {
 
         return new Response<>(200, "Successfully joined the group!", groupResponse);
     }
-
 
     public Response<GroupResponse> selectTopicForGroup(Long topicId) {
         // Get current account from token
@@ -334,7 +330,7 @@ public class GroupService {
                 .orElseThrow(() -> new NotFoundException("Topic not found with id: " + topicId));
 
         // Update topic for group
-        group.setTopicId(topic.getId());
+        group.setTopic(topic);
         group.setUpdatedAt(LocalDateTime.now());
 
         // Save updated group
@@ -347,7 +343,7 @@ public class GroupService {
         // Tạo đối tượng phản hồi
         GroupResponse groupResponse = new GroupResponse(
                 group.getId(),
-                group.getTopicId(),
+                ((group.getTopic() == null) ? 0 : group.getTopic().getId()),
                 group.getStudents().stream().map(Account::getId).collect(Collectors.toList()),
                 group.getQuantityMember(),
                 group.getUpdatedAt()
@@ -355,8 +351,6 @@ public class GroupService {
 
         return new Response<>(200, "Topic updated successfully for the group!", groupResponse);
     }
-
-
 
     public Response<GroupResponse> removeAccountFromGroup(RemoveMemberRequest removeMemberRequest) {
         // Find the group by ID
@@ -388,7 +382,7 @@ public class GroupService {
         // Create a response entity
         GroupResponse groupResponse = new GroupResponse(
                 group.getId(),
-                group.getTopicId(),
+                ((group.getTopic() == null) ? 0 : group.getTopic().getId()),
                 group.getStudents().stream().map(Account::getId).collect(Collectors.toList()),
                 group.getQuantityMember(),
                 group.getCreatedAt()
@@ -396,4 +390,39 @@ public class GroupService {
 
         return new Response<>(200, "Account removed from group successfully!", groupResponse);
     }
+
+    public Response<GetMyGroupResponseDTO> getMyGroup() {
+        // Get the current account of the group creator
+        Account currentAccount = accountUtils.getCurrentAccount();
+        if (currentAccount == null) {
+            return new Response<>(401, "Please login first", null);
+        }
+
+        // Get the group associated with the current account
+        Group group = Optional.ofNullable(currentAccount.getGroup())
+                .flatMap(g -> groupRepository.findById(g.getId()))
+                .orElse(null);
+
+        if (group == null) {
+            return new Response<>(400, "You don't belong to any group.", null);
+        }
+
+        // Create response DTO with group details and map students to GroupStudentResponseDTO
+        GetMyGroupResponseDTO response = GetMyGroupResponseDTO.builder()
+                .groupId((group.getTopic() == null) ? 0 : group.getTopic().getId())
+                .groupQuantity(group.getQuantityMember())
+                .topicId(group.getTopic().getId())
+                .studentList(group.getStudents().stream()
+                        .map(account -> GroupStudentResponseDTO.builder()
+                                .accountId(account.getId())
+                                .accountAvatar(account.getAvatar())
+                                .accountName(account.getName())
+                                .accountEmail(account.getEmail())
+                                .build())
+                        .collect(Collectors.toList()))
+                .build();
+
+        return new Response<>(200, "Successfully retrieved group.", response);
+    }
+
 }

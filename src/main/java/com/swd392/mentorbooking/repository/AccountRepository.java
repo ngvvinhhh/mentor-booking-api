@@ -47,4 +47,13 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
 
     @Query("SELECT a FROM Account a WHERE a.isDeleted = false AND (:role IS NULL OR a.role = :role)")
     List<Account> findAccountsByRole(@Param("role") RoleEnum role);
+
+    @Query("SELECT COUNT(a) FROM Account a WHERE a.isDeleted = false")
+    Optional<Integer> countTotalUsers();
+
+    @Query("SELECT COUNT(a) FROM Account a WHERE a.isDeleted = false AND a.role = 'STUDENT'")
+    Optional<Integer> countTotalStudents();
+
+    @Query("SELECT COUNT(a) FROM Account a WHERE a.isDeleted = false AND a.role = 'MENTOR'")
+    Optional<Integer> countTotalMentors();
 }
