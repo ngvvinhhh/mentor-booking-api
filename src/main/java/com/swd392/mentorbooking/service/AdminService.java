@@ -400,26 +400,26 @@ public class AdminService {
         // Transaction log for mentor
         WalletLog walletLogMentor = new WalletLog();
         walletLogMentor.setWallet(walletMentor);
-        walletLogMentor.setAmount(services.getPrice() * 95 / 100);
+        walletLogMentor.setAmount(booking.getTotal() * 95 / 100);
         walletLogMentor.setFrom(adminAccount.getId());
         walletLogMentor.setTo(mentorAccount.getId());
         walletLogMentor.setTypeOfLog(WalletLogType.TRANSFER);
         walletLogMentor.setCreatedAt(LocalDateTime.now());
         walletLogRepository.save(walletLogMentor);
 
-        walletAdmin.setTotal(walletAdmin.getTotal() - (services.getPrice() * 95 / 100));
+        walletAdmin.setTotal(walletAdmin.getTotal() - (booking.getTotal() * 95 / 100));
 
         // Transaction log for admin
         WalletLog walletLogAdmin = new WalletLog();
         walletLogAdmin.setWallet(walletAdmin);
-        walletLogAdmin.setAmount(services.getPrice() * 95 / 100);
+        walletLogAdmin.setAmount(booking.getTotal() * 95 / 100);
         walletLogAdmin.setFrom(adminAccount.getId());
         walletLogAdmin.setTo(mentorAccount.getId());
         walletLogAdmin.setTypeOfLog(WalletLogType.TRANSFER);
         walletLogAdmin.setCreatedAt(LocalDateTime.now());
         walletLogRepository.save(walletLogAdmin);
 
-        walletMentor.setTotal(walletMentor.getTotal() + (services.getPrice() * 95 / 100));
+        walletMentor.setTotal(walletMentor.getTotal() + (booking.getTotal() * 95 / 100));
 
         // Update booking status
         booking.setStatus(BookingStatus.COMPLETED);
@@ -438,6 +438,7 @@ public class AdminService {
                 .bookingId(booking.getBookingId())
                 .location(booking.getLocation())
                 .locationNote(booking.getLocationNote())
+                .total(booking.getTotal())
                 .scheduleId(booking.getSchedule().getId())
                 .message(notification.getMessage())
                 .status(booking.getStatus())
@@ -486,26 +487,26 @@ public class AdminService {
         // Log refund for students
         WalletLog refundLog = new WalletLog();
         refundLog.setWallet(walletStudent);
-        refundLog.setAmount(services.getPrice() * 95 / 100);
+        refundLog.setAmount(booking.getTotal() * 95 / 100);
         refundLog.setFrom(admin.getId());
-        refundLog.setTo(booking.getAccount().getId());
+        refundLog.setTo(booking.getGroup().getStudents().getFirst().getId());
         refundLog.setTypeOfLog(WalletLogType.TRANSFER);
         refundLog.setCreatedAt(LocalDateTime.now());
         walletLogRepository.save(refundLog);
 
-        walletStudent.setTotal(walletStudent.getTotal() + (services.getPrice() * 95 / 100));
+        walletStudent.setTotal(walletStudent.getTotal() + (booking.getTotal() * 95 / 100));
 
         // Transaction log for admin
         WalletLog adminLog = new WalletLog();
         adminLog.setWallet(walletAdmin);
-        adminLog.setAmount(services.getPrice() * 95 / 100);
+        adminLog.setAmount(booking.getTotal() * 95 / 100);
         adminLog.setFrom(admin.getId());
-        adminLog.setTo(booking.getAccount().getId());
+        adminLog.setTo(booking.getGroup().getStudents().getFirst().getId());
         adminLog.setTypeOfLog(WalletLogType.TRANSFER);
         adminLog.setCreatedAt(LocalDateTime.now());
         walletLogRepository.save(adminLog);
 
-        walletAdmin.setTotal(walletAdmin.getTotal() - (services.getPrice() * 95 / 100));
+        walletAdmin.setTotal(walletAdmin.getTotal() - (booking.getTotal() * 95 / 100));
 
         // Update booking status
         booking.setStatus(BookingStatus.CANCELLED);
@@ -524,6 +525,7 @@ public class AdminService {
                 .bookingId(booking.getBookingId())
                 .location(booking.getLocation())
                 .locationNote(booking.getLocationNote())
+                .total(booking.getTotal())
                 .scheduleId(booking.getSchedule().getId())
                 .message(notification.getMessage())
                 .status(booking.getStatus())

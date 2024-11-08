@@ -17,6 +17,7 @@ import java.util.Date;
 @Builder
 public class BookingResponse {
     private Long bookingId;
+    private Double total;
     private String location;
     private String locationNote;
     private Long scheduleId;
