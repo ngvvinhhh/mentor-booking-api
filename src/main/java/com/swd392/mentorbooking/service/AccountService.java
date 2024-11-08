@@ -2,23 +2,22 @@ package com.swd392.mentorbooking.service;
 
 import com.swd392.mentorbooking.dto.account.UpdateProfileRequestDTO;
 import com.swd392.mentorbooking.dto.achievement.GetAchievementResponseDTO;
-import com.swd392.mentorbooking.entity.Achievement;
+import com.swd392.mentorbooking.dto.booking.BookingResponse;
+import com.swd392.mentorbooking.entity.*;
+import com.swd392.mentorbooking.entity.Enum.BookingStatus;
 import com.swd392.mentorbooking.entity.Enum.RoleEnum;
 import com.swd392.mentorbooking.entity.Enum.SpecializationEnum;
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.dto.account.SearchMentorResponseDTO;
 import com.swd392.mentorbooking.dto.account.GetProfileResponse;
-import com.swd392.mentorbooking.entity.Account;
-import com.swd392.mentorbooking.entity.Services;
-import com.swd392.mentorbooking.entity.Wallet;
+import com.swd392.mentorbooking.entity.Enum.WalletLogType;
 import com.swd392.mentorbooking.exception.ErrorCode;
 import com.swd392.mentorbooking.exception.auth.AuthAppException;
-import com.swd392.mentorbooking.repository.AccountRepository;
-import com.swd392.mentorbooking.repository.ServiceRepository;
-import com.swd392.mentorbooking.repository.WalletRepository;
-import com.swd392.mentorbooking.repository.WebsiteFeedbackRepository;
+import com.swd392.mentorbooking.exception.group.NotFoundException;
+import com.swd392.mentorbooking.repository.*;
 import com.swd392.mentorbooking.utils.AccountSpecification;
 import com.swd392.mentorbooking.utils.AccountUtils;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +47,17 @@ public class AccountService {
     private WalletRepository walletRepository;
     @Autowired
     private ServiceRepository serviceRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private WalletRepository walletLogRepository;
+
+
 
     // ** PROFILE SECTION ** //
 
@@ -205,6 +216,74 @@ public class AccountService {
         searchMentorResponseDTO.setSpecializationList(account.getSpecializations());
         searchMentorResponseDTO.setAvatar(account.getAvatar());
         return searchMentorResponseDTO;
+    }
+
+    @Transactional
+    public Response<BookingResponse> cancelBooking(Long bookingId) {
+        // Check student account
+        Account studentAccount = accountUtils.getCurrentAccount();
+        if (studentAccount == null) {
+            return new Response<>(401, "Access denied. Only students can cancel their own bookings.", null);
+        }
+
+        // Find booking by ID
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Booking not found with id: " + bookingId));
+
+        // Check booking status
+        if (!booking.getStatus().equals(BookingStatus.SUCCESSFUL)) {
+            return new Response<>(400, "Booking cannot be canceled as it is not in successful status.", null);
+        }
+
+        // Get student's wallet
+        Wallet walletStudent = walletRepository.findByAccount(studentAccount);
+        if (walletStudent == null) {
+            throw new NotFoundException("Student's wallet not found!");
+        }
+
+        Account admin = accountRepository.findByRole(RoleEnum.ADMIN)
+                .orElseThrow(() -> new NotFoundException("Admin account not found"));
+
+        Wallet walletAdmin = walletRepository.findByAccount(admin);
+        if (walletAdmin == null) {
+            throw new NotFoundException("Admin's wallet not found!");
+        }
+
+        Services services = serviceRepository.findByAccount(booking.getSchedule().getAccount());
+        if (services == null) {
+            throw new NotFoundException("Service not found!");
+        }
+
+
+        walletStudent.setTotal(walletStudent.getTotal() + (booking.getTotal() * 95 / 100));
+
+        walletAdmin.setTotal(walletAdmin.getTotal() - (booking.getTotal() * 95 / 100));
+
+        // Update booking status
+        booking.setStatus(BookingStatus.CANCELLED);
+        bookingRepository.save(booking);
+
+        Notification notification = notificationRepository.findByBookingAndAccount(booking, studentAccount)
+                .orElse(new Notification());
+
+        notification.setMessage(booking.getStatus().getMessage());
+        notification.setStatus(booking.getStatus());
+
+        notificationRepository.save(notification);
+
+        // Tạo đối tượng phản hồi
+        BookingResponse bookingResponse = BookingResponse.builder()
+                .bookingId(booking.getBookingId())
+                .location(booking.getLocation())
+                .locationNote(booking.getLocationNote())
+                .total(booking.getTotal())
+                .scheduleId(booking.getSchedule().getId())
+                .message(notification.getMessage())
+                .status(booking.getStatus())
+                .mentorName(booking.getSchedule().getAccount().getName())
+                .build();
+
+        return new Response<>(200, "Booking canceled successfully!", bookingResponse);
     }
 }
 
