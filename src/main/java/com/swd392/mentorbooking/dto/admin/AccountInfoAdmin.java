@@ -24,8 +24,6 @@ public class AccountInfoAdmin {
     private String className;
     private AccountStatusEnum status;
     private Boolean isDeleted;
-    private GroupResponse group;
-
 
     public static AccountInfoAdmin fromAccount(Account account) {
         AccountInfoAdmin accountInfoAdmin = new AccountInfoAdmin();

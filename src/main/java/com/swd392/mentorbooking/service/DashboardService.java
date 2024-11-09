@@ -113,6 +113,9 @@ public class DashboardService {
         // Tạo BarChartBox và gán danh sách BarChartData
         BarChartBox barChartBox = new BarChartBox();
         barChartBox.setChartData(chartDataList);
+        barChartBox.setTitle("Profit Earned");
+        barChartBox.setColor("#8884d8");
+        barChartBox.setDataKey("profit");
 
         return barChartBox;
     }

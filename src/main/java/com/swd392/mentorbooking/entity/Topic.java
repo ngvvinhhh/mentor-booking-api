@@ -3,6 +3,7 @@ package com.swd392.mentorbooking.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -36,9 +37,11 @@ public class Topic {
     private String description;
 
     @Column(name = "created_at")
+    @JsonIgnore
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
+    @JsonIgnore
     private LocalDateTime updatedAt;
 
     @Column(name = "is_deleted", nullable = false)
@@ -46,6 +49,7 @@ public class Topic {
 
     // Quan hệ 1 topic có thể có nhiều group
     @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Group> groups;
 }
 
