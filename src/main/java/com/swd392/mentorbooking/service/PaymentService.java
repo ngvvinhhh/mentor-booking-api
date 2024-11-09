@@ -152,13 +152,13 @@ public class PaymentService {
             // Add money to wallet
             addToWallet(payment.getAccount().getWallet(), payment.getTotal());
 
-            return "redirect:https://circuit-project.vercel.app/payment/payment-success";
+            return "redirect:http://localhost:5173/payment";
         } else {
             // Payment failed, update status failed
             payment.setStatus(PaymentStatusEnum.FAILED);
             paymentRepository.save(payment);
 
-            return "redirect:https://circuit-project.vercel.app/payment/payment-failure";
+            return "redirect:https://circuit-project.vercel.app/payment/paymentFailure";
         }
     }
 

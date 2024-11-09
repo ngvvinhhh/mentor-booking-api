@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProjectProgressService {
@@ -152,8 +153,12 @@ public class ProjectProgressService {
             return new Response<>(404, "Column not found with id: " + columnId, null);
         }
 
-        progressColumn.setTitle(columnUpdateRequestDTO.getTitle());
-        progressColumn.setOrderIndex(columnUpdateRequestDTO.getOrderIndex());
+        if (columnUpdateRequestDTO.getTitle() != null) {
+            progressColumn.setTitle(columnUpdateRequestDTO.getTitle());
+        }
+        if (columnUpdateRequestDTO.getOrderIndex() != null) {
+            progressColumn.setOrderIndex(columnUpdateRequestDTO.getOrderIndex());
+        }
 
         progressColumnRepository.save(progressColumn);
 
@@ -289,5 +294,96 @@ public class ProjectProgressService {
         progressCardRepository.delete(progressCard);
 
         return new Response<>(200, "Deleted card successfully!", null);
+    }
+
+    public Response<ProjectProgressDTO> getMyProjectProgress() {
+        Account account = accountUtils.getCurrentAccount();
+        if (account == null) {
+            return new Response<>(401, "Please login first!", null);
+        }
+        if (account.getStatus().equals(AccountStatusEnum.UNVERIFIED)) {
+            return new Response<>(403, "Please verify your account first!", null);
+        }
+        if (account.getIsDeleted().equals(true)) {
+            return new Response<>(410, "Your account has been deleted, please contact support for more information!", null);
+        }
+
+        Group group = groupRepository.findByStudentsContaining(account).orElse(null);
+        if (group == null) {
+            return new Response<>(401, "You don't belong to any group!", null);
+        }
+
+        ProjectProgress projectProgress = projectProgressRepository.findByGroup(group).orElse(null);
+        if (projectProgress == null) {
+            return new Response<>(401, "Your group doesn't have any project!", null);
+        }
+        ProjectProgressDTO response = convertToDTO(projectProgress);
+        return new Response<>(200, "Retrieved project progress successfully!", response);
+    }
+
+    public ProjectProgressDTO convertToDTO(ProjectProgress projectProgress) {
+        ProjectProgressDTO projectProgressDTO = new ProjectProgressDTO();
+
+        // Thiết lập thông tin cơ bản
+        projectProgressDTO.setId(projectProgress.getId().toString());
+        projectProgressDTO.setTitle(projectProgress.getDescription()); // Giả sử title = description
+        projectProgressDTO.setDescription(projectProgress.getDescription());
+        projectProgressDTO.setType("Some Type");  // Thêm thông tin loại nếu cần
+
+        // Thiết lập thứ tự các cột
+        projectProgressDTO.setColumnOrderIds(projectProgress.getProgressColumns().stream()
+                .sorted((col1, col2) -> col1.getOrderIndex().compareTo(col2.getOrderIndex()))
+                .map(col -> col.getId().toString())
+                .collect(Collectors.toList()));
+
+        // Thiết lập các cột
+        List<ProjectColumnDTO> columnDTOs = projectProgress.getProgressColumns().stream()
+                .map(this::convertToColumnDTO)
+                .collect(Collectors.toList());
+
+        projectProgressDTO.setColumns(columnDTOs);
+
+        return projectProgressDTO;
+    }
+
+    public ProjectColumnDTO convertToColumnDTO(ProgressColumn progressColumn) {
+        ProjectColumnDTO columnDTO = new ProjectColumnDTO();
+
+        columnDTO.setId(progressColumn.getId().toString());
+        columnDTO.setBoardId(progressColumn.getId().toString()); // Giả sử bạn cần ID dưới dạng String
+        columnDTO.setTitle(progressColumn.getTitle());
+
+        // Thiết lập thứ tự các thẻ (cards)
+        columnDTO.setCardOrderIds(progressColumn.getProgressCards().stream()
+                .sorted((card1, card2) -> card1.getOrderIndex().compareTo(card2.getOrderIndex()))
+                .map(card -> card.getId().toString())
+                .collect(Collectors.toList()));
+
+        // Thiết lập các thẻ
+        List<ProgressCardDTO> cardDTOs = progressColumn.getProgressCards().stream()
+                .map(this::convertToCardDTO)
+                .collect(Collectors.toList());
+
+        columnDTO.setCards(cardDTOs);
+
+        return columnDTO;
+    }
+
+    public ProgressCardDTO convertToCardDTO(ProgressCard progressCard) {
+        ProgressCardDTO cardDTO = new ProgressCardDTO();
+
+        cardDTO.setCardId(progressCard.getId());
+        cardDTO.setProjectProgressId(progressCard.getProgressColumn().getProjectProgress().getId().toString());
+        cardDTO.setProjectColumnId(progressCard.getProgressColumn().getId().toString());
+        cardDTO.setTitle(progressCard.getTitle());
+        cardDTO.setDescription(progressCard.getDescription());
+        cardDTO.setCover(progressCard.getCover());
+
+        // Lấy memberIds từ account nếu cần
+        if (progressCard.getAccount() != null) {
+            cardDTO.setMemberIds(List.of(progressCard.getAccount().getId().toString()));
+        }
+
+        return cardDTO;
     }
 }

@@ -209,14 +209,19 @@ public class GroupService {
             accountRepository.save(sender);
         }
 
-        ProjectProgress projectProgress = ProjectProgress.builder()
-                .group(group)
-                .description("Project progress for group " + group.getId())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .isDeleted(false)
-                .build();
-        projectProgressRepository.save(projectProgress);
+        //Check if project progress exist
+        ProjectProgress projectProgress = projectProgressRepository.findByGroup(group).orElse(null);
+        if (projectProgress == null) {
+            projectProgress = ProjectProgress.builder()
+                    .group(group)
+                    .description("Project progress for group " + group.getId())
+                    .createdAt(LocalDateTime.now())
+                    .updatedAt(LocalDateTime.now())
+                    .isDeleted(false)
+                    .build();
+            projectProgressRepository.save(projectProgress);
+        }
+
 
         if (group.getIsDeleted()) {
             return new Response<>(400, "Cannot add account to a deleted group.", null);

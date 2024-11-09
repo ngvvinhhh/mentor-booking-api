@@ -1,12 +1,11 @@
 package com.swd392.mentorbooking.controller;
 
+import com.swd392.mentorbooking.dto.dashboard.BarChartBox;
 import com.swd392.mentorbooking.dto.dashboard.ChartBox;
-import com.swd392.mentorbooking.dto.dashboard.DashboardData;
 import com.swd392.mentorbooking.dto.dashboard.TopDealUser;
 import com.swd392.mentorbooking.service.DashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,4 +50,15 @@ public class DashboardController {
         return dashboardService.getChartBoxStudent();
     }
 
+    @Operation(summary = "Lấy tổng số revenue")
+    @GetMapping("/chart-box-revenue")
+    public ChartBox chartBoxRevenue() {
+        return dashboardService.getTotalRevenue();
+    }
+
+    @Operation(summary = "Lấy tổng số revenue theo tuần")
+    @GetMapping("/weekly-revenue")
+    public BarChartBox weeklyRevenue() {
+        return dashboardService.getWeeklyRevenue();
+    }
 }

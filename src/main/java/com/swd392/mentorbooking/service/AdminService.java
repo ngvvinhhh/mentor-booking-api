@@ -97,19 +97,6 @@ public class AdminService {
                     .map(AccountInfoAdmin::getId)
                     .collect(Collectors.toList());
 
-            // Lấy các nhóm theo ID tài khoản một lần duy nhất
-            Map<Long, Group> accountGroupMap = groupRepository.findGroupsByStudentIds(accountIds)
-                    .stream()
-                    .flatMap(group -> group.getStudents().stream()
-                            .map(student -> Map.entry(student.getId(), group)))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-            // Gán GroupResponse vào từng AccountInfoAdmin
-            for (AccountInfoAdmin accountInfoAdmin : returnData) {
-                Group group = accountGroupMap.get(accountInfoAdmin.getId());
-                accountInfoAdmin.setGroup(group != null ? GroupResponse.fromGroup(group) : null);
-            }
-
             return new Response<>(200, "Retrieve data successfully!", returnData);
 
         } catch (Exception e) {
@@ -288,7 +275,7 @@ public class AdminService {
         return new Response<>(200, "Successfully fetched all feedbacks!", feedbackResponses);
     }
 
-    public Response<AccountInfoAdmin> deleteAccount(Long accountId) {
+    public Response deleteAccount(Long accountId) {
         //checkAccount();
 
         Account accountToDelete = accountRepository.findById(accountId).orElse(null);
