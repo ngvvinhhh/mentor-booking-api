@@ -45,6 +45,7 @@ public class AccountService {
 
     @Autowired
     private WalletRepository walletRepository;
+
     @Autowired
     private ServiceRepository serviceRepository;
 
@@ -55,7 +56,7 @@ public class AccountService {
     private NotificationRepository notificationRepository;
 
     @Autowired
-    private WalletRepository walletLogRepository;
+    private WalletLogRepository walletLogRepository;
 
 
 
@@ -254,8 +255,27 @@ public class AccountService {
             throw new NotFoundException("Service not found!");
         }
 
+        // Log refund for students
+        WalletLog refundLog = new WalletLog();
+        refundLog.setWallet(walletStudent);
+        refundLog.setAmount(booking.getTotal() * 95 / 100);
+        refundLog.setFrom(admin.getId());
+        refundLog.setTo(booking.getGroup().getStudents().getFirst().getId());
+        refundLog.setTypeOfLog(WalletLogType.TRANSFER);
+        refundLog.setCreatedAt(LocalDateTime.now());
+        walletLogRepository.save(refundLog);
 
         walletStudent.setTotal(walletStudent.getTotal() + (booking.getTotal() * 95 / 100));
+
+        // Transaction log for admin
+        WalletLog adminLog = new WalletLog();
+        adminLog.setWallet(walletAdmin);
+        adminLog.setAmount(booking.getTotal() * 95 / 100);
+        adminLog.setFrom(admin.getId());
+        adminLog.setTo(booking.getGroup().getStudents().getFirst().getId());
+        adminLog.setTypeOfLog(WalletLogType.TRANSFER);
+        adminLog.setCreatedAt(LocalDateTime.now());
+        walletLogRepository.save(adminLog);
 
         walletAdmin.setTotal(walletAdmin.getTotal() - (booking.getTotal() * 95 / 100));
 
@@ -285,5 +305,94 @@ public class AccountService {
 
         return new Response<>(200, "Booking canceled successfully!", bookingResponse);
     }
+
+    @Transactional
+    public Response<BookingResponse> completeBooking(Long bookingId) {
+        // Check student account
+        Account studentAccount = accountUtils.getCurrentAccount();
+        if (studentAccount == null) {
+            return new Response<>(401, "Access denied. Only students can complete their own bookings.", null);
+        }
+
+        // Find booking by ID
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Booking not found with id: " + bookingId));
+
+        // Check booking status
+        if (!booking.getStatus().equals(BookingStatus.SUCCESSFUL)) {
+            return new Response<>(400, "Booking cannot be completed as it is not in successful status.", null);
+        }
+
+        // Find mentor account and wallet
+        Account mentorAccount = booking.getSchedule().getAccount();
+        Wallet walletMentor = walletRepository.findByAccount(mentorAccount);
+        if (walletMentor == null) {
+            throw new NotFoundException("Mentor's wallet not found!");
+        }
+
+        // Find admin account and wallet
+        Account admin = accountRepository.findByRole(RoleEnum.ADMIN)
+                .orElseThrow(() -> new NotFoundException("Admin account not found"));
+        Wallet walletAdmin = walletRepository.findByAccount(admin);
+        if (walletAdmin == null) {
+            throw new NotFoundException("Admin's wallet not found!");
+        }
+
+        Services services = serviceRepository.findByAccount(mentorAccount);
+        if (services == null) {
+            throw new NotFoundException("Service not found!");
+        }
+
+        // Log payment to mentor
+        WalletLog mentorLog = new WalletLog();
+        mentorLog.setWallet(walletMentor);
+        mentorLog.setAmount(booking.getTotal() * 95 / 100);
+        mentorLog.setFrom(admin.getId());
+        mentorLog.setTo(mentorAccount.getId());
+        mentorLog.setTypeOfLog(WalletLogType.TRANSFER);
+        mentorLog.setCreatedAt(LocalDateTime.now());
+        walletLogRepository.save(mentorLog);
+
+        walletMentor.setTotal(walletMentor.getTotal() + (booking.getTotal() * 95 / 100));
+
+        // Log transaction for admin
+        WalletLog adminLog = new WalletLog();
+        adminLog.setWallet(walletAdmin);
+        adminLog.setAmount(booking.getTotal() * 95 / 100);
+        adminLog.setFrom(admin.getId());
+        adminLog.setTo(mentorAccount.getId());
+        adminLog.setTypeOfLog(WalletLogType.TRANSFER);
+        adminLog.setCreatedAt(LocalDateTime.now());
+        walletLogRepository.save(adminLog);
+
+        walletAdmin.setTotal(walletAdmin.getTotal() - (booking.getTotal() * 95 / 100));
+
+        // Update booking status
+        booking.setStatus(BookingStatus.COMPLETED);
+        bookingRepository.save(booking);
+
+        // Create or update notification
+        Notification notification = notificationRepository.findByBookingAndAccount(booking, studentAccount)
+                .orElse(new Notification());
+
+        notification.setMessage(booking.getStatus().getMessage());
+        notification.setStatus(booking.getStatus());
+        notificationRepository.save(notification);
+
+        // Create response object
+        BookingResponse bookingResponse = BookingResponse.builder()
+                .bookingId(booking.getBookingId())
+                .location(booking.getLocation())
+                .locationNote(booking.getLocationNote())
+                .total(booking.getTotal())
+                .scheduleId(booking.getSchedule().getId())
+                .message(notification.getMessage())
+                .status(booking.getStatus())
+                .mentorName(mentorAccount.getName())
+                .build();
+
+        return new Response<>(200, "Booking completed successfully!", bookingResponse);
+    }
+
 }
 
