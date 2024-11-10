@@ -76,4 +76,9 @@ public class AccountController {
     public Response<BookingResponse> rejectBooking(@PathVariable Long bookingId) {
         return accountService.cancelBooking(bookingId);
     }
+
+    @PostMapping("/booking/complete/{bookingId}")
+    public Response<BookingResponse> approveBooking(@PathVariable Long bookingId) {
+        return accountService.completeBooking(bookingId);
+    }
 }
