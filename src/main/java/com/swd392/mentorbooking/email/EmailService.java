@@ -35,8 +35,8 @@ public class EmailService {
     @Autowired
     private OTPRepository otpRepository;
 
-    @Value("${URL}")
-    private String url;
+//    @Value("${URL}")
+    private String url = "http://167.71.220.5:8080";
 
     @Async
     public void sendVerifyEmail(EmailDetail emailDetail) {
@@ -97,7 +97,7 @@ public class EmailService {
 
             // Tạo token để người dùng có thể reset mật khẩu
             String token = jwtService.generateToken(emailDetail.getRecipient());
-            String resetLink = "https://circuit-project.vercel.app/forgotPassword?" + token;
+            String resetLink = "http://167.71.220.5/forgotPassword?" + token;
 
             context.setVariable("link", resetLink);
             context.setVariable("button", "Reset Password");

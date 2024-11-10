@@ -236,7 +236,7 @@ public class GroupService {
 
 
         if (accountOpt.isEmpty()) {
-            emailDetail.setAttachment("http://localhost:5173/signUp");
+            emailDetail.setAttachment("http://167.71.220.5/signUp");
             emailDetail.setName("User");
         } else {
             Account account = entityManager.merge(accountOpt.get());

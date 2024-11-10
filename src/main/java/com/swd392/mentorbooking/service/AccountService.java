@@ -58,7 +58,6 @@ public class AccountService {
     private WalletRepository walletLogRepository;
 
 
-
     // ** PROFILE SECTION ** //
 
     public Response<GetProfileResponse> getProfile() {
@@ -154,8 +153,7 @@ public class AccountService {
                     .twitterLink(account.getTwitterLink())
                     .youtubeLink(account.getYoutubeLink())
                     .build();
-        }
-        else {
+        } else {
             response = GetProfileResponse.builder()
                     .id(account.getId())
                     .name(account.getName())
@@ -231,59 +229,66 @@ public class AccountService {
                 .orElseThrow(() -> new NotFoundException("Booking not found with id: " + bookingId));
 
         // Check booking status
-        if (!booking.getStatus().equals(BookingStatus.SUCCESSFUL)) {
-            return new Response<>(400, "Booking cannot be canceled as it is not in successful status.", null);
+        if (booking.getStatus().equals(BookingStatus.SUCCESSFUL)) {
+            return new Response<>(400, "Your booking with mentor have been approved by mentor, you cannot cancel it now.", null);
+        }
+        if (booking.getStatus().equals(BookingStatus.COMPLETED)) {
+            return new Response<>(400, "Your booking has been completed, you cannot cancel it.", null);
+        }
+        if (booking.getStatus().equals(BookingStatus.PROCESSING)) {
+            // Get student's wallet
+            Wallet walletStudent = walletRepository.findByAccount(studentAccount);
+            if (walletStudent == null) {
+                throw new NotFoundException("Student's wallet not found!");
+            }
+
+            Account admin = accountRepository.findByRole(RoleEnum.ADMIN)
+                    .orElseThrow(() -> new NotFoundException("Admin account not found"));
+
+            Wallet walletAdmin = walletRepository.findByAccount(admin);
+            if (walletAdmin == null) {
+                throw new NotFoundException("Admin's wallet not found!");
+            }
+
+            Services services = serviceRepository.findByAccount(booking.getSchedule().getAccount());
+            if (services == null) {
+                throw new NotFoundException("Service not found!");
+            }
+
+
+            walletStudent.setTotal(walletStudent.getTotal() + (booking.getTotal() * 95 / 100));
+
+            walletAdmin.setTotal(walletAdmin.getTotal() - (booking.getTotal() * 95 / 100));
+
+            // Update booking status
+            booking.setStatus(BookingStatus.CANCELLED);
+            bookingRepository.save(booking);
+
+            Notification notification = notificationRepository.findByBookingAndAccount(booking, studentAccount)
+                    .orElse(new Notification());
+
+            notification.setMessage(booking.getStatus().getMessage());
+            notification.setStatus(booking.getStatus());
+
+            notificationRepository.save(notification);
+
+            // Tạo đối tượng phản hồi
+            BookingResponse bookingResponse = BookingResponse.builder()
+                    .bookingId(booking.getBookingId())
+                    .location(booking.getLocation())
+                    .locationNote(booking.getLocationNote())
+                    .total(booking.getTotal())
+                    .scheduleId(booking.getSchedule().getId())
+                    .message(notification.getMessage())
+                    .status(booking.getStatus())
+                    .mentorName(booking.getSchedule().getAccount().getName())
+                    .build();
+
+            return new Response<>(200, "Booking canceled successfully!", bookingResponse);
+        } else {
+            return new Response<>(200, "Your booking is not in processing state, you cannot cancel it.", null);
         }
 
-        // Get student's wallet
-        Wallet walletStudent = walletRepository.findByAccount(studentAccount);
-        if (walletStudent == null) {
-            throw new NotFoundException("Student's wallet not found!");
-        }
-
-        Account admin = accountRepository.findByRole(RoleEnum.ADMIN)
-                .orElseThrow(() -> new NotFoundException("Admin account not found"));
-
-        Wallet walletAdmin = walletRepository.findByAccount(admin);
-        if (walletAdmin == null) {
-            throw new NotFoundException("Admin's wallet not found!");
-        }
-
-        Services services = serviceRepository.findByAccount(booking.getSchedule().getAccount());
-        if (services == null) {
-            throw new NotFoundException("Service not found!");
-        }
-
-
-        walletStudent.setTotal(walletStudent.getTotal() + (booking.getTotal() * 95 / 100));
-
-        walletAdmin.setTotal(walletAdmin.getTotal() - (booking.getTotal() * 95 / 100));
-
-        // Update booking status
-        booking.setStatus(BookingStatus.CANCELLED);
-        bookingRepository.save(booking);
-
-        Notification notification = notificationRepository.findByBookingAndAccount(booking, studentAccount)
-                .orElse(new Notification());
-
-        notification.setMessage(booking.getStatus().getMessage());
-        notification.setStatus(booking.getStatus());
-
-        notificationRepository.save(notification);
-
-        // Tạo đối tượng phản hồi
-        BookingResponse bookingResponse = BookingResponse.builder()
-                .bookingId(booking.getBookingId())
-                .location(booking.getLocation())
-                .locationNote(booking.getLocationNote())
-                .total(booking.getTotal())
-                .scheduleId(booking.getSchedule().getId())
-                .message(notification.getMessage())
-                .status(booking.getStatus())
-                .mentorName(booking.getSchedule().getAccount().getName())
-                .build();
-
-        return new Response<>(200, "Booking canceled successfully!", bookingResponse);
     }
 }
 

@@ -1,11 +1,14 @@
 package com.swd392.mentorbooking.exception;
 
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.swd392.mentorbooking.dto.ErrorResponse;
 import com.swd392.mentorbooking.dto.Response;
 import com.swd392.mentorbooking.exception.group.NotFoundException;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -69,8 +72,20 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<String> handleAuthenticationException(AuthenticationException ex) {
-        String message = "Authentication failed. Please check your token!";
-        return new ResponseEntity<>(message, HttpStatus.UNAUTHORIZED);
+        // Kiểm tra loại lỗi (chẳng hạn khi hết hạn token)
+        if (ex instanceof CredentialsExpiredException) {
+            return new ResponseEntity<>("Token expired. Please log in again.", HttpStatus.UNAUTHORIZED);
+        } else if (ex instanceof BadCredentialsException) {
+            return new ResponseEntity<>("Invalid credentials.", HttpStatus.UNAUTHORIZED);
+        }
+
+        // Các lỗi khác trả về thông báo chung
+        return new ResponseEntity<>("Authentication error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    @ExceptionHandler(TokenExpiredException.class)
+    public ResponseEntity<String> handleTokenExpiredException(TokenExpiredException ex) {
+        // Trả về thông báo lỗi và mã trạng thái HTTP 401 (Unauthorized)
+        return new ResponseEntity<>("Token has expired. Please log in again.", HttpStatus.UNAUTHORIZED);
     }
 
 }
