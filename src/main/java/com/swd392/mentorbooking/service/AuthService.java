@@ -217,7 +217,7 @@ public class AuthService implements UserDetailsService {
                     .recipient(account.getEmail())
                     .msgBody("Dear " + account.getName() + ",\n\n" +
                             "We received a request to reset the password for your account. To complete the process, please click the link below:\n\n" +
-                            "<a href=\"https://circuit-project.vercel.app/forgotPassword?" + token + "\">Reset My Password</a>\n\n" +
+                            "<a href=\"http://167.71.220.5/forgotPassword?" + token + "\">Reset My Password</a>\n\n" +
                             "If you did not request a password reset, please ignore this email or contact support if you have any concerns.\n\n" +
                             "Thank you,\nThe Support Team")
                     .subject("Password Reset Request - Action Required")

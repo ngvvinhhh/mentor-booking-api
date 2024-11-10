@@ -160,7 +160,7 @@ public class AuthController {
     @GetMapping("/verify/{token}")
     public ResponseEntity<Void> activateAccount(@PathVariable String token) throws Exception {
         if (authService.verifyAccount(token)) {
-            return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("http://localhost:5173/login")).build();
+            return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("http://167.71.220.5/login")).build();
         }
         return null;
     }

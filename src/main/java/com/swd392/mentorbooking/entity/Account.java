@@ -144,6 +144,10 @@ public class Account implements UserDetails {
     private List<ProgressCard> progressCards;
 
     @JsonIgnore
+    @OneToMany(mappedBy = "assignee", cascade = CascadeType.ALL)
+    private List<ProgressTask> progressTasks;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<ServiceFeedback> feedbackRatings;
 

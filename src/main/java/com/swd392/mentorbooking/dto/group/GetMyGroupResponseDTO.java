@@ -9,7 +9,7 @@ import java.util.List;
 @Builder
 public class GetMyGroupResponseDTO {
     private long groupId;
-    private long topicId;
+    private Long topicId;
     private int groupQuantity;
     private List<GroupStudentResponseDTO> studentList;
 }
