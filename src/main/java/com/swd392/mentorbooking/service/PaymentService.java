@@ -78,7 +78,7 @@ public class PaymentService {
         String tmnCode = "CT4QG49Y";
         String secretKey = "SK312A8PEUV5CSZVLJ8U5LCYH4F13X5H";
         String vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        String returnUrl = "https://circuit-project.vercel.app/payment/payment-pending?id=" + payment.getId();
+        String returnUrl = "http://167.71.220.5/paymentSuccess?id=" + payment.getId();
         String currCode = "VND";
 
         Map<String, String> vnpParams = new TreeMap<>();
@@ -152,13 +152,13 @@ public class PaymentService {
             // Add money to wallet
             addToWallet(payment.getAccount().getWallet(), payment.getTotal());
 
-            return "redirect:http://localhost:5173/payment";
+            return "redirect:http://167.71.220.5/payment";
         } else {
             // Payment failed, update status failed
             payment.setStatus(PaymentStatusEnum.FAILED);
             paymentRepository.save(payment);
 
-            return "redirect:https://circuit-project.vercel.app/payment/paymentFailure";
+            return "redirect:http://167.71.220.5/payment/paymentFailure";
         }
     }
 

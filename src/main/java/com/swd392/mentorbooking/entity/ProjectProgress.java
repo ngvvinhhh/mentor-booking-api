@@ -39,5 +39,8 @@ public class ProjectProgress {
 
     @OneToMany(mappedBy = "projectProgress", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProgressColumn> progressColumns;
+
+    @OneToMany(mappedBy = "projectProgress", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProgressTask> progressTasks;
 }
 

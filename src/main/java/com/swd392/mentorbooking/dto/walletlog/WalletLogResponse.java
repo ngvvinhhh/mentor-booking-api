@@ -1,6 +1,7 @@
 package com.swd392.mentorbooking.dto.walletlog;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.swd392.mentorbooking.entity.Enum.WalletLogType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class WalletLogResponse {
     private Long from;
     private Long to;
     private WalletLogType type;
+    @JsonFormat(pattern="dd-MM-yyyy")
     private LocalDateTime createdAt;
 
 }
